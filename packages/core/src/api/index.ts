@@ -1,7 +1,8 @@
 import express from "express";
 import bodyParser from 'body-parser'
+import morgan from "morgan";
 
-import { API_PORT } from "src/config";
+import { API_PORT, LOG } from "src/config";
 
 let datas = [] as object[]
 
@@ -27,6 +28,14 @@ export function start() {
 
   // parse application/json
   app.use(bodyParser.json())
+
+  app.use(morgan('dev'))
+  if (LOG.LOG_BODY) {
+    app.use((req, res, next) => {
+      console.log("BODY", req.body);
+      next();
+    });
+  }
 
   app.post<PluginParams, any, PostDataRequest, any>(
     '/v1.0/data/:pluginName', 

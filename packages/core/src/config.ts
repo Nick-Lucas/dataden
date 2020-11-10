@@ -11,3 +11,9 @@ export function validate() {
 
 export const MONGO_URI = process.env.MONGO_URI
 export const API_PORT = process.env.PORT
+
+const LOG_LEVEL = process.env.LOG_LEVEL
+export const LOG = {
+  LOG_LEVEL,
+  LOG_BODY: LOG_LEVEL === 'debug'
+}
