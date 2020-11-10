@@ -1,3 +1,9 @@
-import {  } from "mongodb";
+import { MongoClient } from "mongodb";
+import { MONGO_URI } from "src/config";
 
-export const OK = true
+export async function getClient() {
+  const client = await MongoClient.connect(MONGO_URI)
+  
+  return client
+}
+

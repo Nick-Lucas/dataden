@@ -1,18 +1,6 @@
-import * as dotenv from "dotenv";
+import { validate } from "./config";
+import { getClient } from "./db";
 
-import { OK } from "./db";
+validate()
 
-const env = dotenv.config()
-if (env.error) {
-  console.error("[dotenv]", env.error)
-  throw env.error
-}
-
-console.log(process.env.MONGO_URI)
-
-console.log("Hello World!!", OK)
-
-let i = 0
-setInterval(() => {
-  console.log("Hi, again! " + i++)
-}, 1000)
+getClient().then(client => client.db("TEST_DB").admin().listDatabases({nameOnly: true}).then(dbs => console.log(dbs)))
