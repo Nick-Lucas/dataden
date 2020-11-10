@@ -7,12 +7,16 @@
   "private": true,
   "scripts": {
     "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
-    "lint:fix": "yarn run lint --fix"
+    "lint:fix": "yarn run lint --fix",
+    "dev": "wsrun --parallel --exclude-missing watch"
   },
   "workspaces": [
     "packages/*"
   ],
   "dependencies": {
     "@mydata/build": "1.0.0"
+  },
+  "devDependencies": {
+    "wsrun": "^5.2.4"
   }
 }

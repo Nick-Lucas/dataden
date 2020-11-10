@@ -1,13 +1,13 @@
-const typescript = require('@wessberg/rollup-plugin-ts')
-const commonjs = require('@rollup/plugin-commonjs')
-const run = require('@rollup/plugin-run')
+import typescript from '@wessberg/rollup-plugin-ts'
+import commonjs from '@rollup/plugin-commonjs'
+import run from '@rollup/plugin-run'
 
 const dev = process.env.ROLLUP_WATCH === 'true'
 
 /**
  * @type {() => import("rollup").RollupOptions}
  */
-module.exports = () => ({
+export default () => ({
   input: 'src/index.ts',
   output: {
     dir: 'dist',
