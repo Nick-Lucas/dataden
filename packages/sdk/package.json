@@ -1,0 +1,14 @@
+{
+  "name": "@mydata/sdk",
+  "version": "1.0.0",
+  "description": "SDK for building plugins",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "watch": "rollup -c rollup.config.js --watch"
+  },
+  "dependencies": {
+    "@mydata/build": "1.0.0"
+  }
+}
