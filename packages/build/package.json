@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "watch": "rollup -c rollup.config.js --watch"
+    "dev": "rollup -c rollup.config.js --watch"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",

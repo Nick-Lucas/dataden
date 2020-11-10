@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ROLLUP_RUN=true rollup -c rollup.config.js --watch"
+    "dev": "ROLLUP_RUN=true rollup -c rollup.config.js --watch"
   },
   "dependencies": {
     "@mydata/build": "1.0.0",

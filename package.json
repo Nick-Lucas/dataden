@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
     "lint:fix": "yarn run lint --fix",
-    "dev": "wsrun --parallel --exclude-missing watch"
+    "dev": "wsrun --parallel --exclude-missing dev"
   },
   "workspaces": [
     "packages/*"

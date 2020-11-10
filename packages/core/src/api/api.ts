@@ -4,6 +4,8 @@ import morgan from 'morgan'
 
 import { API_PORT, LOG } from 'src/config'
 
+import * as endpoints from './endpoints'
+
 export function start() {
   const app = express()
 
@@ -20,6 +22,8 @@ export function start() {
       next()
     })
   }
+
+  endpoints.add(app)
 
   app.listen(API_PORT)
   console.log('[API] Listening on port', API_PORT)
