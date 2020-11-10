@@ -28,15 +28,12 @@ export function start() {
   // parse application/json
   app.use(bodyParser.json())
 
-
   app.post<PluginParams, any, PostDataRequest, any>(
     '/v1.0/data/:pluginName', 
     (request, response) => {
       const { pluginName } = request.params
       const body = request.body
-      console.log(request)
-      console.log("POST [DATA]", { pluginName, body })
-
+      
       datas.push(...body.data)
 
       response.sendStatus(200)
@@ -48,8 +45,6 @@ export function start() {
     (request, response) => {
       const { pluginName } = request.params
       const data = request.body
-
-      console.log("POST [DATA]", { pluginName, data })
 
       response.send({
         data: datas

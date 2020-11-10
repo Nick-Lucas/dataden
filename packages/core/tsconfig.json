@@ -10,7 +10,9 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "module": "ES2015",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationDir": "dist"
   },
   "include": [
     "src/**/*.ts",

@@ -1,0 +1,18 @@
+{
+  "name": "@mydata/build",
+  "version": "1.0.0",
+  "description": "Build Tools for this Monorepo",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-run": "^2.0.2",
+    "@wessberg/rollup-plugin-ts": "^1.3.8",
+    "rollup": "^2.33.1",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+    "tslib": "^2.0.3"
+  }
+}
