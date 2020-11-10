@@ -10,7 +10,7 @@
     }
   },
   "include": [
-    "src/*"
+    "src/**/*"
   ],
   "typeAcquisition": {
     "enable": true
