@@ -1,0 +1,12 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": ".",
+    "checkJs": true,
+    "outDir": "dist/"
+  },
+  "include": [
+    "src/*"
+  ]
+}

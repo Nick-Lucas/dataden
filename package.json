@@ -1,0 +1,11 @@
+{
+  "name": "mydata",
+  "version": "1.0.0",
+  "description": "Personal and Extensible Data Warehouse",
+  "author": "Nick Lucas",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
