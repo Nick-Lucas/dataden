@@ -5,7 +5,14 @@
   "author": "Nick Lucas",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
+    "lint:fix": "yarn run lint --fix"
+  },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@mydata/build": "1.0.0"
+  }
 }

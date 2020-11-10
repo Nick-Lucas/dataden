@@ -1,23 +1,23 @@
-import express from "express";
+import express from 'express'
 import bodyParser from 'body-parser'
-import morgan from "morgan";
+import morgan from 'morgan'
 
-import { API_PORT, LOG } from "src/config";
+import { API_PORT, LOG } from 'src/config'
 
-let datas = [] as object[]
+const datas = [] as Record<string, unknown>[]
 
 interface PluginParams {
   pluginName: string
 }
 
 interface PostDataRequest {
-  mode: "append" | "replace",
-  data: object[],
+  mode: 'append' | 'replace'
+  data: Record<string, unknown>[]
   lastDate: Date
 }
 
 interface GetDataResponse {
-  data: object[]
+  data: Record<string, unknown>[]
 }
 
 export function start() {
@@ -32,17 +32,17 @@ export function start() {
   app.use(morgan('dev'))
   if (LOG.LOG_BODY) {
     app.use((req, res, next) => {
-      console.log("BODY", req.body);
-      next();
-    });
+      console.log('BODY', req.body)
+      next()
+    })
   }
 
   app.post<PluginParams, any, PostDataRequest, any>(
-    '/v1.0/data/:pluginName', 
+    '/v1.0/data/:pluginName',
     (request, response) => {
       const { pluginName } = request.params
       const body = request.body
-      
+
       datas.push(...body.data)
 
       response.sendStatus(200)
@@ -50,7 +50,7 @@ export function start() {
   )
 
   app.get<any, GetDataResponse, any, any>(
-    '/v1.0/data/:pluginName', 
+    '/v1.0/data/:pluginName',
     (request, response) => {
       const { pluginName } = request.params
       const data = request.body
@@ -60,7 +60,7 @@ export function start() {
       })
     }
   )
-  
+
   app.listen(API_PORT)
-  console.log("[API] Listening on port", API_PORT)
+  console.log('[API] Listening on port', API_PORT)
 }

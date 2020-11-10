@@ -1,4 +1,4 @@
-const typescript = require("@wessberg/rollup-plugin-ts")
+const typescript = require('@wessberg/rollup-plugin-ts')
 const commonjs = require('@rollup/plugin-commonjs')
 const run = require('@rollup/plugin-run')
 
@@ -20,5 +20,5 @@ module.exports = () => ({
     }),
     commonjs(),
     dev && run()
-  ].filter(Boolean),
+  ].filter(Boolean)
 })

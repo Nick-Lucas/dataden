@@ -2,13 +2,23 @@
   "name": "@mydata/build",
   "version": "1.0.0",
   "description": "Build Tools for this Monorepo",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "watch": "rollup -c rollup.config.js"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-run": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
     "@wessberg/rollup-plugin-ts": "^1.3.8",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.21.5",
+    "prettier": "^2.1.2",
     "rollup": "^2.33.1",
     "typescript": "^4.0.5"
   },
