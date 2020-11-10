@@ -16,7 +16,8 @@ export default () => ({
   },
   plugins: [
     typescript({
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.json',
+      exclude: ['node_modules/**/*', '*/**/node_modules/**/*']
     }),
     commonjs(),
     useRun && run()
