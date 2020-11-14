@@ -1,3 +1,3 @@
 import { rollup } from '@mydata/build'
 
-export default rollup()
+export default rollup({ includeNodeModules: true })

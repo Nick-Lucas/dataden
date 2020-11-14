@@ -7,7 +7,7 @@ const useRun = process.env.ROLLUP_RUN === 'true'
 /**
  * @type {() => import("rollup").RollupOptions}
  */
-export default () => ({
+export default ({ includeNodeModules = false } = {}) => ({
   input: 'src/index.ts',
   output: {
     dir: 'dist',
@@ -19,7 +19,7 @@ export default () => ({
       tsconfig: 'tsconfig.json',
       exclude: ['node_modules/**/*', '*/**/node_modules/**/*']
     }),
-    commonjs(),
+    includeNodeModules && commonjs(),
     useRun && run()
   ].filter(Boolean)
 })
