@@ -1,0 +1,11 @@
+[
+  {
+    "example/random-number": {
+      "version": 1,
+      "name": "Random Number Generator",
+      "description": "An example plugin, useful as a test plugin",
+      "source": "TODO",
+      "verified": true
+    }
+  }
+]
