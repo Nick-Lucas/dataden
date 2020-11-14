@@ -5,6 +5,15 @@ export interface RegistryPlugin {
   description: string
   source: string
   verified: boolean
+  local: false
+}
+
+export interface LocalPlugin {
+  id: string
+  name: string
+  description: string
+  source: string
+  local: true
 }
 
 export interface Registry {

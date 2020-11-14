@@ -2,9 +2,8 @@ import { MongoClient } from 'mongodb'
 import { DATABASES, COLLECTIONS } from './common'
 
 export interface Plugin {
-  name: string
-  source: string
-  local: boolean
+  id: string
+  location: string
 }
 
 function getCollecton(client: MongoClient) {
@@ -19,14 +18,14 @@ export async function get(client: MongoClient): Promise<Plugin[]> {
 
 export async function getOne(
   client: MongoClient,
-  pluginName: string
+  pluginId: string
 ): Promise<Plugin> {
-  return await getCollecton(client).findOne<Plugin>({ name: pluginName })
+  return await getCollecton(client).findOne<Plugin>({ id: pluginId })
 }
 
 export async function upsert(client: MongoClient, plugin: Plugin) {
   await getCollecton(client).updateOne(
-    { name: plugin.name },
+    { name: plugin.id },
     { $set: plugin },
     {
       upsert: true

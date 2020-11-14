@@ -5,7 +5,7 @@ import { DataPayload, DataRow } from '@mydata/sdk'
 const datas = [] as DataRow[]
 
 interface PluginParams {
-  pluginName: string
+  pluginId: string
 }
 
 type PostDataRequest = DataPayload
@@ -16,12 +16,12 @@ interface GetDataResponse {
 
 export function listen(app: Express) {
   app.post<PluginParams, any, PostDataRequest, any>(
-    '/v1.0/data/:pluginName',
+    '/v1.0/data/:pluginId',
     (request, response) => {
-      const { pluginName } = request.params
+      const { pluginId: pluginId } = request.params
       const body = request.body
 
-      console.log('[Post Data]', pluginName, body)
+      console.log('[Post Data]', pluginId, body)
       datas.push(...body.data)
 
       response.sendStatus(200)
@@ -29,11 +29,11 @@ export function listen(app: Express) {
   )
 
   app.get<any, GetDataResponse, any, any>(
-    '/v1.0/data/:pluginName',
+    '/v1.0/data/:pluginId',
     (request, response) => {
-      const { pluginName } = request.params
+      const { pluginId } = request.params
 
-      console.log('[Post Data]', pluginName, datas)
+      console.log('[Post Data]', pluginId, datas)
       response.send({
         data: datas
       })
