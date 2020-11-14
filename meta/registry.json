@@ -1,5 +1,5 @@
-[
-  {
+{
+  "byId": {
     "example/random-number": {
       "version": 1,
       "name": "Random Number Generator",
@@ -8,4 +8,4 @@
       "verified": true
     }
   }
-]
+}
