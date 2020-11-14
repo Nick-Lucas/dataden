@@ -14,7 +14,7 @@ interface GetDataResponse {
   data: DataRow[]
 }
 
-export function add(app: Express) {
+export function listen(app: Express) {
   app.post<PluginParams, any, PostDataRequest, any>(
     '/v1.0/data/:pluginName',
     (request, response) => {

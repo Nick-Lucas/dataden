@@ -1,11 +1,8 @@
 import { Express } from 'express'
-import { DataPayload, DataRow } from '@mydata/sdk'
+import axios from 'axios'
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
-
-// TEST STORE
-const datas = [] as DataRow[]
 
 interface RegistryPlugin {
   version: number
@@ -19,15 +16,19 @@ interface RegistryResponse {
   byId: RegistryPlugin[]
 }
 
-export function add(app: Express) {
+export function listen(app: Express) {
   app.get<void, RegistryResponse, void, void>(
     '/v1.0/registry',
-    async (request, response) => {
-      const registry = await fetch(REGISTRY_URI)
+    async (request, response, next) => {
+      try {
+        const registry = await axios.get<RegistryResponse>(REGISTRY_URI, {
+          validateStatus: (status) => status === 200
+        })
 
-      const registryData: RegistryResponse = await registry.json()
-
-      response.send(registryData)
+        response.send(registry.data)
+      } catch (e) {
+        next(e)
+      }
     }
   )
 }

@@ -23,7 +23,7 @@ export function start() {
     })
   }
 
-  endpoints.add(app)
+  endpoints.listen(app)
 
   app.listen(API_PORT)
   console.log('[API] Listening on port', API_PORT)

@@ -17,7 +17,7 @@ interface GetPluginResponse {
   plugin: Plugins.Plugin
 }
 
-export function add(app: Express) {
+export function listen(app: Express) {
   app.put<void, MaybeErrorBody, PutPluginRequest, void>(
     '/v1.0/plugins',
     async (request, response) => {
