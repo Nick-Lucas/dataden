@@ -1,5 +1,6 @@
 import { Express } from 'express'
 import { getClient, Plugins } from 'src/db'
+import { loadPlugins } from 'src/PluginManager'
 
 interface PluginParams {
   pluginName: string
@@ -63,4 +64,9 @@ export function listen(app: Express) {
       }
     }
   )
+
+  app.post(`/v1.0/plugins/reload`, async (request, response) => {
+    loadPlugins()
+    response.sendStatus(200)
+  })
 }
