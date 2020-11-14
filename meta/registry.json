@@ -1,11 +1,12 @@
 {
-  "byId": {
-    "example/random-number": {
+  "list": [
+    {
       "version": 1,
+      "id": "example/random-number",
       "name": "Random Number Generator",
       "description": "An example plugin, useful as a test plugin",
       "source": "TODO",
       "verified": true
     }
-  }
+  ]
 }
