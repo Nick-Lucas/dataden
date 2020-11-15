@@ -19,3 +19,13 @@ export async function getClient() {
 
   return client
 }
+
+export interface PagingPosition {
+  page: number
+}
+
+export interface PagingResult<T> {
+  page: number
+  pages: number
+  data: T[]
+}

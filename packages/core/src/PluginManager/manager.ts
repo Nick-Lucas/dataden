@@ -6,7 +6,7 @@ import { LocalPlugin, Registry, RegistryPlugin } from './types'
 
 import { getClient, Plugins } from 'src/db'
 
-import { DataLoader } from '@mydata/sdk'
+import { PluginDefinition } from '@mydata/sdk'
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
@@ -36,9 +36,9 @@ export async function installPlugin(
       throw `[installPlugin] Local Plugin ${plugin.id} Cannot Be Installed. Does not exist.`
     }
 
-    await Plugins.upsert(client, installedPlugin)
+    await Plugins.Installed.upsert(client, installedPlugin)
   } else {
-    throw '[installPlugin] Remot Plugin Install: Not Implemented'
+    throw '[installPlugin] Remote Plugin Install: Not Implemented'
     // TODO: download to directory
     // TODO: register local location
   }
@@ -50,13 +50,13 @@ export function uninstallPlugin(pluginId: string) {
   throw '[uninstallPlugin] Not Implemented'
 }
 
-export async function loadPlugins(): Promise<DataLoader[]> {
+export async function loadPlugins(): Promise<PluginDefinition[]> {
   const client = await getClient()
-  const plugins = await Plugins.get(client)
+  const plugins = await Plugins.Installed.list(client)
 
   console.log(`[loadPlugins] ${plugins?.length ?? 0} Plugins will be loaded`)
 
-  const loaders: DataLoader[] = []
+  const definitions: PluginDefinition[] = []
   for (const plugin of plugins) {
     const exists = fs.existsSync(plugin.location)
     if (!exists) {
@@ -66,20 +66,20 @@ export async function loadPlugins(): Promise<DataLoader[]> {
       continue
     }
 
-    const dataLoader = require(plugin.location) as DataLoader
-    if (!dataLoader || typeof dataLoader.loadData !== 'function') {
+    const definition = (await require(plugin.location)) as PluginDefinition
+    if (!definition || typeof definition.loadData !== 'function') {
       console.error(
-        `[loadPlugins] ❗️ Bad DataLoader definition for ${plugin.id} as ${plugin.location}. Recieved: ${dataLoader}`
+        `[loadPlugins] ❗️ Bad PluginDefinition definition for ${plugin.id} as ${plugin.location}. Recieved: ${definition}`
       )
       continue
     }
 
     console.log(`[loadPlugins] 😃 Loaded Plugin ${plugin.id}`)
 
-    loaders.push(dataLoader)
+    definitions.push(definition)
   }
 
-  return loaders
+  return definitions
 }
 
 export async function getRegistry() {

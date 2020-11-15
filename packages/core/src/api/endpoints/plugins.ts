@@ -43,7 +43,7 @@ export function listen(app: Express) {
     async (request, response) => {
       const client = await getClient()
       try {
-        const plugins = await Plugins.get(client)
+        const plugins = await Plugins.Installed.list(client)
         await response.send({ plugins })
       } catch (e) {
         response.status(500)
@@ -59,7 +59,7 @@ export function listen(app: Express) {
 
       const client = await getClient()
       try {
-        const plugin = await Plugins.getOne(client, pluginId)
+        const plugin = await Plugins.Installed.get(client, pluginId)
         await response.send({ plugin })
       } catch (e) {
         response.status(500)
@@ -71,7 +71,17 @@ export function listen(app: Express) {
   app.post(`/v1.0/plugins/reload`, async (request, response) => {
     const plugins = await loadPlugins()
     const responses = await Promise.all(
-      plugins.map((plugin) => plugin.loadData({ lastDate: null, settings: {} }))
+      plugins.map((plugin) =>
+        plugin.loadData(
+          // TODO: use actual settings
+          { plugin: null, schedule: null },
+          {
+            lastSync: {
+              date: new Date(0)
+            }
+          }
+        )
+      )
     )
     response.send(JSON.stringify({ plugins, responses }))
   })

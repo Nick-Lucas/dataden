@@ -1,18 +1,3 @@
-export interface DataRow extends Record<string, unknown> {
-  uniqueId
-}
-
-export interface DataRequest {
-  lastDate: Date
-  settings: Record<string, string>
-}
-
-export interface DataPayload {
-  mode: 'append' | 'replace'
-  data: DataRow[]
-  lastDate: Date
-}
-
 export interface Schedule {
   every: number
   grain:
@@ -26,7 +11,10 @@ export interface Schedule {
     | 'week'
 }
 
-type SettingId = string
+//
+// Settings
+
+export type SettingId = string
 
 export interface Settings {
   schedule: Schedule
@@ -41,9 +29,33 @@ export interface SettingDefinition {
   select?: string[]
 }
 
+//
+// Data Loader
+
+export interface DataRow extends Record<string, any> {
+  uniqueId
+}
+
+export interface SyncInfo {
+  date: Date
+}
+
+export interface DataRequest {
+  lastSync: SyncInfo
+}
+
+export interface DataPayload {
+  mode: 'append' | 'replace'
+  data: DataRow[]
+  lastDate: Date
+}
+
+//
+// Plugin Definitions
+
 export interface Initable {
   /** You may initialise any plugin state here. */
-  init: () => Promise<void>
+  init?: () => Promise<void>
 }
 
 export interface PluginDefinition {
@@ -51,10 +63,10 @@ export interface PluginDefinition {
   // Configuration
 
   /** Used when initilising the plugin for the first time. Provide sensible (or no) defaults for plugin settings */
-  getDefaultSettings: () => Promise<Settings>
+  getDefaultSettings?: () => Promise<Settings>
 
   /** Return configuration which can be used to populate a UI with controls or validate plugin settings */
-  getCustomSettingsDefinition: () => Promise<SettingDefinition[]>
+  getCustomSettingsDefinition?: () => Promise<SettingDefinition[]>
 
   //
   // Data
@@ -63,7 +75,13 @@ export interface PluginDefinition {
   loadData: (settings: Settings, request: DataRequest) => Promise<DataPayload>
 }
 
+//
+// Errors
+
 export class NotImplementedError extends Error {}
+
+//
+// Constructors
 
 export async function createPlugin({
   getDefaultSettings = async () => ({
