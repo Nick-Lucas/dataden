@@ -1,1 +1,1 @@
-export * from './PluginDefinition'
+export * from './PluginInstance'

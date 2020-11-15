@@ -12,12 +12,15 @@ export const COLLECTIONS = {
   }
 }
 
+let _client = null
 export async function getClient() {
-  const client = await MongoClient.connect(MONGO_URI, {
-    useUnifiedTopology: true
-  })
+  if (!_client) {
+    _client = await MongoClient.connect(MONGO_URI, {
+      useUnifiedTopology: true
+    })
+  }
 
-  return client
+  return _client
 }
 
 export interface PagingPosition {

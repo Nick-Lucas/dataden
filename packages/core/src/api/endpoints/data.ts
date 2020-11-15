@@ -1,42 +1,46 @@
 import { Express } from 'express'
-import { DataPayload, DataRow } from '@mydata/sdk'
-
-// TEST STORE
-const datas = [] as DataRow[]
+import { DataRow } from '@mydata/sdk'
+import { getClient, PagingResult, Plugins } from 'src/db'
 
 interface PluginParams {
   pluginId: string
 }
 
-type PostDataRequest = DataPayload
-
-interface GetDataResponse {
-  data: DataRow[]
-}
+type GetDataResponse = PagingResult<DataRow>
 
 export function listen(app: Express) {
-  app.post<PluginParams, any, PostDataRequest, any>(
+  // app.post<PluginParams, any, PostDataRequest, any>(
+  //   '/v1.0/data/:pluginId',
+  //   (request, response) => {
+  //     const { pluginId: pluginId } = request.params
+  //     const body = request.body
+
+  //     datas.push(...body.data)
+
+  //     response.status(200)
+  //   }
+  // )
+
+  app.get<PluginParams, GetDataResponse, any, any>(
     '/v1.0/data/:pluginId',
-    (request, response) => {
-      const { pluginId: pluginId } = request.params
-      const body = request.body
+    async (request, response, next) => {
+      try {
+        const { pluginId } = request.params
 
-      console.log('[Post Data]', pluginId, body)
-      datas.push(...body.data)
+        const client = await getClient()
 
-      response.sendStatus(200)
-    }
-  )
+        // TODO: implement paging properly
+        const data = await Plugins.Data.fetch(
+          client,
+          pluginId,
+          { page: 0 },
+          1000
+        )
 
-  app.get<any, GetDataResponse, any, any>(
-    '/v1.0/data/:pluginId',
-    (request, response) => {
-      const { pluginId } = request.params
-
-      console.log('[Post Data]', pluginId, datas)
-      response.send({
-        data: datas
-      })
+        response.send(data)
+      } catch (e) {
+        next(e)
+      }
     }
   )
 }

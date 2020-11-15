@@ -58,7 +58,7 @@ export interface Initable {
   init?: () => Promise<void>
 }
 
-export interface PluginDefinition {
+export interface PluginInstance {
   //
   // Configuration
 
@@ -99,7 +99,7 @@ export async function createPlugin({
   loadData = async () => {
     throw new NotImplementedError('loadData')
   }
-}: PluginDefinition & Initable): Promise<PluginDefinition> {
+}: PluginInstance & Initable): Promise<PluginInstance> {
   await init()
 
   return {

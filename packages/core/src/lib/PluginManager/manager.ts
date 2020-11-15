@@ -2,11 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 
-import { LocalPlugin, Registry, RegistryPlugin } from './types'
+import {
+  LocalPlugin,
+  PluginDefinition,
+  Registry,
+  RegistryPlugin
+} from './types'
 
 import { getClient, Plugins } from 'src/db'
 
-import { PluginDefinition } from '@mydata/sdk'
+import { PluginInstance } from '@mydata/sdk'
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
@@ -58,28 +63,61 @@ export async function loadPlugins(): Promise<PluginDefinition[]> {
 
   const definitions: PluginDefinition[] = []
   for (const plugin of plugins) {
-    const exists = fs.existsSync(plugin.location)
-    if (!exists) {
-      console.warn(
-        `[loadPlugins] 😒 Plugin ${plugin.id} at location ${plugin.location} has disappeared`
-      )
+    const instance = await loadPlugin(plugin)
+    if (!instance) {
       continue
     }
 
-    const definition = (await require(plugin.location)) as PluginDefinition
-    if (!definition || typeof definition.loadData !== 'function') {
-      console.error(
-        `[loadPlugins] ❗️ Bad PluginDefinition definition for ${plugin.id} as ${plugin.location}. Recieved: ${definition}`
-      )
-      continue
-    }
-
-    console.log(`[loadPlugins] 😃 Loaded Plugin ${plugin.id}`)
-
-    definitions.push(definition)
+    definitions.push({
+      id: plugin.id,
+      ...instance
+    })
   }
 
   return definitions
+}
+
+export async function loadPluginById(
+  pluginId: string
+): Promise<PluginInstance | null> {
+  const client = await getClient()
+  const plugin = await Plugins.Installed.get(client, pluginId)
+  if (!plugin) {
+    return null
+  }
+
+  return loadPlugin(plugin)
+}
+
+async function loadPlugin(
+  plugin: Plugins.Plugin
+): Promise<PluginInstance | null> {
+  if (!plugin.location) {
+    console.warn(
+      `[loadPlugins] 😒 Plugin ${plugin.id} as location is not provided.`
+    )
+    return null
+  }
+
+  const exists = fs.existsSync(plugin.location)
+  if (!exists) {
+    console.warn(
+      `[loadPlugins] 😒 Plugin ${plugin.id} at location ${plugin.location} has disappeared. Please re-install.`
+    )
+    return null
+  }
+
+  const instance = (await require(plugin.location)) as PluginInstance
+  if (!instance || typeof instance.loadData !== 'function') {
+    console.error(
+      `[loadPlugins] ❗️ Bad PluginInstance definition for ${plugin.id} as ${plugin.location}. Recieved: ${instance}`
+    )
+    return null
+  }
+
+  console.log(`[loadPlugins] 😃 Loaded Plugin ${plugin.id}`)
+
+  return instance
 }
 
 export async function getRegistry() {

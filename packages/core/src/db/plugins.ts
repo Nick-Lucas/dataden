@@ -1,19 +1,27 @@
 import { MongoClient } from 'mongodb'
 import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
 
-import { DataRow, SyncInfo } from '@mydata/sdk'
+import { DataRow, SyncInfo, Settings as ISettings } from '@mydata/sdk'
 
 export interface Plugin {
   id: string
   location: string
 }
 
-type Collection = 'syncs' | 'data'
+type Collection = 'syncs' | 'data' | 'settings'
 
-function db(client: MongoClient, pluginId: string, collection: Collection) {
+function getDatabaseName(pluginId: string) {
+  return pluginId.toLowerCase().replace(/[^a-z0-9]/, '_')
+}
+
+function getPluginDb(
+  client: MongoClient,
+  pluginId: string,
+  collection: Collection
+) {
   return client
-    .db(DATABASES.CORE)
-    .collection(DATABASES.PLUGIN_PREFIX + collection)
+    .db(DATABASES.PLUGIN_PREFIX + getDatabaseName(pluginId))
+    .collection(collection)
 }
 
 export const Installed = {
@@ -46,15 +54,13 @@ export const Installed = {
   }
 }
 
-// TODO: should wrap writes up in a transaction on the outside outside
-
 export const Data = {
   append: async function (
     client: MongoClient,
     pluginId: string,
     rows: DataRow[]
   ): Promise<void> {
-    await db(client, pluginId, 'data').insertMany(rows, {
+    await getPluginDb(client, pluginId, 'data').insertMany(rows, {
       ordered: true
     })
   },
@@ -64,7 +70,7 @@ export const Data = {
     pluginId: string,
     rows: DataRow[]
   ): Promise<void> {
-    await db(client, pluginId, 'data').deleteMany({})
+    await getPluginDb(client, pluginId, 'data').deleteMany({})
     await Data.append(client, pluginId, rows)
   },
 
@@ -74,7 +80,7 @@ export const Data = {
     position: PagingPosition = { page: 0 },
     pageSize = 1000
   ): Promise<PagingResult<DataRow>> {
-    const cursor = await db(client, pluginId, 'data').find<DataRow>({})
+    const cursor = await getPluginDb(client, pluginId, 'data').find<DataRow>({})
 
     const totalRows = await cursor.count(false)
     const pages = Math.ceil(totalRows / pageSize)
@@ -92,8 +98,8 @@ export const Data = {
 }
 
 export const Syncs = {
-  get: async (client: MongoClient, pluginId: string): Promise<SyncInfo> => {
-    const lastSync = await db(
+  last: async (client: MongoClient, pluginId: string): Promise<SyncInfo> => {
+    const lastSync = await getPluginDb(
       client,
       pluginId,
       'syncs'
@@ -113,6 +119,37 @@ export const Syncs = {
     pluginId: string,
     sync: SyncInfo
   ): Promise<void> => {
-    await db(client, pluginId, 'syncs').insertOne(sync)
+    await getPluginDb(client, pluginId, 'syncs').insertOne(sync)
+  }
+}
+
+export const Settings = {
+  get: async (
+    client: MongoClient,
+    pluginId: string
+  ): Promise<ISettings | null> => {
+    const settings = await getPluginDb(
+      client,
+      pluginId,
+      'settings'
+    ).findOne<ISettings | null>({})
+
+    if (settings) {
+      return settings
+    } else {
+      return null
+    }
+  },
+
+  set: async (
+    client: MongoClient,
+    pluginId: string,
+    settings: ISettings
+  ): Promise<void> => {
+    await getPluginDb(client, pluginId, 'settings').updateOne(
+      {},
+      { $set: settings },
+      { upsert: true }
+    )
   }
 }

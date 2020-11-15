@@ -1,5 +1,5 @@
 import { Express } from 'express'
-import { getRegistry, Registry } from 'src/PluginManager'
+import { getRegistry, Registry } from 'src/lib/PluginManager'
 
 type RegistryResponse = Registry
 

@@ -1,11 +1,13 @@
 import { Express } from 'express'
+
 import { getClient, Plugins } from 'src/db'
 import {
   installPlugin,
-  loadPlugins,
   LocalPlugin,
   RegistryPlugin
-} from 'src/PluginManager'
+} from 'src/lib/PluginManager'
+import { Scheduler } from 'src/lib/Scheduler'
+import { Settings } from '@mydata/sdk'
 
 interface PluginParams {
   pluginId: string
@@ -21,6 +23,9 @@ interface GetPluginsResponse {
 interface GetPluginResponse {
   plugin: Plugins.Plugin
 }
+
+type GetSettingsResponse = Settings | string
+type SetSettingsRequest = Settings
 
 export function listen(app: Express) {
   app.put<void, PutPluginResponse, PutPluginRequest, void>(
@@ -69,20 +74,55 @@ export function listen(app: Express) {
   )
 
   app.post(`/v1.0/plugins/reload`, async (request, response) => {
-    const plugins = await loadPlugins()
-    const responses = await Promise.all(
-      plugins.map((plugin) =>
-        plugin.loadData(
-          // TODO: use actual settings
-          { plugin: null, schedule: null },
-          {
-            lastSync: {
-              date: new Date(0)
-            }
-          }
-        )
-      )
-    )
-    response.send(JSON.stringify({ plugins, responses }))
+    await Scheduler.stop()
+    await Scheduler.start()
+
+    response.sendStatus(200)
   })
+
+  app.get<PluginParams, GetSettingsResponse, void, void>(
+    `/v1.0/plugins/:pluginId/settings`,
+    async (request, response, next) => {
+      try {
+        const { pluginId } = request.params
+
+        const client = await getClient()
+        const settings = await Plugins.Settings.get(client, pluginId)
+        if (settings) {
+          response.send(settings)
+          return
+        }
+
+        const instance = await Scheduler.getInstance(pluginId)
+        if (!instance) {
+          response.status(404)
+          response.send('Could not get Plugin instance')
+          return
+        }
+
+        const defaultSettings = await instance.getDefaultSettings()
+
+        response.send(defaultSettings)
+      } catch (e) {
+        next(e)
+      }
+    }
+  )
+
+  app.post<PluginParams, void, SetSettingsRequest, void>(
+    `/v1.0/plugins/:pluginId/settings`,
+    async (request, response, next) => {
+      try {
+        const { pluginId } = request.params
+        const settings = request.body
+
+        const client = await getClient()
+        await Plugins.Settings.set(client, pluginId, settings)
+
+        response.sendStatus(200)
+      } catch (e) {
+        next(e)
+      }
+    }
+  )
 }
