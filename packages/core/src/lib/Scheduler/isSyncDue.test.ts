@@ -16,11 +16,11 @@ describe('isSyncDue', () => {
     expect(result).toBe(true)
   })
 
-  it('should be false for the same value', () => {
+  it('should be false when not enough time has passed', () => {
     const result = isSyncDue(
-      new Date(0),
+      new Date(2020, 5, 15, 16, 0, 59),
       {
-        date: new Date(0)
+        date: new Date(2020, 5, 15, 16, 0, 0)
       },
       {
         every: 1,
@@ -33,9 +33,9 @@ describe('isSyncDue', () => {
 
   it('should be true when 1 minute has passed', () => {
     const result = isSyncDue(
-      new Date(0, 0, 0, 0, 1),
+      new Date(2020, 5, 15, 16, 1, 0),
       {
-        date: new Date(0)
+        date: new Date(2020, 5, 15, 16, 0, 0)
       },
       {
         every: 1,

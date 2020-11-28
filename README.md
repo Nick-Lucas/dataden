@@ -25,4 +25,3 @@ Collect all your data into a personal data warehouse for cross-analysis and aggr
 
 * `/> yarn install`
 * `/> yarn dev`
-* `cd packages/core && yarn start`
