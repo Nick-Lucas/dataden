@@ -4,6 +4,7 @@ import { getClient, PagingResult, Plugins } from 'src/db'
 
 interface PluginParams {
   pluginId: string
+  dataSetName: string
 }
 
 type GetDataResponse = PagingResult<DataRow>
@@ -25,7 +26,7 @@ export function listen(app: Express) {
     '/v1.0/data/:pluginId',
     async (request, response, next) => {
       try {
-        const { pluginId } = request.params
+        const { pluginId, dataSetName } = request.params
 
         const client = await getClient()
 
@@ -33,6 +34,7 @@ export function listen(app: Express) {
         const data = await Plugins.Data.fetch(
           client,
           pluginId,
+          dataSetName,
           { page: 0 },
           1000
         )

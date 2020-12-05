@@ -17,10 +17,12 @@ export interface Schedule {
 export type SettingId = string
 
 export interface Settings {
+  name: string // TODO: use name for database, and when it changes also migrate the database
   schedule: Schedule
   plugin: Record<SettingId, any>
 }
 
+// TODO: consume this in a frontend
 export interface SettingDefinition {
   id: SettingId
   name: string
@@ -58,6 +60,11 @@ export interface Initable {
   init?: () => Promise<void>
 }
 
+export type DataLoader = {
+  name: string
+  load: (settings: Settings, request: DataRequest) => Promise<DataPayload>
+}
+
 export interface PluginInstance {
   //
   // Configuration
@@ -72,39 +79,48 @@ export interface PluginInstance {
   // Data
 
   /** Must be implemented! Given configuration, return any new state which should be stored */
-  loadData: (settings: Settings, request: DataRequest) => Promise<DataPayload>
+  loaders: DataLoader[]
 }
+
+type PluginInstanceRequest = Omit<PluginInstance, 'loaders'> & {
+  loaders: DataLoader | DataLoader[]
+} & Initable
 
 //
 // Errors
 
 export class NotImplementedError extends Error {}
+export class PluginValidationError extends Error {}
+export class DataLoaderValidationError extends Error {}
 
 //
 // Constructors
 
-export async function createPlugin({
-  getDefaultSettings = async () => ({
-    schedule: {
-      every: 1,
-      grain: 'day'
-    },
-    plugin: {}
-  }),
-
-  getCustomSettingsDefinition = async () => [],
-
-  init = async () => await Promise.resolve(),
-
-  loadData = async () => {
-    throw new NotImplementedError('loadData')
+export function createPlugin({
+  init = null,
+  getDefaultSettings = null,
+  getCustomSettingsDefinition = null,
+  loaders = null
+}: PluginInstanceRequest): PluginInstance {
+  if (!getDefaultSettings) {
+    throw new PluginValidationError('getDefaultSettings must be defined')
   }
-}: PluginInstance & Initable): Promise<PluginInstance> {
-  await init()
+
+  if (!loaders || (Array.isArray(loaders) && !loaders.length)) {
+    throw new DataLoaderValidationError('DataLoader was not provided')
+  }
+  if (!Array.isArray(loaders)) {
+    loaders = [loaders]
+  }
+
+  // TODO: verify data loader names are alpha-numeric and _
+  // throw new DataLoaderValidationError("Loader ${loader.name} is not valid, can only contain: a-z 0-9 _")
+
+  init?.()
 
   return {
-    getCustomSettingsDefinition,
     getDefaultSettings,
-    loadData
+    getCustomSettingsDefinition,
+    loaders
   }
 }

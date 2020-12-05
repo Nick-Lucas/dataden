@@ -8,7 +8,7 @@ export interface Plugin {
   location: string
 }
 
-type Collection = 'syncs' | 'data' | 'settings'
+type Collection = 'syncs' | 'settings' | string
 
 function getDatabaseName(pluginId: string) {
   return pluginId.toLowerCase().replace(/[^a-z0-9]/, '_')
@@ -58,29 +58,39 @@ export const Data = {
   append: async function (
     client: MongoClient,
     pluginId: string,
+    dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, pluginId, 'data').insertMany(rows, {
-      ordered: true
-    })
+    await getPluginDb(client, pluginId, 'data_' + dataSetName).insertMany(
+      rows,
+      {
+        ordered: true
+      }
+    )
   },
 
   replace: async function (
     client: MongoClient,
     pluginId: string,
+    dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, pluginId, 'data').deleteMany({})
-    await Data.append(client, pluginId, rows)
+    await getPluginDb(client, pluginId, 'data_' + dataSetName).deleteMany({})
+    await Data.append(client, pluginId, dataSetName, rows)
   },
 
   fetch: async function (
     client: MongoClient,
     pluginId: string,
+    dataSetName: string,
     position: PagingPosition = { page: 0 },
     pageSize = 1000
   ): Promise<PagingResult<DataRow>> {
-    const cursor = await getPluginDb(client, pluginId, 'data').find<DataRow>({})
+    const cursor = await getPluginDb(
+      client,
+      pluginId,
+      'data_' + dataSetName
+    ).find<DataRow>({})
 
     const totalRows = await cursor.count(false)
     const pages = Math.ceil(totalRows / pageSize)

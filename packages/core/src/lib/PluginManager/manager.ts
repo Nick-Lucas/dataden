@@ -108,14 +108,16 @@ async function loadPlugin(
   }
 
   const instance = (await require(plugin.location)) as PluginInstance
-  if (!instance || typeof instance.loadData !== 'function') {
+  if (!pluginInstanceIsValid(instance)) {
     console.error(
-      `[loadPlugins] ❗️ Bad PluginInstance definition for ${plugin.id} as ${plugin.location}. Recieved: ${instance}`
+      `[loadPlugins] ❗️ Bad PluginInstance definition for ${plugin.id} at ${plugin.location}.`
     )
     return null
   }
 
-  console.log(`[loadPlugins] 😃 Loaded Plugin ${plugin.id}`)
+  console.log(
+    `[loadPlugins] 😃 Loaded Plugin ${plugin.id} with ${instance.loaders.length} loaders`
+  )
 
   return instance
 }
@@ -124,4 +126,13 @@ export async function getRegistry() {
   return await axios.get<Registry>(REGISTRY_URI, {
     validateStatus: (status) => status === 200
   })
+}
+
+function pluginInstanceIsValid(instance: PluginInstance) {
+  return (
+    instance &&
+    Array.isArray(instance.loaders) &&
+    instance.loaders.length > 0 &&
+    instance.loaders.every((loader) => typeof loader === 'function')
+  )
 }

@@ -87,36 +87,48 @@ function queueSchedule(
 
     isRunning = true
     let dbSession: ClientSession = null
-    try {
-      console.log(`[Scheduler] ${plugin.id}: Will Load Data`)
+    for (const loader of plugin.loaders) {
+      try {
+        console.log(`[Scheduler] ${plugin.id}: Will Load Data`)
 
-      const result = await plugin.loadData(settings, { lastSync: lastSync })
+        const result = await loader.load(settings, { lastSync: lastSync })
 
-      dbSession = client.startSession()
-      await dbSession.withTransaction(async () => {
-        await Plugins.Syncs.track(client, plugin.id, {
-          date: result.lastDate
+        dbSession = client.startSession()
+        await dbSession.withTransaction(async () => {
+          await Plugins.Syncs.track(client, plugin.id, {
+            date: result.lastDate
+          })
+
+          if (result.mode === 'append') {
+            await Plugins.Data.append(
+              client,
+              plugin.id,
+              loader.name,
+              result.data
+            )
+          } else if (result.mode === 'replace') {
+            await Plugins.Data.replace(
+              client,
+              plugin.id,
+              loader.name,
+              result.data
+            )
+          } else {
+            throw `Unknown Result Mode: "${result.mode}"`
+          }
         })
 
-        if (result.mode === 'append') {
-          await Plugins.Data.append(client, plugin.id, result.data)
-        } else if (result.mode === 'replace') {
-          await Plugins.Data.replace(client, plugin.id, result.data)
-        } else {
-          throw `Unknown Result Mode: "${result.mode}"`
+        console.log(`[Scheduler] ${plugin.id}: 👌 Data Load Finished`)
+      } catch (e) {
+        console.error(
+          `[Scheduler] ${plugin.id}: ❗️ Data Load Failed with error.`,
+          e
+        )
+      } finally {
+        isRunning = false
+        if (dbSession) {
+          dbSession.endSession()
         }
-      })
-
-      console.log(`[Scheduler] ${plugin.id}: 👌 Data Load Finished`)
-    } catch (e) {
-      console.error(
-        `[Scheduler] ${plugin.id}: ❗️ Data Load Failed with error.`,
-        e
-      )
-    } finally {
-      isRunning = false
-      if (dbSession) {
-        dbSession.endSession()
       }
     }
   }
