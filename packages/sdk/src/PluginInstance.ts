@@ -30,9 +30,27 @@ export interface DataRow extends Record<string, any> {
   uniqueId
 }
 
-export interface SyncInfo {
+export type SyncSuccessInfo = {
+  /** Outcome */
+  success: true
+
+  /** The date of the sync attempt */
   date: Date
+
+  /** the date to feed into the next sync, for instance the date of the newest record retrieved during the last sync */
+  latestDate: Date
 }
+export type SyncFailureInfo = {
+  /** Outcome */
+  success: false
+
+  /** The date of the sync attempt */
+  date: Date
+
+  /** Error if the outcome was a failure */
+  error?: string
+}
+export type SyncInfo = SyncSuccessInfo | SyncFailureInfo
 
 export interface DataRequest {
   lastSync: SyncInfo

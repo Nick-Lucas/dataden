@@ -3,7 +3,7 @@ import { MONGO_URI } from 'src/config'
 
 export const DATABASES = {
   CORE: 'core',
-  PLUGIN_PREFIX: 'plugin_'
+  PLUGIN_PREFIX: 'plugin__'
 }
 
 export const COLLECTIONS = {

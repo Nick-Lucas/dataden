@@ -29,7 +29,7 @@ describe('createPlugin', () => {
     expect(Array.isArray(plugin.loaders)).toBe(true)
     expect(plugin.loaders.length).toBe(1)
 
-    expect((await plugin.getDefaultSettings()).name).toBe('MyPlugin')
+    expect(plugin.name).toBe('MyPlugin')
     expect(plugin.loaders[0].name).toBe('Dataset')
     expect(typeof plugin.loaders[0].load).toBe('function')
   })
@@ -74,7 +74,7 @@ describe('createPlugin', () => {
     expect(Array.isArray(plugin.loaders)).toBe(true)
     expect(plugin.loaders.length).toBe(2)
 
-    expect((await plugin.getDefaultSettings()).name).toBe('MyPlugin')
+    expect(plugin.name).toBe('MyPlugin')
     expect(plugin.loaders[0].name).toBe('Dataset_1')
     expect(typeof plugin.loaders[0].load).toBe('function')
     expect(plugin.loaders[1].name).toBe('Dataset_2')

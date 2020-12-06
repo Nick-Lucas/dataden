@@ -5,7 +5,9 @@ describe('isSyncDue', () => {
     const result = isSyncDue(
       new Date(),
       {
-        date: new Date(0)
+        success: true,
+        date: new Date(0),
+        latestDate: null
       },
       {
         every: 1,
@@ -20,7 +22,9 @@ describe('isSyncDue', () => {
     const result = isSyncDue(
       new Date(2020, 5, 15, 16, 0, 59),
       {
-        date: new Date(2020, 5, 15, 16, 0, 0)
+        success: true,
+        date: new Date(2020, 5, 15, 16, 0, 0),
+        latestDate: null
       },
       {
         every: 1,
@@ -35,7 +39,9 @@ describe('isSyncDue', () => {
     const result = isSyncDue(
       new Date(2020, 5, 15, 16, 1, 0),
       {
-        date: new Date(2020, 5, 15, 16, 0, 0)
+        success: true,
+        date: new Date(2020, 5, 15, 16, 0, 0),
+        latestDate: null
       },
       {
         every: 1,

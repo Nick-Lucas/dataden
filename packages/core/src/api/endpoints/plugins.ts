@@ -117,24 +117,26 @@ export function listen(app: Express) {
 
         const client = await Db.getClient()
 
-        const installedPlugin = await Db.Plugins.Installed.get(client, pluginId)
-        const pluginInstance = installedPlugin.instances.find(
+        const definition = await Scheduler.getPluginDefinition(pluginId)
+        const instance = definition.plugin.instances.find(
           (instance) =>
             instance.uuid === instanceId || instance.name === instanceId
         )
-        if (!pluginInstance) {
+        if (!instance) {
           response.status(404)
           response.send(`Plugin instance id ${instanceId} not found`)
           return
         }
 
-        const settings = await Db.Plugins.Settings.get(client, pluginInstance)
+        const settings = await Db.Plugins.Settings.get(client, {
+          pluginName: definition.service.name,
+          instanceName: instance.name
+        })
         if (settings) {
           response.send(settings)
           return
         }
 
-        const definition = await Scheduler.getPluginDefinition(pluginId)
         if (!definition) {
           response.status(404)
           response.send('Could not get Plugin instance')
@@ -159,18 +161,25 @@ export function listen(app: Express) {
 
         const client = await Db.getClient()
 
-        const installedPlugin = await Db.Plugins.Installed.get(client, pluginId)
-        const pluginInstance = installedPlugin.instances.find(
+        const definition = await Scheduler.getPluginDefinition(pluginId)
+        const instance = definition.plugin.instances.find(
           (instance) =>
             instance.uuid === instanceId || instance.name === instanceId
         )
-        if (!pluginInstance) {
+        if (!instance) {
           response.status(404)
           response.send(`Plugin instance id ${instanceId} not found`)
           return
         }
 
-        await Db.Plugins.Settings.set(client, pluginInstance, settings)
+        await Db.Plugins.Settings.set(
+          client,
+          {
+            pluginName: definition.service.name,
+            instanceName: instance.name
+          },
+          settings
+        )
 
         response.sendStatus(200)
       } catch (e) {

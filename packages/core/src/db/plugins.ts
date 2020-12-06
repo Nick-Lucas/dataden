@@ -1,8 +1,14 @@
-import { MongoClient } from 'mongodb'
+import { FilterQuery, MongoClient } from 'mongodb'
 import * as uuid from 'uuid'
-import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
+import { DateTime } from 'luxon'
 
-import { DataRow, SyncInfo, Settings as ISettings } from '@mydata/sdk'
+import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
+import {
+  DataRow,
+  SyncInfo,
+  Settings as ISettings,
+  SyncSuccessInfo
+} from '@mydata/sdk'
 
 export interface PluginBase {
   id: string
@@ -23,18 +29,25 @@ export interface Plugin extends PluginBase {
 
 type Collection = 'syncs' | 'settings' | string
 
-function getDatabaseName(instance: PluginInstance) {
-  return instance.name.toLowerCase().replace(/[^a-z0-9]/, '_')
+export interface DbPath {
+  pluginName: string
+  instanceName: string
 }
 
-function getPluginDb(
+function getDatabaseName(info: DbPath) {
+  return (info.pluginName + '__' + info.instanceName)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/, '_')
+}
+
+function getPluginDb<T>(
   client: MongoClient,
-  instance: PluginInstance,
+  path: DbPath,
   collection: Collection
 ) {
   return client
-    .db(DATABASES.PLUGIN_PREFIX + getDatabaseName(instance))
-    .collection(collection)
+    .db(DATABASES.PLUGIN_PREFIX + getDatabaseName(path))
+    .collection<T>(collection)
 }
 
 export const Installed = {
@@ -87,40 +100,35 @@ export const Installed = {
 export const Data = {
   append: async function (
     client: MongoClient,
-    instance: PluginInstance,
+    path: DbPath,
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, instance, 'data_' + dataSetName).insertMany(
-      rows,
-      {
-        ordered: true
-      }
-    )
+    await getPluginDb(client, path, 'data_' + dataSetName).insertMany(rows, {
+      ordered: true
+    })
   },
 
   replace: async function (
     client: MongoClient,
-    instance: PluginInstance,
+    path: DbPath,
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, instance, 'data_' + dataSetName).deleteMany({})
-    await Data.append(client, instance, dataSetName, rows)
+    await getPluginDb(client, path, 'data_' + dataSetName).deleteMany({})
+    await Data.append(client, path, dataSetName, rows)
   },
 
   fetch: async function (
     client: MongoClient,
-    instance: PluginInstance,
+    path: DbPath,
     dataSetName: string,
     position: PagingPosition = { page: 0 },
     pageSize = 1000
   ): Promise<PagingResult<DataRow>> {
-    const cursor = await getPluginDb(
-      client,
-      instance,
-      'data_' + dataSetName
-    ).find<DataRow>({})
+    const cursor = await getPluginDb(client, path, 'data_' + dataSetName).find<
+      DataRow
+    >({})
 
     const totalRows = await cursor.count(false)
     const pages = Math.ceil(totalRows / pageSize)
@@ -138,42 +146,41 @@ export const Data = {
 }
 
 export const Syncs = {
-  last: async (
+  last: async <T extends SyncInfo>(
     client: MongoClient,
-    instance: PluginInstance
-  ): Promise<SyncInfo> => {
-    const lastSync = await getPluginDb(
-      client,
-      instance,
-      'syncs'
-    ).findOne<SyncInfo | null>({}, { sort: { $natural: -1 } })
+    path: DbPath,
+    query: FilterQuery<SyncInfo> = {}
+  ): Promise<T | SyncSuccessInfo> => {
+    const lastSync = await getPluginDb(client, path, 'syncs').findOne<T | null>(
+      query,
+      { sort: { $natural: -1 } }
+    )
 
     if (lastSync) {
       return lastSync
     } else {
       return {
-        date: new Date(0)
+        success: true,
+        date: new Date(0),
+        latestDate: null
       }
     }
   },
 
   track: async (
     client: MongoClient,
-    instance: PluginInstance,
+    path: DbPath,
     sync: SyncInfo
   ): Promise<void> => {
-    await getPluginDb(client, instance, 'syncs').insertOne(sync)
+    await getPluginDb(client, path, 'syncs').insertOne(sync)
   }
 }
 
 export const Settings = {
-  get: async (
-    client: MongoClient,
-    instance: PluginInstance
-  ): Promise<ISettings | null> => {
+  get: async (client: MongoClient, path: DbPath): Promise<ISettings | null> => {
     const settings = await getPluginDb(
       client,
-      instance,
+      path,
       'settings'
     ).findOne<ISettings | null>({})
 
@@ -186,10 +193,10 @@ export const Settings = {
 
   set: async (
     client: MongoClient,
-    instance: PluginInstance,
+    path: DbPath,
     settings: ISettings
   ): Promise<void> => {
-    await getPluginDb(client, instance, 'settings').updateOne(
+    await getPluginDb(client, path, 'settings').updateOne(
       {},
       { $set: settings },
       { upsert: true }

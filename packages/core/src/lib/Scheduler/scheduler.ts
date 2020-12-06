@@ -1,12 +1,13 @@
 import { ClientSession, MongoClient } from 'mongodb'
 import * as Db from 'src/db'
-import { PluginInstance } from 'src/db/plugins'
+import { DbPath, PluginInstance } from 'src/db/plugins'
 import {
   PluginServiceDefinition,
   loadPluginServiceDefinitions,
   loadPluginServiceDefinitionById
 } from 'src/lib/PluginManager'
 import { isSyncDue } from './isSyncDue'
+import { SyncInfo, SyncSuccessInfo } from '@mydata/sdk'
 
 const liveIntervals: NodeJS.Timeout[] = []
 const liveServices: PluginServiceDefinition[] = []
@@ -22,7 +23,10 @@ export async function start() {
   const client = await Db.getClient()
   for (const definition of definitions) {
     for (const instance of definition.plugin.instances) {
-      const settings = await Db.Plugins.Settings.get(client, instance)
+      const settings = await Db.Plugins.Settings.get(client, {
+        pluginName: definition.service.name,
+        instanceName: instance.name
+      })
       if (!settings) {
         console.warn(
           `[Scheduler] ${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
@@ -70,13 +74,28 @@ function queueSchedule(
   let isRunning = false
 
   const pluginId = definition.plugin.id
+  const dbPath: DbPath = {
+    pluginName: definition.service.name,
+    instanceName: instance.name
+  }
 
   async function maybeLoadData() {
     console.log(`[Scheduler] ${pluginId}: Checking if sync is due`)
-    const lastSync = await Db.Plugins.Syncs.last(client, instance)
-    const settings = await Db.Plugins.Settings.get(client, instance)
 
-    const syncDue = isSyncDue(new Date(), lastSync, settings.schedule)
+    const settings = await Db.Plugins.Settings.get(client, dbPath)
+    const lastSyncAttempt = await Db.Plugins.Syncs.last<SyncInfo>(
+      client,
+      dbPath
+    )
+    const lastSyncSuccess = await Db.Plugins.Syncs.last<SyncSuccessInfo>(
+      client,
+      dbPath,
+      {
+        success: true
+      }
+    )
+
+    const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
     if (!syncDue) {
       console.log(`[Scheduler] ${pluginId}: Sync not due yet`)
       return
@@ -97,25 +116,29 @@ function queueSchedule(
       try {
         console.log(`[Scheduler] ${pluginId}: Will Load Data`)
 
-        const result = await loader.load(settings, { lastSync: lastSync })
+        const result = await loader.load(settings, {
+          lastSync: lastSyncSuccess
+        })
 
         dbSession = client.startSession()
         await dbSession.withTransaction(async () => {
-          await Db.Plugins.Syncs.track(client, instance, {
-            date: result.lastDate
+          await Db.Plugins.Syncs.track(client, dbPath, {
+            success: true,
+            latestDate: result.lastDate,
+            date: new Date()
           })
 
           if (result.mode === 'append') {
             await Db.Plugins.Data.append(
               client,
-              instance,
+              dbPath,
               loader.name,
               result.data
             )
           } else if (result.mode === 'replace') {
             await Db.Plugins.Data.replace(
               client,
-              instance,
+              dbPath,
               loader.name,
               result.data
             )
@@ -130,6 +153,12 @@ function queueSchedule(
           `[Scheduler] ${pluginId}: ❗️ Data Load Failed with error.`,
           e
         )
+
+        await Db.Plugins.Syncs.track(client, dbPath, {
+          success: false,
+          date: new Date(),
+          error: e
+        })
       } finally {
         isRunning = false
         if (dbSession) {
