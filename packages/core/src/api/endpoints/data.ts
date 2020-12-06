@@ -1,13 +1,13 @@
 import { Express } from 'express'
 import { DataRow } from '@mydata/sdk'
-import { getClient, PagingResult, Plugins } from 'src/db'
+import * as Db from 'src/db'
 
 interface PluginParams {
   pluginId: string
   dataSetName: string
 }
 
-type GetDataResponse = PagingResult<DataRow>
+type GetDataResponse = Db.PagingResult<DataRow>
 
 export function listen(app: Express) {
   // app.post<PluginParams, any, PostDataRequest, any>(
@@ -28,10 +28,10 @@ export function listen(app: Express) {
       try {
         const { pluginId, dataSetName } = request.params
 
-        const client = await getClient()
+        const client = await Db.getClient()
 
         // TODO: implement paging properly
-        const data = await Plugins.Data.fetch(
+        const data = await Db.Plugins.Data.fetch(
           client,
           pluginId,
           dataSetName,

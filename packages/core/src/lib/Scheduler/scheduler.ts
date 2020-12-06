@@ -1,6 +1,6 @@
 import { response } from 'express'
 import { ClientSession, MongoClient } from 'mongodb'
-import { getClient, Plugins } from 'src/db'
+import * as Db from 'src/db'
 import {
   PluginDefinition,
   loadPlugins,
@@ -19,9 +19,9 @@ export async function start() {
 
   instances.push(...plugins)
 
-  const client = await getClient()
+  const client = await Db.getClient()
   for (const plugin of plugins) {
-    const settings = await Plugins.Settings.get(client, plugin.id)
+    const settings = await Db.Plugins.Settings.get(client, plugin.id)
     if (!settings) {
       console.warn(
         `[Scheduler] ${plugin.id} ❗️ Plugin can not start as it has not been configured`
@@ -67,8 +67,8 @@ function queueSchedule(
 
   async function maybeLoadData() {
     console.log(`[Scheduler] ${plugin.id}: Checking if sync is due`)
-    const lastSync = await Plugins.Syncs.last(client, plugin.id)
-    const settings = await Plugins.Settings.get(client, plugin.id)
+    const lastSync = await Db.Plugins.Syncs.last(client, plugin.id)
+    const settings = await Db.Plugins.Settings.get(client, plugin.id)
 
     const syncDue = isSyncDue(new Date(), lastSync, settings.schedule)
     if (!syncDue) {
@@ -95,19 +95,19 @@ function queueSchedule(
 
         dbSession = client.startSession()
         await dbSession.withTransaction(async () => {
-          await Plugins.Syncs.track(client, plugin.id, {
+          await Db.Plugins.Syncs.track(client, plugin.id, {
             date: result.lastDate
           })
 
           if (result.mode === 'append') {
-            await Plugins.Data.append(
+            await Db.Plugins.Data.append(
               client,
               plugin.id,
               loader.name,
               result.data
             )
           } else if (result.mode === 'replace') {
-            await Plugins.Data.replace(
+            await Db.Plugins.Data.replace(
               client,
               plugin.id,
               loader.name,

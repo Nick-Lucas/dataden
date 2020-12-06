@@ -1,6 +1,6 @@
 import { Express } from 'express'
 
-import { getClient, Plugins } from 'src/db'
+import * as Db from 'src/db'
 import {
   installPlugin,
   LocalPlugin,
@@ -14,14 +14,14 @@ interface PluginParams {
 }
 
 type PutPluginRequest = RegistryPlugin | LocalPlugin
-type PutPluginResponse = Plugins.Plugin | string
+type PutPluginResponse = Db.Plugins.Plugin | string
 
 interface GetPluginsResponse {
-  plugins: Plugins.Plugin[]
+  plugins: Db.Plugins.Plugin[]
 }
 
 interface GetPluginResponse {
-  plugin: Plugins.Plugin
+  plugin: Db.Plugins.Plugin
 }
 
 type GetSettingsResponse = Settings | string
@@ -46,9 +46,9 @@ export function listen(app: Express) {
   app.get<void, GetPluginsResponse | string, any, any>(
     '/v1.0/plugins',
     async (request, response) => {
-      const client = await getClient()
+      const client = await Db.getClient()
       try {
-        const plugins = await Plugins.Installed.list(client)
+        const plugins = await Db.Plugins.Installed.list(client)
         await response.send({ plugins })
       } catch (e) {
         response.status(500)
@@ -62,9 +62,9 @@ export function listen(app: Express) {
     async (request, response) => {
       const { pluginId } = request.params
 
-      const client = await getClient()
+      const client = await Db.getClient()
       try {
-        const plugin = await Plugins.Installed.get(client, pluginId)
+        const plugin = await Db.Plugins.Installed.get(client, pluginId)
         await response.send({ plugin })
       } catch (e) {
         response.status(500)
@@ -86,8 +86,8 @@ export function listen(app: Express) {
       try {
         const { pluginId } = request.params
 
-        const client = await getClient()
-        const settings = await Plugins.Settings.get(client, pluginId)
+        const client = await Db.getClient()
+        const settings = await Db.Plugins.Settings.get(client, pluginId)
         if (settings) {
           response.send(settings)
           return
@@ -116,8 +116,8 @@ export function listen(app: Express) {
         const { pluginId } = request.params
         const settings = request.body
 
-        const client = await getClient()
-        await Plugins.Settings.set(client, pluginId, settings)
+        const client = await Db.getClient()
+        await Db.Plugins.Settings.set(client, pluginId, settings)
 
         response.sendStatus(200)
       } catch (e) {

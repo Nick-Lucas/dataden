@@ -9,7 +9,7 @@ import {
   RegistryPlugin
 } from './types'
 
-import { getClient, Plugins } from 'src/db'
+import * as Db from 'src/db'
 
 import { PluginInstance, pluginInstanceIsValid } from '@mydata/sdk'
 
@@ -24,24 +24,24 @@ if (!fs.existsSync(pluginDir)) {
 
 export async function installPlugin(
   plugin: RegistryPlugin | LocalPlugin
-): Promise<Plugins.Plugin> {
+): Promise<Db.Plugins.Plugin> {
   if (!plugin.source) {
     console.warn(`Source not defined for plugin ${plugin.id}`)
     return
   }
 
-  const installedPlugin: Plugins.Plugin = {
+  const installedPlugin: Db.Plugins.Plugin = {
     id: plugin.id,
     location: plugin.source
   }
 
-  const client = await getClient()
+  const client = await Db.getClient()
   if (plugin.local) {
     if (!fs.existsSync(plugin.source)) {
       throw `[installPlugin] Local Plugin ${plugin.id} Cannot Be Installed. Does not exist.`
     }
 
-    await Plugins.Installed.upsert(client, installedPlugin)
+    await Db.Plugins.Installed.upsert(client, installedPlugin)
   } else {
     throw '[installPlugin] Remote Plugin Install: Not Implemented'
     // TODO: download to directory
@@ -56,8 +56,8 @@ export function uninstallPlugin(pluginId: string) {
 }
 
 export async function loadPlugins(): Promise<PluginDefinition[]> {
-  const client = await getClient()
-  const plugins = await Plugins.Installed.list(client)
+  const client = await Db.getClient()
+  const plugins = await Db.Plugins.Installed.list(client)
 
   console.log(`[loadPlugins] ${plugins?.length ?? 0} Plugins will be loaded`)
 
@@ -80,8 +80,8 @@ export async function loadPlugins(): Promise<PluginDefinition[]> {
 export async function loadPluginById(
   pluginId: string
 ): Promise<PluginInstance | null> {
-  const client = await getClient()
-  const plugin = await Plugins.Installed.get(client, pluginId)
+  const client = await Db.getClient()
+  const plugin = await Db.Plugins.Installed.get(client, pluginId)
   if (!plugin) {
     return null
   }
@@ -90,7 +90,7 @@ export async function loadPluginById(
 }
 
 async function loadPlugin(
-  plugin: Plugins.Plugin
+  plugin: Db.Plugins.Plugin
 ): Promise<PluginInstance | null> {
   if (!plugin.location) {
     console.warn(
