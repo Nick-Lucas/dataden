@@ -4,14 +4,14 @@ import axios from 'axios'
 
 import {
   LocalPlugin,
-  PluginDefinition,
+  PluginServiceDefinition,
   Registry,
   RegistryPlugin
 } from './types'
 
 import * as Db from 'src/db'
 
-import { PluginInstance, pluginInstanceIsValid } from '@mydata/sdk'
+import { PluginService, pluginInstanceIsValid } from '@mydata/sdk'
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
@@ -23,75 +23,78 @@ if (!fs.existsSync(pluginDir)) {
 }
 
 export async function installPlugin(
-  plugin: RegistryPlugin | LocalPlugin
+  registryPlugin: RegistryPlugin | LocalPlugin
 ): Promise<Db.Plugins.Plugin> {
-  if (!plugin.source) {
-    console.warn(`Source not defined for plugin ${plugin.id}`)
+  if (!registryPlugin.source) {
+    console.warn(`Source not defined for plugin ${registryPlugin.id}`)
     return
   }
 
-  const installedPlugin: Db.Plugins.Plugin = {
-    id: plugin.id,
-    location: plugin.source
+  const plugin: Db.Plugins.Plugin = {
+    id: registryPlugin.id,
+    location: registryPlugin.source,
+    version: (registryPlugin as RegistryPlugin).version ?? -1,
+    instances: [
+      {
+        name: 'default'
+      }
+    ]
   }
 
   const client = await Db.getClient()
-  if (plugin.local) {
-    if (!fs.existsSync(plugin.source)) {
-      throw `[installPlugin] Local Plugin ${plugin.id} Cannot Be Installed. Does not exist.`
+  if (registryPlugin.local) {
+    if (!fs.existsSync(registryPlugin.source)) {
+      throw `[installPlugin] Local Plugin ${registryPlugin.id} Cannot Be Installed. Does not exist.`
     }
 
-    await Db.Plugins.Installed.upsert(client, installedPlugin)
+    return await Db.Plugins.Installed.upsert(client, plugin)
   } else {
     throw '[installPlugin] Remote Plugin Install: Not Implemented'
     // TODO: download to directory
     // TODO: register local location
   }
-
-  return installedPlugin
 }
 
 export function uninstallPlugin(pluginId: string) {
   throw '[uninstallPlugin] Not Implemented'
 }
 
-export async function loadPlugins(): Promise<PluginDefinition[]> {
+export async function loadPluginServiceDefinitions(): Promise<
+  PluginServiceDefinition[]
+> {
   const client = await Db.getClient()
   const plugins = await Db.Plugins.Installed.list(client)
 
   console.log(`[loadPlugins] ${plugins?.length ?? 0} Plugins will be loaded`)
 
-  const definitions: PluginDefinition[] = []
+  const definitions: PluginServiceDefinition[] = []
   for (const plugin of plugins) {
-    const instance = await loadPlugin(plugin)
-    if (!instance) {
+    const definition = await loadPluginServiceDefinition(plugin)
+    if (!definition) {
       continue
     }
 
-    definitions.push({
-      id: plugin.id,
-      ...instance
-    })
+    definitions.push(definition)
   }
 
   return definitions
 }
 
-export async function loadPluginById(
+export async function loadPluginServiceDefinitionById(
   pluginId: string
-): Promise<PluginInstance | null> {
+): Promise<PluginServiceDefinition | null> {
   const client = await Db.getClient()
   const plugin = await Db.Plugins.Installed.get(client, pluginId)
   if (!plugin) {
     return null
   }
 
-  return loadPlugin(plugin)
+  return loadPluginServiceDefinition(plugin)
 }
 
-async function loadPlugin(
+async function loadPluginServiceDefinition(
   plugin: Db.Plugins.Plugin
-): Promise<PluginInstance | null> {
+): Promise<PluginServiceDefinition | null> {
   if (!plugin.location) {
     console.warn(
       `[loadPlugins] 😒 Plugin ${plugin.id} as location is not provided.`
@@ -107,8 +110,8 @@ async function loadPlugin(
     return null
   }
 
-  const instance = (await require(plugin.location)) as PluginInstance
-  if (!pluginInstanceIsValid(instance)) {
+  const service = (await require(plugin.location)) as PluginService
+  if (!pluginInstanceIsValid(service)) {
     console.error(
       `[loadPlugins] ❗️ Bad PluginInstance definition for ${plugin.id} at ${plugin.location}.`
     )
@@ -116,10 +119,13 @@ async function loadPlugin(
   }
 
   console.log(
-    `[loadPlugins] 😃 Loaded Plugin ${plugin.id} with ${instance.loaders.length} loaders`
+    `[loadPlugins] 😃 Loaded Plugin ${plugin.id} with ${service.loaders.length} loaders`
   )
 
-  return instance
+  return {
+    plugin,
+    service
+  }
 }
 
 export async function getRegistry() {

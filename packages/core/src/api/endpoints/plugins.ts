@@ -13,6 +13,10 @@ interface PluginParams {
   pluginId: string
 }
 
+interface PluginInstanceParams extends PluginParams {
+  instanceId: string
+}
+
 type PutPluginRequest = RegistryPlugin | LocalPlugin
 type PutPluginResponse = Db.Plugins.Plugin | string
 
@@ -32,6 +36,8 @@ export function listen(app: Express) {
     '/v1.0/plugins',
     async (request, response) => {
       const plugin = request.body
+
+      // TODO: check if already installed and reject if so
 
       try {
         const installedPlugin = await installPlugin(plugin)
@@ -73,6 +79,29 @@ export function listen(app: Express) {
     }
   )
 
+  app.put<PluginParams, PutPluginResponse, Db.Plugins.Plugin, any>(
+    '/v1.0/plugins/:pluginId',
+    async (request, response) => {
+      const { pluginId } = request.params
+      const pluginDto = request.body
+
+      if (pluginId !== pluginDto.id) {
+        response.status(400)
+        await response.send(`${pluginId} != ${pluginDto.id}`)
+        return
+      }
+
+      const client = await Db.getClient()
+      try {
+        await Db.Plugins.Installed.upsert(client, pluginDto)
+        await response.send(pluginDto)
+      } catch (e) {
+        response.status(500)
+        await response.send(String(e))
+      }
+    }
+  )
+
   app.post(`/v1.0/plugins/reload`, async (request, response) => {
     await Scheduler.stop()
     await Scheduler.start()
@@ -80,27 +109,39 @@ export function listen(app: Express) {
     response.sendStatus(200)
   })
 
-  app.get<PluginParams, GetSettingsResponse, void, void>(
-    `/v1.0/plugins/:pluginId/settings`,
+  app.get<PluginInstanceParams, GetSettingsResponse, void, void>(
+    `/v1.0/plugins/:pluginId/:instanceId/settings`,
     async (request, response, next) => {
       try {
-        const { pluginId } = request.params
+        const { pluginId, instanceId } = request.params
 
         const client = await Db.getClient()
-        const settings = await Db.Plugins.Settings.get(client, pluginId)
+
+        const installedPlugin = await Db.Plugins.Installed.get(client, pluginId)
+        const pluginInstance = installedPlugin.instances.find(
+          (instance) =>
+            instance.uuid === instanceId || instance.name === instanceId
+        )
+        if (!pluginInstance) {
+          response.status(404)
+          response.send(`Plugin instance id ${instanceId} not found`)
+          return
+        }
+
+        const settings = await Db.Plugins.Settings.get(client, pluginInstance)
         if (settings) {
           response.send(settings)
           return
         }
 
-        const instance = await Scheduler.getInstance(pluginId)
-        if (!instance) {
+        const definition = await Scheduler.getPluginDefinition(pluginId)
+        if (!definition) {
           response.status(404)
           response.send('Could not get Plugin instance')
           return
         }
 
-        const defaultSettings = await instance.getDefaultSettings()
+        const defaultSettings = await definition.service.getDefaultSettings()
 
         response.send(defaultSettings)
       } catch (e) {
@@ -109,15 +150,27 @@ export function listen(app: Express) {
     }
   )
 
-  app.post<PluginParams, void, SetSettingsRequest, void>(
-    `/v1.0/plugins/:pluginId/settings`,
+  app.post<PluginInstanceParams, void | string, SetSettingsRequest, void>(
+    `/v1.0/plugins/:pluginId/:instanceId/settings`,
     async (request, response, next) => {
       try {
-        const { pluginId } = request.params
+        const { pluginId, instanceId } = request.params
         const settings = request.body
 
         const client = await Db.getClient()
-        await Db.Plugins.Settings.set(client, pluginId, settings)
+
+        const installedPlugin = await Db.Plugins.Installed.get(client, pluginId)
+        const pluginInstance = installedPlugin.instances.find(
+          (instance) =>
+            instance.uuid === instanceId || instance.name === instanceId
+        )
+        if (!pluginInstance) {
+          response.status(404)
+          response.send(`Plugin instance id ${instanceId} not found`)
+          return
+        }
+
+        await Db.Plugins.Settings.set(client, pluginInstance, settings)
 
         response.sendStatus(200)
       } catch (e) {

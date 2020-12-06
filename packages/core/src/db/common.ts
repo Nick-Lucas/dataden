@@ -2,8 +2,8 @@ import { MongoClient } from 'mongodb'
 import { MONGO_URI } from 'src/config'
 
 export const DATABASES = {
-  CORE: 'app_core',
-  PLUGIN_PREFIX: 'app_plugin_'
+  CORE: 'core',
+  PLUGIN_PREFIX: 'plugin_'
 }
 
 export const COLLECTIONS = {

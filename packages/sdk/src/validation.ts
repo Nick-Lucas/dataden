@@ -1,6 +1,6 @@
-import { PluginInstance } from './PluginInstance'
+import { PluginService } from './PluginInstance'
 
-export function pluginInstanceIsValid(instance: PluginInstance) {
+export function pluginInstanceIsValid(instance: PluginService) {
   if (!instance) {
     console.warn('Plugin instance is nully')
     return false

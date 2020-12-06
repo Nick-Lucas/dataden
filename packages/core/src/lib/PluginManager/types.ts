@@ -1,4 +1,5 @@
-import { PluginInstance } from '@mydata/sdk'
+import { Plugin } from 'src/db/plugins'
+import { PluginService } from '@mydata/sdk'
 
 export interface CorePlugin {
   id: string
@@ -24,4 +25,7 @@ export interface Registry {
   list: RegistryPlugin[]
 }
 
-export type PluginDefinition = CorePlugin & PluginInstance
+export type PluginServiceDefinition = {
+  plugin: Plugin
+  service: PluginService
+}

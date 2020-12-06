@@ -19,7 +19,6 @@ export interface Schedule {
 export type SettingId = string
 
 export interface Settings {
-  name?: string // TODO: use name for database, and when it changes also migrate the database
   schedule: Schedule
   plugin: Record<SettingId, any>
 }
@@ -53,7 +52,7 @@ export type DataLoader = {
   load: (settings: Settings, request: DataRequest) => Promise<DataPayload>
 }
 
-export interface PluginInstance {
+export interface PluginService {
   name: string
 
   //
@@ -69,7 +68,7 @@ export interface PluginInstance {
   loaders: DataLoader[]
 }
 
-type PluginInstanceRequest = Omit<PluginInstance, 'loaders'> & {
+type PluginServiceRequest = Omit<PluginService, 'loaders'> & {
   loaders: DataLoader | DataLoader[]
 }
 
@@ -87,7 +86,7 @@ export function createPlugin({
   name = null,
   getDefaultSettings = null,
   loaders = null
-}: PluginInstanceRequest): PluginInstance {
+}: PluginServiceRequest): PluginService {
   if (!nameIsValid(name)) {
     throw new PluginValidationError(
       `Plugin name is invalid, must be a-z 0-9 _ but received: ${name}`
