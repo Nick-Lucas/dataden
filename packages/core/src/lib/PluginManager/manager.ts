@@ -11,7 +11,7 @@ import {
 
 import { getClient, Plugins } from 'src/db'
 
-import { PluginInstance } from '@mydata/sdk'
+import { PluginInstance, pluginInstanceIsValid } from '@mydata/sdk'
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
@@ -126,13 +126,4 @@ export async function getRegistry() {
   return await axios.get<Registry>(REGISTRY_URI, {
     validateStatus: (status) => status === 200
   })
-}
-
-function pluginInstanceIsValid(instance: PluginInstance) {
-  return (
-    instance &&
-    Array.isArray(instance.loaders) &&
-    instance.loaders.length > 0 &&
-    instance.loaders.every((loader) => typeof loader === 'function')
-  )
 }

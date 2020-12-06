@@ -3,9 +3,9 @@ import { createPlugin } from './PluginInstance'
 describe('createPlugin', () => {
   it('should define a basic plugin', async () => {
     const plugin = createPlugin({
+      name: 'MyPlugin',
       getDefaultSettings: async () => {
         return {
-          name: 'MyPlugin',
           plugin: {},
           schedule: {
             every: 1,
@@ -36,9 +36,9 @@ describe('createPlugin', () => {
 
   it('should define a basic plugin with multiple loaders', async () => {
     const plugin = createPlugin({
+      name: 'MyPlugin',
       getDefaultSettings: async () => {
         return {
-          name: 'MyPlugin',
           plugin: {},
           schedule: {
             every: 1,
@@ -48,7 +48,7 @@ describe('createPlugin', () => {
       },
       loaders: [
         {
-          name: 'Dataset 1',
+          name: 'Dataset_1',
           load: async () => {
             return {
               lastDate: new Date(),
@@ -58,7 +58,7 @@ describe('createPlugin', () => {
           }
         },
         {
-          name: 'Dataset 2',
+          name: 'Dataset_2',
           load: async () => {
             return {
               lastDate: new Date(),
@@ -75,18 +75,18 @@ describe('createPlugin', () => {
     expect(plugin.loaders.length).toBe(2)
 
     expect((await plugin.getDefaultSettings()).name).toBe('MyPlugin')
-    expect(plugin.loaders[0].name).toBe('Dataset 1')
+    expect(plugin.loaders[0].name).toBe('Dataset_1')
     expect(typeof plugin.loaders[0].load).toBe('function')
-    expect(plugin.loaders[1].name).toBe('Dataset 2')
+    expect(plugin.loaders[1].name).toBe('Dataset_2')
     expect(typeof plugin.loaders[1].load).toBe('function')
   })
 
   it('should throw when no loaders are defined', async () => {
     function make(loaders) {
       createPlugin({
+        name: 'MyPlugin',
         getDefaultSettings: async () => {
           return {
-            name: 'MyPlugin',
             plugin: {},
             schedule: {
               every: 1,
@@ -98,7 +98,30 @@ describe('createPlugin', () => {
       })
     }
 
-    expect(() => make(null)).toThrow()
-    expect(() => make([])).toThrow()
+    expect(() => make(null)).toThrow('DataLoader was not provided')
+    expect(() => make([])).toThrow('DataLoader was not provided')
+  })
+
+  it('should throw when loader name is invalid', async () => {
+    function make() {
+      createPlugin({
+        name: 'MyPlugin',
+        getDefaultSettings: async () => {
+          return {
+            plugin: {},
+            schedule: {
+              every: 1,
+              grain: 'minute'
+            }
+          }
+        },
+        loaders: {
+          name: 'Invalid 1',
+          load: null
+        }
+      })
+    }
+
+    expect(make).toThrow('DataLoader name is invalid')
   })
 })
