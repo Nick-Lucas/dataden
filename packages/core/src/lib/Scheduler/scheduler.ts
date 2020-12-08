@@ -114,7 +114,7 @@ function queueSchedule(
     let dbSession: ClientSession = null
     for (const loader of definition.service.loaders) {
       try {
-        console.log(`[Scheduler] ${pluginId}: Will Load Data`)
+        console.log(`[Scheduler] ${pluginId} (${loader.name}): Will Load Data`)
 
         const result = await loader.load(settings, {
           lastSync: lastSyncSuccess
@@ -147,10 +147,12 @@ function queueSchedule(
           }
         })
 
-        console.log(`[Scheduler] ${pluginId}: 👌 Data Load Finished`)
+        console.log(
+          `[Scheduler] ${pluginId} (${loader.name}): 👌 Data Load Finished`
+        )
       } catch (e) {
         console.error(
-          `[Scheduler] ${pluginId}: ❗️ Data Load Failed with error.`,
+          `[Scheduler] ${pluginId} (${loader.name}): ❗️ Data Load Failed with error.`,
           e
         )
 

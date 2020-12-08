@@ -119,8 +119,7 @@ export function listen(app: Express) {
 
         const definition = await Scheduler.getPluginDefinition(pluginId)
         const instance = definition.plugin.instances.find(
-          (instance) =>
-            instance.uuid === instanceId || instance.name === instanceId
+          (instance) => instance.name === instanceId
         )
         if (!instance) {
           response.status(404)
@@ -162,9 +161,9 @@ export function listen(app: Express) {
         const client = await Db.getClient()
 
         const definition = await Scheduler.getPluginDefinition(pluginId)
+
         const instance = definition.plugin.instances.find(
-          (instance) =>
-            instance.uuid === instanceId || instance.name === instanceId
+          (instance) => instance.name === instanceId
         )
         if (!instance) {
           response.status(404)

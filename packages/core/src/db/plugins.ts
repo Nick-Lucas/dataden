@@ -1,6 +1,4 @@
 import { FilterQuery, MongoClient } from 'mongodb'
-import * as uuid from 'uuid'
-import { DateTime } from 'luxon'
 
 import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
 import {
@@ -19,7 +17,6 @@ export interface PluginBase {
 export type PluginInstallRequest = PluginBase
 
 export interface PluginInstance {
-  uuid?: string
   name: string
 }
 
@@ -71,11 +68,6 @@ export const Installed = {
     plugin: PluginInstallRequest | Plugin
   ): Promise<Plugin> {
     const instances = (plugin as Plugin).instances ?? []
-    for (const instance of instances) {
-      if (!uuid.validate(instance.uuid)) {
-        instance.uuid = uuid.v4()
-      }
-    }
 
     const pluginDto: Plugin = {
       ...plugin,
