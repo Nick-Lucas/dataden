@@ -80,7 +80,9 @@ function queueSchedule(
   }
 
   async function maybeLoadData() {
-    console.log(`[Scheduler] ${pluginId}: Checking if sync is due`)
+    console.log(
+      `[Scheduler] ${pluginId}->${instance.name}: Checking if sync is due`
+    )
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
     const lastSyncAttempt = await Db.Plugins.Syncs.last<SyncInfo>(
@@ -97,15 +99,15 @@ function queueSchedule(
 
     const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
     if (!syncDue) {
-      console.log(`[Scheduler] ${pluginId}: Sync not due yet`)
+      console.log(`[Scheduler] ${pluginId}->${instance.name}: Sync not due yet`)
       return
     }
 
-    console.log(`[Scheduler] ${pluginId}: Will attempt sync`)
+    console.log(`[Scheduler] ${pluginId}->${instance.name}: Will attempt sync`)
 
     if (isRunning) {
       console.warn(
-        `[Scheduler] ${pluginId}: ❗️ Last Sync is still in progress! Bailing.`
+        `[Scheduler] ${pluginId}->${instance.name}: ❗️ Last Sync is still in progress! Bailing.`
       )
       return
     }
@@ -114,7 +116,9 @@ function queueSchedule(
     let dbSession: ClientSession = null
     for (const loader of definition.service.loaders) {
       try {
-        console.log(`[Scheduler] ${pluginId} (${loader.name}): Will Load Data`)
+        console.log(
+          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: Will Load Data`
+        )
 
         const result = await loader.load(settings, {
           lastSync: lastSyncSuccess
@@ -148,11 +152,11 @@ function queueSchedule(
         })
 
         console.log(
-          `[Scheduler] ${pluginId} (${loader.name}): 👌 Data Load Finished`
+          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
         )
       } catch (e) {
         console.error(
-          `[Scheduler] ${pluginId} (${loader.name}): ❗️ Data Load Failed with error.`,
+          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: ❗️ Data Load Failed with error.`,
           e
         )
 
