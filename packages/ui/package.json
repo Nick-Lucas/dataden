@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node scripts/start.js",
     "dev": "yarn run start",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "build": "node scripts/build.js"
   },
   "dependencies": {
     "@babel/core": "7.12.3",
@@ -72,9 +71,7 @@
       "last 1 safari version"
     ]
   },
-  "babel": {
-    "presets": [
-      "react-app"
-    ]
+  "devDependencies": {
+    "@babel/preset-react": "^7.12.10"
   }
 }

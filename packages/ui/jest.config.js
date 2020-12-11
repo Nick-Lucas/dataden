@@ -1,4 +1,5 @@
 module.exports = {
+  rootDir: __dirname,
   roots: ['<rootDir>/src'],
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}', '!src/**/*.d.ts'],
   setupFiles: ['react-app-polyfill/jsdom'],
@@ -10,7 +11,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   testRunner: '/Users/nick/dev/mydata/node_modules/jest-circus/runner.js',
   transform: {
-    '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/node_modules/babel-jest',
+    '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/jsTransform.js',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
     '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)':
       '<rootDir>/config/jest/fileTransform.js'
