@@ -5,22 +5,23 @@
     "allowJs": true,
     "checkJs": true,
     "paths": {
-      "src/*": ["src/*"],
-      "@mydata/*": ["../*/src"]
+      "src/*": ["src/*"]
     },
     "esModuleInterop": true,
     "sourceMap": true,
     "module": "ES2015",
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "jsx": "preserve"
   },
   "include": [
-    "src/**/*.ts",
     "src/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   "typeAcquisition": {
-    "enable": true,
-    "include": ["node"]
+    "enable": true
   }
 }

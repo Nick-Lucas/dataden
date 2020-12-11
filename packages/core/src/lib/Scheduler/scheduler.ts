@@ -176,5 +176,5 @@ function queueSchedule(
 
   maybeLoadData()
 
-  return setInterval(maybeLoadData, 30000)
+  return global.setInterval(maybeLoadData, 30000)
 }
