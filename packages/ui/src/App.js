@@ -13,7 +13,7 @@ export function App() {
           path="/dashboard"
           component={() => (
             <Layout title="Dashboard">
-              <Row gutter={['16', '16']}>
+              <Row gutter={[16, 16]}>
                 <Col span="24">
                   <ContentCardCSS>
                     <Typography.Paragraph>Content</Typography.Paragraph>
