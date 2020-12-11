@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { ReactQueryCacheProvider, QueryCache } from 'react-query'
+import { ReactQueryDevtools } from 'react-query-devtools'
 
 import './index.css'
 import 'antd/dist/antd.css'
@@ -9,9 +11,15 @@ import type {} from 'styled-components/cssprop'
 import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 
+const queryCache = new QueryCache()
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ReactQueryCacheProvider queryCache={queryCache}>
+      <App />
+
+      <ReactQueryDevtools position="bottom-right" />
+    </ReactQueryCacheProvider>
   </React.StrictMode>,
   document.getElementById('root')
 )
