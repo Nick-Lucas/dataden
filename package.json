@@ -11,9 +11,11 @@
     "lint:fix": "yarn run lint --fix",
     "dev": "wsrun --parallel --exclude-missing dev"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "dependencies": {
     "@mydata/build": "1.0.0"
   },
