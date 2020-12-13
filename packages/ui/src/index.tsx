@@ -14,13 +14,13 @@ import reportWebVitals from './reportWebVitals'
 const queryCache = new QueryCache()
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ReactQueryCacheProvider queryCache={queryCache}>
-      <App />
+  // <React.StrictMode>
+  <ReactQueryCacheProvider queryCache={queryCache}>
+    <App />
 
-      <ReactQueryDevtools position="bottom-right" />
-    </ReactQueryCacheProvider>
-  </React.StrictMode>,
+    <ReactQueryDevtools position="bottom-right" />
+  </ReactQueryCacheProvider>,
+  // </React.StrictMode>,
   document.getElementById('root')
 )
 

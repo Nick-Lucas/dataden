@@ -41,7 +41,7 @@ export const Plugins: FC = () => {
 
           <Space>
             <div />
-            <Button type="primary" size="large">
+            <Button type="primary" size="large" disabled>
               Add New Plugin
             </Button>
           </Space>

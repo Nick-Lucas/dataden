@@ -12,7 +12,7 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
   plugin,
   instance
 }) => {
-  const [editing, setEditing] = useState(true)
+  const [editing, setEditing] = useState(false)
 
   return (
     <List.Item>
@@ -30,7 +30,7 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
             Edit
           </Button>
 
-          <Button type="dashed" danger>
+          <Button type="dashed" danger disabled>
             Remove
           </Button>
         </Space>
@@ -42,7 +42,12 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
         afterClose={() => setEditing(false)}
         footer={null}
       >
-        <PluginInstanceEdit plugin={plugin} instance={instance} isNew={false} />
+        <PluginInstanceEdit
+          plugin={plugin}
+          instance={instance}
+          isNew={false}
+          onSubmitted={() => setEditing(false)}
+        />
       </Modal>
     </List.Item>
   )

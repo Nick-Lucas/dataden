@@ -24,9 +24,13 @@ export function Plugin({ plugin }) {
         </Typography.Title>
 
         <Space>
-          <Button type="primary">Add Instance</Button>
+          <Button type="primary" disabled>
+            Add Instance
+          </Button>
 
-          <Button danger>Uninstall</Button>
+          <Button danger disabled>
+            Uninstall
+          </Button>
         </Space>
       </Row>
       <Row>
