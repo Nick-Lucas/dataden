@@ -56,6 +56,7 @@ export function Plugin({ plugin }) {
         onCancel={() => setAddingInstance(false)}
         afterClose={() => setAddingInstance(false)}
         footer={null}
+        destroyOnClose
       >
         <PluginInstanceCreate
           plugin={plugin}
