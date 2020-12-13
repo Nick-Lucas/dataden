@@ -55,13 +55,17 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
   }, [onSubmitted, settingsMutationResult.isSuccess])
 
   return (
-    <Form layout="vertical" onFinish={onSubmit}>
+    <Form
+      layout="vertical"
+      onFinish={onSubmit}
+      initialValues={{ name: instance.name }}
+    >
       <Typography.Title level={4}>
         {isNew ? `Add Instance to ${plugin.name}` : `Edit ${instance.name}`}
       </Typography.Title>
 
-      <Form.Item label="Name">
-        <Input name="name" disabled={!isNew} />
+      <Form.Item label="Name" name="name">
+        <Input disabled={!isNew} />
       </Form.Item>
 
       <Form.Item label="Settings">
