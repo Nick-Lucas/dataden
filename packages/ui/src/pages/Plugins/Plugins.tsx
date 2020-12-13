@@ -1,10 +1,12 @@
 import { FC, useState } from 'react'
-import { Typography, Input, List, Button, Row, Space } from 'antd'
+import { Input, Button, Row, Space } from 'antd'
 import { useQuery } from 'react-query'
 import axios from 'axios'
 import { css } from 'styled-components/macro'
 
-import { Layout, ContentCard } from 'src/Layout'
+import { Layout } from 'src/Layout'
+
+import { Plugin } from './Plugin'
 
 const getInstalledPlugins = () => {
   return axios.get('/v1.0/plugins')
@@ -52,56 +54,7 @@ export const Plugins: FC = () => {
                 ? plugin.name.indexOf(search) >= 0
                 : true
             )
-            .map((plugin) => (
-              <ContentCard
-                key={plugin.id}
-                css={css`
-                  margin-top: 1rem;
-                  padding: 0.5rem 1rem;
-                `}
-              >
-                <Row justify="space-between">
-                  <Typography.Title level={4} style={{ marginBottom: 0 }}>
-                    {plugin.name}{' '}
-                    {plugin.version >= 0 && `(version: {plugin.version})`}
-                  </Typography.Title>
-
-                  <Space>
-                    <Button type="primary">Add Instance</Button>
-
-                    <Button danger>Uninstall</Button>
-                  </Space>
-                </Row>
-                <Row>
-                  <Typography.Text type="secondary">
-                    {plugin.location}
-                  </Typography.Text>
-                </Row>
-
-                <List>
-                  {plugin.instances.map((instance) => (
-                    <List.Item key={instance.name}>
-                      <Row
-                        css={css`
-                          width: 100%;
-                        `}
-                        justify="space-between"
-                        align="middle"
-                      >
-                        <Typography.Text>{instance.name}</Typography.Text>
-
-                        <Space>
-                          <Button type="text">Edit</Button>
-                          <Button type="dashed" danger>
-                            Remove
-                          </Button>
-                        </Space>
-                      </Row>
-                    </List.Item>
-                  ))}
-                </List>
-              </ContentCard>
-            ))}
+            .map((plugin) => <Plugin key={plugin.id} plugin={plugin} />)}
       </Layout>
     </>
   )
