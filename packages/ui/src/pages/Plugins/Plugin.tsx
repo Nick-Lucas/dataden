@@ -1,10 +1,14 @@
-import { Typography, List, Button, Row, Space } from 'antd'
+import { useState } from 'react'
+import { Typography, List, Button, Row, Space, Modal } from 'antd'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'
 import { PluginInstance } from './PluginInstance'
+import { PluginInstanceCreate } from './PluginInstanceCreate'
 
 export function Plugin({ plugin }) {
+  const [addingInstance, setAddingInstance] = useState(false)
+
   return (
     <ContentCard
       key={plugin.id}
@@ -24,7 +28,7 @@ export function Plugin({ plugin }) {
         </Typography.Title>
 
         <Space>
-          <Button type="primary" disabled>
+          <Button type="primary" onClick={() => setAddingInstance(true)}>
             Add Instance
           </Button>
 
@@ -46,6 +50,18 @@ export function Plugin({ plugin }) {
           />
         ))}
       </List>
+
+      <Modal
+        visible={addingInstance}
+        onCancel={() => setAddingInstance(false)}
+        afterClose={() => setAddingInstance(false)}
+        footer={null}
+      >
+        <PluginInstanceCreate
+          plugin={plugin}
+          onSubmitted={() => setAddingInstance(false)}
+        />
+      </Modal>
     </ContentCard>
   )
 }

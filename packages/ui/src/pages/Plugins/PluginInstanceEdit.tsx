@@ -1,51 +1,53 @@
-import { FC, useCallback, useEffect, useState } from 'react'
-import { Button, Form, Input, Row, Typography, message } from 'antd'
-import { useQuery, useMutation } from 'react-query'
-import axios from 'axios'
-import Editor from '@monaco-editor/react'
-import { editor } from 'monaco-editor'
+import { FC, useCallback, useEffect } from 'react'
+import { Button, Form, Row, Typography, message } from 'antd'
+import { JSONEditor } from './JSONEditor'
+import {
+  usePluginInstanceSettings,
+  usePluginInstanceSettingsUpdate
+} from 'src/queries'
 
 interface PluginInstanceEditProps {
   plugin: any
   instance: any
-  isNew: boolean
   onSubmitted?: () => void
-}
-
-interface EditorMountResult {
-  getEditorValue: () => string
-  editorElement: editor.IStandaloneCodeEditor
 }
 
 export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
   plugin,
   instance,
-  isNew = false,
   onSubmitted
 }) => {
-  const [mount, setMount] = useState<EditorMountResult | null>(null)
+  const settingsQuery = usePluginInstanceSettings(plugin.id, instance.name)
+  const [
+    settingsMutation,
+    settingsMutationResult
+  ] = usePluginInstanceSettingsUpdate()
 
-  const settingsQuery = useQuery(
-    ['plugin/settings', plugin.id, instance.name],
-    getPluginSettings
-  )
-  const [settingsMutation, settingsMutationResult] = useMutation(
-    postPluginSettings
+  const loaded = settingsQuery.isSuccess
+
+  const onSubmit = useCallback(
+    (values) => {
+      const { settings } = values
+
+      settingsMutation({
+        pluginId: plugin.id,
+        instanceName: instance.name,
+        settings: JSON.parse(settings)
+      })
+    },
+    [instance.name, plugin.id, settingsMutation]
   )
 
-  const onSubmit = useCallback(() => {
-    if (!mount) {
-      return
+  const [form] = Form.useForm()
+
+  useEffect(() => {
+    if (settingsQuery.isSuccess && settingsQuery.data) {
+      form.setFieldsValue({
+        name: instance?.name ?? '',
+        settings: settingsQuery.data
+      })
     }
-
-    const settings = mount.getEditorValue()
-
-    settingsMutation({
-      pluginId: plugin.id,
-      instanceName: instance.name,
-      settings: JSON.parse(settings)
-    })
-  }, [instance.name, mount, plugin.id, settingsMutation])
+  }, [form, instance?.name, settingsQuery.data, settingsQuery.isSuccess])
 
   useEffect(() => {
     if (settingsMutationResult.isSuccess) {
@@ -55,43 +57,15 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
   }, [onSubmitted, settingsMutationResult.isSuccess])
 
   return (
-    <Form
-      layout="vertical"
-      onFinish={onSubmit}
-      initialValues={{ name: instance.name }}
-    >
-      <Typography.Title level={4}>
-        {isNew ? `Add Instance to ${plugin.name}` : `Edit ${instance.name}`}
-      </Typography.Title>
+    <Form form={form} layout="vertical" onFinish={onSubmit}>
+      <Typography.Title level={4}>Edit {instance.name}</Typography.Title>
 
-      <Form.Item label="Name" name="name">
-        <Input disabled={!isNew} />
-      </Form.Item>
-
-      <Form.Item label="Settings">
-        {!settingsQuery.isLoading && settingsQuery.isSuccess && (
-          <Editor
-            height="20rem"
-            language="json"
-            value={settingsQuery.data}
-            width="100%"
-            options={{
-              lineNumbers: 'off'
-            }}
-            editorDidMount={(getEditorValue, editorElement) =>
-              setMount({ getEditorValue, editorElement })
-            }
-          />
-        )}
+      <Form.Item label="Settings" name={loaded ? 'settings' : undefined}>
+        {loaded && <JSONEditor />}
       </Form.Item>
 
       <Row justify="center">
-        <Button
-          htmlType="submit"
-          type="primary"
-          style={{ width: '10rem' }}
-          disabled={!mount}
-        >
+        <Button htmlType="submit" type="primary" style={{ width: '10rem' }}>
           Submit
         </Button>
       </Row>
@@ -102,39 +76,5 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
         </Typography.Text>
       )}
     </Form>
-  )
-}
-
-async function getPluginSettings(key, pluginId, instanceName) {
-  const result = await axios.get(
-    '/v1.0/plugins/' +
-      encodeURIComponent(pluginId) +
-      '/' +
-      encodeURIComponent(instanceName) +
-      '/settings'
-  )
-
-  const { plugin, schedule } = result.data
-
-  return JSON.stringify(
-    {
-      plugin,
-      schedule
-    },
-    null,
-    2
-  )
-}
-
-async function postPluginSettings({ pluginId, instanceName, settings }) {
-  console.log('POST', pluginId, instanceName, settings)
-
-  return await axios.post(
-    '/v1.0/plugins/' +
-      encodeURIComponent(pluginId) +
-      '/' +
-      encodeURIComponent(instanceName) +
-      '/settings',
-    settings
   )
 }

@@ -43,7 +43,15 @@ export async function start() {
 
 export async function stop() {
   while (liveServices.length > 0) liveServices.pop()
-  liveIntervals.forEach((interval) => clearInterval(interval))
+  while (liveIntervals.length > 0) {
+    clearInterval(liveIntervals.pop())
+  }
+}
+
+export async function restart() {
+  console.log('[Scheduler] ❗️❗️❗️ Restarting all Plugins ❗️❗️❗️')
+  await stop()
+  await start()
 }
 
 export async function getPluginDefinition(

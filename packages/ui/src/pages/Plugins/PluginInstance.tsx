@@ -45,7 +45,6 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
         <PluginInstanceEdit
           plugin={plugin}
           instance={instance}
-          isNew={false}
           onSubmitted={() => setEditing(false)}
         />
       </Modal>

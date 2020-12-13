@@ -1,25 +1,17 @@
 import { FC, useState } from 'react'
 import { Input, Button, Row, Space } from 'antd'
-import { useQuery } from 'react-query'
-import axios from 'axios'
+
 import { css } from 'styled-components/macro'
 
 import { Layout } from 'src/Layout'
+import { useInstalledPluginsList } from 'src/queries'
 
 import { Plugin } from './Plugin'
 
-const getInstalledPlugins = () => {
-  return axios.get('/v1.0/plugins')
-}
-
 export const Plugins: FC = () => {
-  const [installed, setInstalled] = useState()
   const [search, setSearch] = useState('')
 
-  const installedPluginsQuery = useQuery(
-    'plugins/installed',
-    getInstalledPlugins
-  )
+  const installedPluginsQuery = useInstalledPluginsList()
 
   return (
     <>

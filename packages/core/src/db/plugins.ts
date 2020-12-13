@@ -7,6 +7,7 @@ import {
   Settings as ISettings,
   SyncSuccessInfo
 } from '@mydata/sdk'
+import { stripMongoId } from './stripMongoId'
 
 export interface PluginBase {
   id: string
@@ -70,7 +71,7 @@ export const Installed = {
     const instances = (plugin as Plugin).instances ?? []
 
     const pluginDto: Plugin = {
-      ...plugin,
+      ...stripMongoId(plugin),
       instances
     }
 

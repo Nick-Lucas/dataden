@@ -94,6 +94,8 @@ export function listen(app: Express) {
       const client = await Db.getClient()
       try {
         await Db.Plugins.Installed.upsert(client, pluginDto)
+        await Scheduler.restart()
+
         await response.send(pluginDto)
       } catch (e) {
         response.status(500)
@@ -103,8 +105,7 @@ export function listen(app: Express) {
   )
 
   app.post(`/v1.0/plugins/reload`, async (request, response) => {
-    await Scheduler.stop()
-    await Scheduler.start()
+    await Scheduler.restart()
 
     response.sendStatus(200)
   })
@@ -179,6 +180,8 @@ export function listen(app: Express) {
           },
           settings
         )
+
+        await Scheduler.restart()
 
         response.sendStatus(200)
       } catch (e) {
