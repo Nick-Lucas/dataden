@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FC, useState } from 'react'
 import { Typography, List, Button, Row, Space, Modal } from 'antd'
 import { css } from 'styled-components/macro'
 
@@ -6,7 +6,14 @@ import { ContentCard } from 'src/Layout'
 import { PluginInstance } from './PluginInstance'
 import { PluginInstanceCreate } from './PluginInstanceCreate'
 
-export function Plugin({ plugin }) {
+import * as Api from '@mydata/core/dist/api-types'
+
+interface PluginProps {
+  plugin: Api.Plugins.Plugin
+  onSubmitted?: () => void
+}
+
+export const Plugin: FC<PluginProps> = ({ plugin }) => {
   const [addingInstance, setAddingInstance] = useState(false)
 
   return (
@@ -24,7 +31,7 @@ export function Plugin({ plugin }) {
             marginBottom: 0
           }}
         >
-          {plugin.name} {plugin.version >= 0 && `(version: {plugin.version})`}
+          {plugin.id} {plugin.version >= 0 && `(version: {plugin.version})`}
         </Typography.Title>
 
         <Space>

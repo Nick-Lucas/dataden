@@ -1,19 +1,9 @@
 import axios from 'axios'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-
 import * as Api from '@mydata/core/dist/api-types'
 
-export const Queries = {
-  Plugins: {
-    InstalledList: 'plugins/installed',
-    Installed: (id) => 'plugins/' + id,
-    Settings: (pluginId, instanceName) =>
-      `plugins/${pluginId}/${instanceName}/settings`
-  }
-}
-
 export function useInstalledPluginsList() {
-  return useQuery(Queries.Plugins.InstalledList, async () => {
+  return useQuery(Api.Plugins.GetPlugins.path, async () => {
     return (
       await axios.get<Api.Plugins.GetPlugins.Response>(
         Api.Plugins.GetPlugins.path
@@ -22,13 +12,11 @@ export function useInstalledPluginsList() {
   })
 }
 
-export function useInstalledPlugin(pluginId: string) {
-  return useQuery(Queries.Plugins.Installed(pluginId), async () => {
+export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
+  return useQuery(Api.Plugins.GetPlugin.getPath(params), async () => {
     return (
       await axios.get<Api.Plugins.GetPlugin.Response>(
-        Api.Plugins.GetPlugin.getPath({
-          pluginId: pluginId
-        })
+        Api.Plugins.GetPlugin.getPath(params)
       )
     ).data
   })
@@ -50,26 +38,26 @@ export function useInstalledPluginUpdate() {
     },
     {
       onSuccess: (response, { data }) => {
-        client.invalidateQueries(Queries.Plugins.InstalledList)
-        client.invalidateQueries(Queries.Plugins.Installed(data.id))
+        client.invalidateQueries(Api.Plugins.GetPlugins.path)
+        client.invalidateQueries(
+          Api.Plugins.GetPlugin.getPath({
+            pluginId: data.id
+          })
+        )
       }
     }
   )
 }
 
 export function usePluginInstanceSettings(
-  pluginId: string,
-  instanceId: string
+  params: Api.Plugins.GetPluginInstanceSettings.RouteParams
 ) {
   return useQuery(
-    [Queries.Plugins.Settings(pluginId, instanceId)],
+    Api.Plugins.GetPluginInstanceSettings.getPath(params),
     async function () {
       return (
         await axios.get<Api.Plugins.GetPluginInstanceSettings.Response>(
-          Api.Plugins.GetPluginInstanceSettings.getPath({
-            pluginId,
-            instanceId
-          })
+          Api.Plugins.GetPluginInstanceSettings.getPath(params)
         )
       ).data
     }
@@ -81,27 +69,24 @@ export function usePluginInstanceSettingsUpdate() {
 
   return useMutation(
     async function ({
-      pluginId,
-      instanceId,
+      params,
       settings
     }: {
-      pluginId: string
-      instanceId: string
+      params: Api.Plugins.PutPluginInstanceSettings.RouteParams
       settings: Api.Plugins.PutPluginInstanceSettings.Body
     }) {
       return (
         await axios.post<Api.Plugins.PutPluginInstanceSettings.Response>(
-          Api.Plugins.PutPluginInstanceSettings.getPath({
-            pluginId,
-            instanceId
-          }),
+          Api.Plugins.PutPluginInstanceSettings.getPath(params),
           settings
         )
       ).data
     },
     {
-      onSuccess: (response, { pluginId, instanceId }) => {
-        client.invalidateQueries(Queries.Plugins.Settings(pluginId, instanceId))
+      onSuccess: (response, { params }) => {
+        client.invalidateQueries(
+          Api.Plugins.GetPluginInstanceSettings.getPath(params)
+        )
       }
     }
   )

@@ -4,8 +4,10 @@ import produce from 'immer'
 import { Rule } from 'antd/lib/form'
 import { useInstalledPlugin, useInstalledPluginUpdate } from 'src/queries'
 
+import * as Api from '@mydata/core/dist/api-types'
+
 interface PluginInstanceCreateProps {
-  plugin: any
+  plugin: Api.Plugins.Plugin
   onSubmitted?: () => void
 }
 
@@ -13,7 +15,7 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
   plugin,
   onSubmitted
 }) => {
-  const pluginQuery = useInstalledPlugin(plugin.id)
+  const pluginQuery = useInstalledPlugin({ pluginId: plugin.id })
   const pluginUpdate = useInstalledPluginUpdate()
 
   const onSubmit = useCallback(
@@ -50,9 +52,7 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
 
   return (
     <Form layout="vertical" onFinish={onSubmit}>
-      <Typography.Title level={4}>
-        Add Instance to {plugin.name}
-      </Typography.Title>
+      <Typography.Title level={4}>Add Instance to {plugin.id}</Typography.Title>
 
       <Form.Item label="Name" name="name" rules={validators}>
         <Input autoFocus />

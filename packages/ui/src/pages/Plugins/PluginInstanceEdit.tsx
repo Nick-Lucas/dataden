@@ -6,9 +6,11 @@ import {
   usePluginInstanceSettingsUpdate
 } from 'src/queries'
 
+import * as Api from '@mydata/core/dist/api-types'
+
 interface PluginInstanceEditProps {
-  plugin: any
-  instance: any
+  plugin: Api.Plugins.Plugin
+  instance: Api.Plugins.PluginInstance
   onSubmitted?: () => void
 }
 
@@ -17,7 +19,10 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
   instance,
   onSubmitted
 }) => {
-  const settingsQuery = usePluginInstanceSettings(plugin.id, instance.name)
+  const settingsQuery = usePluginInstanceSettings({
+    pluginId: plugin.id,
+    instanceId: instance.name
+  })
   const settingsUpdate = usePluginInstanceSettingsUpdate()
 
   const loaded = settingsQuery.isSuccess
@@ -28,14 +33,18 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
 
       try {
         await settingsUpdate.mutateAsync({
-          pluginId: plugin.id,
-          instanceId: instance.name,
+          params: {
+            pluginId: plugin.id,
+            instanceId: instance.name
+          },
           settings: JSON.parse(settings)
         })
 
         onSubmitted?.()
         message.success('Settings: Saved')
-      } catch (err) {}
+      } catch (err) {
+        message.error(`Error: ${String(err)}`)
+      }
     },
     [instance.name, onSubmitted, plugin.id, settingsUpdate]
   )
