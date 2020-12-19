@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { ReactQueryCacheProvider, QueryCache } from 'react-query'
+import { QueryClientProvider, QueryClient } from 'react-query'
 import { ReactQueryDevtools } from 'react-query-devtools'
 
 import './index.css'
@@ -11,15 +11,15 @@ import type {} from 'styled-components/cssprop'
 import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 
-const queryCache = new QueryCache()
+const queryClient = new QueryClient()
 
 ReactDOM.render(
   // <React.StrictMode>
-  <ReactQueryCacheProvider queryCache={queryCache}>
+  <QueryClientProvider client={queryClient}>
     <App />
 
     <ReactQueryDevtools position="bottom-right" />
-  </ReactQueryCacheProvider>,
+  </QueryClientProvider>,
   // </React.StrictMode>,
   document.getElementById('root')
 )

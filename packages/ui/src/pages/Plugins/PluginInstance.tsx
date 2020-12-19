@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react'
+import { FC, useCallback, useState } from 'react'
 import {
   Row,
   Typography,
@@ -26,9 +26,9 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
   instance
 }) => {
   const [editing, setEditing] = useState(false)
-  const [pluginUpdate, pluginUpdateResult] = useInstalledPluginUpdate()
+  const pluginUpdate = useInstalledPluginUpdate()
 
-  const handleRemove = useCallback(() => {
+  const handleRemove = useCallback(async () => {
     const update = produce(plugin, (draft) => {
       const index = draft.instances.findIndex(
         (other) => other.name === instance.name
@@ -36,17 +36,13 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
       draft.instances.splice(index, 1)
     })
 
-    pluginUpdate({ data: update })
-  }, [instance.name, plugin, pluginUpdate])
-
-  useEffect(() => {
-    if (pluginUpdateResult.isError) {
+    try {
+      await pluginUpdate.mutateAsync({ data: update })
+      message.success(`Plugin instance ${instance.name} removed`)
+    } catch (err) {
       message.error('Problem removing plugin instance: ' + instance.name)
     }
-    if (pluginUpdateResult.isSuccess) {
-      message.success(`Plugin instance ${instance.name} removed`)
-    }
-  }, [instance.name, pluginUpdateResult.isError, pluginUpdateResult.isSuccess])
+  }, [instance.name, plugin, pluginUpdate])
 
   return (
     <List.Item>

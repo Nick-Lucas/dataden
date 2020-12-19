@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo } from 'react'
+import { FC, useCallback, useMemo } from 'react'
 import { Button, Form, Input, Row, Typography } from 'antd'
 import produce from 'immer'
 import { Rule } from 'antd/lib/form'
@@ -14,27 +14,23 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
   onSubmitted
 }) => {
   const pluginQuery = useInstalledPlugin(plugin.id)
-  const [pluginMutation, pluginMutationResult] = useInstalledPluginUpdate()
+  const pluginUpdate = useInstalledPluginUpdate()
 
   const onSubmit = useCallback(
-    ({ name }) => {
+    async ({ name }) => {
       const pluginInstallation = produce(pluginQuery.data, (draft) => {
         draft.instances.push({ name })
       }) as any
 
-      pluginMutation({
-        data: pluginInstallation
-      })
+      try {
+        await pluginUpdate.mutateAsync({
+          data: pluginInstallation
+        })
+        onSubmitted?.()
+      } catch (err) {}
     },
-    [pluginMutation, pluginQuery.data]
+    [onSubmitted, pluginQuery.data, pluginUpdate]
   )
-
-  useEffect(() => {
-    if (pluginMutationResult.isSuccess) {
-      onSubmitted?.()
-    }
-  }, [onSubmitted, pluginMutationResult.isSuccess])
-
   const validators = useMemo<Rule[]>(() => {
     return [
       {
@@ -73,10 +69,9 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
         </Button>
       </Row>
 
-      {pluginMutationResult.isError && (
+      {pluginUpdate.isError && (
         <Typography.Text type="danger">
-          {pluginMutationResult.status}:{' '}
-          {JSON.stringify(pluginMutationResult.error)}
+          {pluginUpdate.status}: {JSON.stringify(pluginUpdate.error)}
         </Typography.Text>
       )}
     </Form>

@@ -18,24 +18,26 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
   onSubmitted
 }) => {
   const settingsQuery = usePluginInstanceSettings(plugin.id, instance.name)
-  const [
-    settingsMutation,
-    settingsMutationResult
-  ] = usePluginInstanceSettingsUpdate()
+  const settingsUpdate = usePluginInstanceSettingsUpdate()
 
   const loaded = settingsQuery.isSuccess
 
   const onSubmit = useCallback(
-    (values) => {
+    async (values) => {
       const { settings } = values
 
-      settingsMutation({
-        pluginId: plugin.id,
-        instanceName: instance.name,
-        settings: JSON.parse(settings)
-      })
+      try {
+        await settingsUpdate.mutateAsync({
+          pluginId: plugin.id,
+          instanceName: instance.name,
+          settings: JSON.parse(settings)
+        })
+
+        onSubmitted?.()
+        message.success('Settings: Saved')
+      } catch (err) {}
     },
-    [instance.name, plugin.id, settingsMutation]
+    [instance.name, onSubmitted, plugin.id, settingsUpdate]
   )
 
   const [form] = Form.useForm()
@@ -48,13 +50,6 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
       })
     }
   }, [form, instance?.name, settingsQuery.data, settingsQuery.isSuccess])
-
-  useEffect(() => {
-    if (settingsMutationResult.isSuccess) {
-      onSubmitted?.()
-      message.success('Settings: Saved')
-    }
-  }, [onSubmitted, settingsMutationResult.isSuccess])
 
   return (
     <Form form={form} layout="vertical" onFinish={onSubmit}>
@@ -70,9 +65,9 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
         </Button>
       </Row>
 
-      {settingsMutationResult.isError && (
+      {settingsUpdate.isError && (
         <Typography.Text type="danger">
-          {settingsMutationResult.status}: {settingsMutationResult.error}
+          {settingsUpdate.status}: {settingsUpdate.error}
         </Typography.Text>
       )}
     </Form>

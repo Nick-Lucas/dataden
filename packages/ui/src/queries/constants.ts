@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useMutation, useQuery, useQueryCache } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 import * as Api from '@mydata/core/dist/api-types'
 
@@ -29,7 +29,7 @@ export function useInstalledPlugin(pluginId: string) {
 }
 
 export function useInstalledPluginUpdate() {
-  const cache = useQueryCache()
+  const client = useQueryClient()
 
   return useMutation(
     async function ({ data }: { data: Api.Plugins.PutPluginData }) {
@@ -40,8 +40,8 @@ export function useInstalledPluginUpdate() {
     },
     {
       onSuccess: (response, { data }) => {
-        cache.invalidateQueries(Queries.Plugins.InstalledList)
-        cache.invalidateQueries(Queries.Plugins.Installed(data.id))
+        client.invalidateQueries(Queries.Plugins.InstalledList)
+        client.invalidateQueries(Queries.Plugins.Installed(data.id))
       }
     }
   )
@@ -52,8 +52,8 @@ export function usePluginInstanceSettings(
   instanceName: string
 ) {
   return useQuery(
-    [Queries.Plugins.Settings(pluginId, instanceName), pluginId, instanceName],
-    async function (key, pluginId: string, instanceName: string) {
+    [Queries.Plugins.Settings(pluginId, instanceName)],
+    async function () {
       const result = await axios.get<Api.Plugins.GetSettingsResponse>(
         '/v1.0/plugins/' +
           encodeURIComponent(pluginId) +
@@ -72,7 +72,7 @@ export function usePluginInstanceSettings(
 }
 
 export function usePluginInstanceSettingsUpdate() {
-  const cache = useQueryCache()
+  const client = useQueryClient()
 
   return useMutation(
     async function ({
@@ -95,7 +95,7 @@ export function usePluginInstanceSettingsUpdate() {
     },
     {
       onSuccess: (response, { pluginId, instanceName }) => {
-        cache.invalidateQueries(
+        client.invalidateQueries(
           Queries.Plugins.Settings(pluginId, instanceName)
         )
       }
