@@ -40,7 +40,7 @@ export const Plugins: FC = () => {
         </Row>
 
         {installedPluginsQuery.isFetched &&
-          installedPluginsQuery.data.data.plugins
+          installedPluginsQuery.data
             .filter((plugin) =>
               search && search.length > 0
                 ? plugin.id.indexOf(search) >= 0

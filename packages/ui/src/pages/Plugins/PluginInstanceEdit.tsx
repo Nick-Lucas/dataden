@@ -29,7 +29,7 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
       try {
         await settingsUpdate.mutateAsync({
           pluginId: plugin.id,
-          instanceName: instance.name,
+          instanceId: instance.name,
           settings: JSON.parse(settings)
         })
 
@@ -67,7 +67,7 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
 
       {settingsUpdate.isError && (
         <Typography.Text type="danger">
-          {settingsUpdate.status}: {settingsUpdate.error}
+          {settingsUpdate.status}: {String(settingsUpdate.error)}
         </Typography.Text>
       )}
     </Form>

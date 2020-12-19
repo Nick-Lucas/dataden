@@ -1,26 +1,84 @@
 import * as Db from 'src/db'
-import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 import { Settings } from '@mydata/sdk'
+import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 
-export interface PluginParams {
-  pluginId: string
+export namespace Common {
+  export interface PluginParams {
+    pluginId: string
+  }
+
+  export interface PluginInstanceParams extends PluginParams {
+    instanceId: string
+  }
 }
 
-export interface PluginInstanceParams extends PluginParams {
-  instanceId: string
+// Other
+
+export namespace GetPlugins {
+  export const path = '/v1.0/plugins'
+
+  export type Response = Db.Plugins.Plugin[]
 }
 
-export type PutPluginRequest = RegistryPlugin | LocalPlugin
-export type PutPluginResponse = Db.Plugins.Plugin | string
-export type PutPluginData = Db.Plugins.Plugin
+export namespace PostInstallPlugin {
+  export const path = '/v1.0/plugins/install'
 
-export interface GetPluginsResponse {
-  plugins: Db.Plugins.Plugin[]
+  export type Body = RegistryPlugin | LocalPlugin
+  export type Response = Db.Plugins.Plugin | string
 }
 
-export interface GetPluginResponse {
-  plugin: Db.Plugins.Plugin
+export namespace Reload {
+  export const path = '/v1.0/plugins/reload'
 }
 
-export type GetSettingsResponse = Settings | string
-export type SetSettingsRequest = Settings
+// Management
+
+export namespace GetPlugin {
+  export const path = '/v1.0/plugins/:pluginId'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' + encodeURIComponent(params.pluginId)
+
+  export type RouteParams = Common.PluginParams
+
+  export type Response = Db.Plugins.Plugin
+}
+
+export namespace PutPlugin {
+  export const path = '/v1.0/plugins/:pluginId'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' + encodeURIComponent(params.pluginId)
+
+  export type RouteParams = Common.PluginParams
+  export type Body = Db.Plugins.Plugin
+
+  export type Response = Db.Plugins.Plugin | string
+}
+
+export namespace GetPluginInstanceSettings {
+  export const path = '/v1.0/plugins/:pluginId/:instanceId/settings'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' +
+    encodeURIComponent(params.pluginId) +
+    '/' +
+    encodeURIComponent(params.instanceId) +
+    '/settings'
+
+  export type RouteParams = Common.PluginInstanceParams
+
+  export type Response = Settings
+}
+
+export namespace PutPluginInstanceSettings {
+  export const path = '/v1.0/plugins/:pluginId/:instanceId/settings'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' +
+    encodeURIComponent(params.pluginId) +
+    '/' +
+    encodeURIComponent(params.instanceId) +
+    '/settings'
+
+  export type RouteParams = Common.PluginInstanceParams
+  export type Body = Settings
+
+  export type Response = void
+}

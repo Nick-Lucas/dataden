@@ -13,18 +13,24 @@ export const Queries = {
 }
 
 export function useInstalledPluginsList() {
-  return useQuery(Queries.Plugins.InstalledList, () => {
-    return axios.get<Api.Plugins.GetPluginsResponse>('/v1.0/plugins')
+  return useQuery(Queries.Plugins.InstalledList, async () => {
+    return (
+      await axios.get<Api.Plugins.GetPlugins.Response>(
+        Api.Plugins.GetPlugins.path
+      )
+    ).data
   })
 }
 
 export function useInstalledPlugin(pluginId: string) {
   return useQuery(Queries.Plugins.Installed(pluginId), async () => {
-    const result = await axios.get<Api.Plugins.GetPluginResponse>(
-      '/v1.0/plugins/' + encodeURIComponent(pluginId)
-    )
-
-    return result.data.plugin
+    return (
+      await axios.get<Api.Plugins.GetPlugin.Response>(
+        Api.Plugins.GetPlugin.getPath({
+          pluginId: pluginId
+        })
+      )
+    ).data
   })
 }
 
@@ -32,11 +38,15 @@ export function useInstalledPluginUpdate() {
   const client = useQueryClient()
 
   return useMutation(
-    async function ({ data }: { data: Api.Plugins.PutPluginData }) {
-      return await axios.put<Api.Plugins.PutPluginResponse>(
-        '/v1.0/plugins/' + encodeURIComponent(data.id),
-        data
-      )
+    async function ({ data }: { data: Api.Plugins.PutPlugin.Body }) {
+      return (
+        await axios.put<Api.Plugins.PutPlugin.Response>(
+          Api.Plugins.PutPlugin.getPath({
+            pluginId: data.id
+          }),
+          data
+        )
+      ).data
     },
     {
       onSuccess: (response, { data }) => {
@@ -49,24 +59,19 @@ export function useInstalledPluginUpdate() {
 
 export function usePluginInstanceSettings(
   pluginId: string,
-  instanceName: string
+  instanceId: string
 ) {
   return useQuery(
-    [Queries.Plugins.Settings(pluginId, instanceName)],
+    [Queries.Plugins.Settings(pluginId, instanceId)],
     async function () {
-      const result = await axios.get<Api.Plugins.GetSettingsResponse>(
-        '/v1.0/plugins/' +
-          encodeURIComponent(pluginId) +
-          '/' +
-          encodeURIComponent(instanceName) +
-          '/settings'
-      )
-
-      if (typeof result.data === 'string') {
-        throw result.data
-      }
-
-      return result.data
+      return (
+        await axios.get<Api.Plugins.GetPluginInstanceSettings.Response>(
+          Api.Plugins.GetPluginInstanceSettings.getPath({
+            pluginId,
+            instanceId
+          })
+        )
+      ).data
     }
   )
 }
@@ -77,27 +82,26 @@ export function usePluginInstanceSettingsUpdate() {
   return useMutation(
     async function ({
       pluginId,
-      instanceName,
+      instanceId,
       settings
     }: {
       pluginId: string
-      instanceName: string
-      settings: Api.Plugins.SetSettingsRequest
+      instanceId: string
+      settings: Api.Plugins.PutPluginInstanceSettings.Body
     }) {
-      return await axios.post(
-        '/v1.0/plugins/' +
-          encodeURIComponent(pluginId) +
-          '/' +
-          encodeURIComponent(instanceName) +
-          '/settings',
-        settings
-      )
+      return (
+        await axios.post<Api.Plugins.PutPluginInstanceSettings.Response>(
+          Api.Plugins.PutPluginInstanceSettings.getPath({
+            pluginId,
+            instanceId
+          }),
+          settings
+        )
+      ).data
     },
     {
-      onSuccess: (response, { pluginId, instanceName }) => {
-        client.invalidateQueries(
-          Queries.Plugins.Settings(pluginId, instanceName)
-        )
+      onSuccess: (response, { pluginId, instanceId }) => {
+        client.invalidateQueries(Queries.Plugins.Settings(pluginId, instanceId))
       }
     }
   )

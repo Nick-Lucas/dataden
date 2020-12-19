@@ -71,7 +71,7 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
 
       {pluginUpdate.isError && (
         <Typography.Text type="danger">
-          {pluginUpdate.status}: {JSON.stringify(pluginUpdate.error)}
+          {pluginUpdate.status}: {String(pluginUpdate.error)}
         </Typography.Text>
       )}
     </Form>

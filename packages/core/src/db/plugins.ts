@@ -191,7 +191,7 @@ export const Settings = {
   ): Promise<void> => {
     await getPluginDb(client, path, 'settings').updateOne(
       {},
-      { $set: settings },
+      { $set: stripMongoId(settings) },
       { upsert: true }
     )
   }
