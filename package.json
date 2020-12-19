@@ -9,7 +9,8 @@
     "test": "yarn jest --watch",
     "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
     "lint:fix": "yarn run lint --fix",
-    "dev": "wsrun --parallel --exclude-missing dev"
+    "dev": "wsrun --parallel --exclude-missing dev",
+    "dev:start": "ROLLUP_RUN=true yarn run dev"
   },
   "workspaces": {
     "packages": [

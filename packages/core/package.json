@@ -6,7 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "ROLLUP_RUN=true rollup -c rollup.config.js --watch"
+    "dev": "rollup -c rollup.config.js --watch",
+    "dev:start": "ROLLUP_RUN=true yarn run dev"
   },
   "dependencies": {
     "@mydata/build": "1.0.0",

@@ -11,6 +11,7 @@
   "dependencies": {
     "@babel/core": "7.12.3",
     "@monaco-editor/react": "^3.7.2",
+    "@mydata/core": "1.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.2",
     "@svgr/webpack": "5.4.0",
     "@testing-library/jest-dom": "^5.11.4",

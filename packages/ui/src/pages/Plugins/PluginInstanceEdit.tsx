@@ -44,7 +44,7 @@ export const PluginInstanceEdit: FC<PluginInstanceEditProps> = ({
     if (settingsQuery.isSuccess && settingsQuery.data) {
       form.setFieldsValue({
         name: instance?.name ?? '',
-        settings: settingsQuery.data
+        settings: JSON.stringify(settingsQuery.data, null, 2)
       })
     }
   }, [form, instance?.name, settingsQuery.data, settingsQuery.isSuccess])

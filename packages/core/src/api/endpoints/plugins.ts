@@ -1,35 +1,20 @@
 import { Express } from 'express'
 
 import * as Db from 'src/db'
-import {
-  installPlugin,
-  LocalPlugin,
-  RegistryPlugin
-} from 'src/lib/PluginManager'
+import { installPlugin } from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
-import { Settings } from '@mydata/sdk'
 
-interface PluginParams {
-  pluginId: string
-}
-
-interface PluginInstanceParams extends PluginParams {
-  instanceId: string
-}
-
-type PutPluginRequest = RegistryPlugin | LocalPlugin
-type PutPluginResponse = Db.Plugins.Plugin | string
-
-interface GetPluginsResponse {
-  plugins: Db.Plugins.Plugin[]
-}
-
-interface GetPluginResponse {
-  plugin: Db.Plugins.Plugin
-}
-
-type GetSettingsResponse = Settings | string
-type SetSettingsRequest = Settings
+import {
+  GetPluginResponse,
+  GetPluginsResponse,
+  GetSettingsResponse,
+  PluginInstanceParams,
+  PluginParams,
+  PutPluginData,
+  PutPluginRequest,
+  PutPluginResponse,
+  SetSettingsRequest
+} from './plugins.types'
 
 export function listen(app: Express) {
   app.put<void, PutPluginResponse, PutPluginRequest, void>(
@@ -79,7 +64,7 @@ export function listen(app: Express) {
     }
   )
 
-  app.put<PluginParams, PutPluginResponse, Db.Plugins.Plugin, any>(
+  app.put<PluginParams, PutPluginResponse, PutPluginData, any>(
     '/v1.0/plugins/:pluginId',
     async (request, response) => {
       const { pluginId } = request.params

@@ -9,14 +9,16 @@ import {
   message,
   Popconfirm
 } from 'antd'
+import produce from 'immer'
 import { css } from 'styled-components/macro'
+
 import { PluginInstanceEdit } from './PluginInstanceEdit'
 import { useInstalledPluginUpdate } from 'src/queries'
-import produce from 'immer'
+import * as Api from '@mydata/core/dist/api-types'
 
 interface PluginInstanceProps {
-  plugin: any
-  instance: any
+  plugin: Api.Plugins.Plugin
+  instance: Api.Plugins.PluginInstance
 }
 
 export const PluginInstance: FC<PluginInstanceProps> = ({

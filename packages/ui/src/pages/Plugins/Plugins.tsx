@@ -43,7 +43,7 @@ export const Plugins: FC = () => {
           installedPluginsQuery.data.data.plugins
             .filter((plugin) =>
               search && search.length > 0
-                ? plugin.name.indexOf(search) >= 0
+                ? plugin.id.indexOf(search) >= 0
                 : true
             )
             .map((plugin) => <Plugin key={plugin.id} plugin={plugin} />)}

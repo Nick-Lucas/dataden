@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { useMutation, useQuery, useQueryCache } from 'react-query'
 
+import * as Api from '@mydata/core/dist/api-types'
+
 export const Queries = {
   Plugins: {
     InstalledList: 'plugins/installed',
@@ -12,13 +14,13 @@ export const Queries = {
 
 export function useInstalledPluginsList() {
   return useQuery(Queries.Plugins.InstalledList, () => {
-    return axios.get('/v1.0/plugins')
+    return axios.get<Api.Plugins.GetPluginsResponse>('/v1.0/plugins')
   })
 }
 
 export function useInstalledPlugin(pluginId: string) {
   return useQuery(Queries.Plugins.Installed(pluginId), async () => {
-    const result = await axios.get(
+    const result = await axios.get<Api.Plugins.GetPluginResponse>(
       '/v1.0/plugins/' + encodeURIComponent(pluginId)
     )
 
@@ -30,8 +32,8 @@ export function useInstalledPluginUpdate() {
   const cache = useQueryCache()
 
   return useMutation(
-    async function ({ data }: { data: any }) {
-      return await axios.put(
+    async function ({ data }: { data: Api.Plugins.PutPluginData }) {
+      return await axios.put<Api.Plugins.PutPluginResponse>(
         '/v1.0/plugins/' + encodeURIComponent(data.id),
         data
       )
@@ -52,7 +54,7 @@ export function usePluginInstanceSettings(
   return useQuery(
     [Queries.Plugins.Settings(pluginId, instanceName), pluginId, instanceName],
     async function (key, pluginId: string, instanceName: string) {
-      const result = await axios.get(
+      const result = await axios.get<Api.Plugins.GetSettingsResponse>(
         '/v1.0/plugins/' +
           encodeURIComponent(pluginId) +
           '/' +
@@ -60,16 +62,11 @@ export function usePluginInstanceSettings(
           '/settings'
       )
 
-      const { plugin, schedule } = result.data
+      if (typeof result.data === 'string') {
+        throw result.data
+      }
 
-      return JSON.stringify(
-        {
-          plugin,
-          schedule
-        },
-        null,
-        2
-      )
+      return result.data
     }
   )
 }
@@ -85,7 +82,7 @@ export function usePluginInstanceSettingsUpdate() {
     }: {
       pluginId: string
       instanceName: string
-      settings: unknown
+      settings: Api.Plugins.SetSettingsRequest
     }) {
       return await axios.post(
         '/v1.0/plugins/' +
