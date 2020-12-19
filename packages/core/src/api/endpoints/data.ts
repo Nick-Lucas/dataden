@@ -1,16 +1,52 @@
 import { Express } from 'express'
-import { DataRow } from '@mydata/sdk'
+// import { DataRow } from '@mydata/sdk'
 import * as Db from 'src/db'
+import { Scheduler } from 'src/lib/Scheduler'
 
-interface PluginParams {
-  pluginId: string
-  dataSetName: string
-}
+import { MaybeError } from './common.types'
+import { GetSyncs } from './data.types'
 
-type GetDataResponse = Db.PagingResult<DataRow>
+// type GetDataResponse = Db.PagingResult<DataRow>
 
-// TODO: bring this back
 export function listen(app: Express) {
+  app.get<void, MaybeError<GetSyncs.Response>, void, void>(
+    GetSyncs.path,
+    async (request, response) => {
+      try {
+        const client = await Db.getClient()
+
+        const result: GetSyncs.Response = []
+        const plugins = await Db.Plugins.Installed.list(client)
+        for (const plugin of plugins) {
+          const definition = await Scheduler.getPluginDefinition(plugin.id)
+
+          for (const instance of plugin.instances) {
+            const lastSync = await Db.Plugins.Syncs.last(
+              client,
+              {
+                pluginServiceName: definition.service.name,
+                instanceName: instance.name
+              },
+              {}
+            )
+
+            result.push({
+              plugin,
+              pluginInstance: instance,
+              lastSync
+            })
+          }
+        }
+        // console.log(result)
+        response.send(result)
+      } catch (error) {
+        response.sendStatus(500)
+        response.send(String(error))
+      }
+    }
+  )
+
+  // TODO: bring this back
   // app.post<PluginParams, any, PostDataRequest, any>(
   //   '/v1.0/data/:pluginId',
   //   (request, response) => {

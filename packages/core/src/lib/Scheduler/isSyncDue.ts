@@ -8,7 +8,7 @@ export function isSyncDue(
   schedule: Schedule
 ): boolean {
   const nowLux = DateTime.fromJSDate(now)
-  const last = DateTime.fromJSDate(lastSync.date ?? new Date(0))
+  const last = DateTime.fromISO(lastSync.date ?? new Date(0).toISOString())
 
   const diffSinceLastSync = nowLux.diff(last)
 

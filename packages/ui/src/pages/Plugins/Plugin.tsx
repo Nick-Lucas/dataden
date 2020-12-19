@@ -21,7 +21,6 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
       key={plugin.id}
       css={css`
         margin-top: 1rem;
-        padding: 0.5rem 1rem;
       `}
     >
       <Row justify="space-between">

@@ -59,7 +59,7 @@ export const Layout: FC<LayoutProps> = ({
 }
 
 export const ContentCard = styled.div`
-  padding: 0 1rem;
+  padding: 0.5rem 1rem;
   background-color: white;
 
   box-shadow: 0px 2px 3px 0px gray;

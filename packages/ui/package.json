@@ -9,6 +9,7 @@
   },
   "proxy": "http://localhost:8001",
   "dependencies": {
+    "@ant-design/icons": "^4.3.0",
     "@babel/core": "7.12.3",
     "@monaco-editor/react": "^3.7.2",
     "@mydata/core": "1.0.0",
@@ -37,6 +38,8 @@
     "jest-circus": "26.6.0",
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
+    "lodash": "^4.17.20",
+    "luxon": "^1.25.0",
     "mini-css-extract-plugin": "0.11.3",
     "monaco-editor": "^0.21.2",
     "optimize-css-assets-webpack-plugin": "5.0.4",

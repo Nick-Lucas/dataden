@@ -1,15 +1,12 @@
 import { FilterQuery, MongoClient } from 'mongodb'
 
 import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
-import {
-  DataRow,
-  SyncInfo,
-  Settings as ISettings,
-  SyncSuccessInfo
-} from '@mydata/sdk'
+import * as Sdk from '@mydata/sdk'
 import { stripMongoId } from './stripMongoId'
 
-export interface PluginBase {
+// DTOS
+
+interface PluginBase {
   id: string
   location: string
   version: number
@@ -25,15 +22,23 @@ export interface Plugin extends PluginBase {
   instances: PluginInstance[]
 }
 
+export type DataRow = Sdk.DataRow
+
+export type Sync = Sdk.SyncInfo
+
+export type Settings = Sdk.Settings
+
+// Db layer
+
 type Collection = 'syncs' | 'settings' | string
 
 export interface DbPath {
-  pluginName: string
+  pluginServiceName: string
   instanceName: string
 }
 
 function getDatabaseName(info: DbPath) {
-  return (info.pluginName + '__' + info.instanceName)
+  return (info.pluginServiceName + '__' + info.instanceName)
     .toLowerCase()
     .replace(/[^a-z0-9]/, '_')
 }
@@ -47,6 +52,8 @@ function getPluginDb<T>(
     .db(DATABASES.PLUGIN_PREFIX + getDatabaseName(path))
     .collection<T>(collection)
 }
+
+// Access
 
 export const Installed = {
   list: async function (client: MongoClient): Promise<Plugin[]> {
@@ -139,22 +146,23 @@ export const Data = {
 }
 
 export const Syncs = {
-  last: async <T extends SyncInfo>(
+  last: async (
     client: MongoClient,
     path: DbPath,
-    query: FilterQuery<SyncInfo> = {}
-  ): Promise<T | SyncSuccessInfo> => {
-    const lastSync = await getPluginDb(client, path, 'syncs').findOne<T | null>(
-      query,
-      { sort: { $natural: -1 } }
-    )
+    query: FilterQuery<Sync> = {}
+  ): Promise<Sync> => {
+    const lastSync = await getPluginDb(
+      client,
+      path,
+      'syncs'
+    ).findOne<Sync | null>(query, { sort: { date: -1 } })
 
     if (lastSync) {
       return lastSync
     } else {
       return {
         success: true,
-        date: new Date(0),
+        date: new Date(0).toISOString(),
         latestDate: null
       }
     }
@@ -163,19 +171,19 @@ export const Syncs = {
   track: async (
     client: MongoClient,
     path: DbPath,
-    sync: SyncInfo
+    sync: Sync
   ): Promise<void> => {
     await getPluginDb(client, path, 'syncs').insertOne(sync)
   }
 }
 
 export const Settings = {
-  get: async (client: MongoClient, path: DbPath): Promise<ISettings | null> => {
+  get: async (client: MongoClient, path: DbPath): Promise<Settings | null> => {
     const settings = await getPluginDb(
       client,
       path,
       'settings'
-    ).findOne<ISettings | null>({})
+    ).findOne<Settings | null>({})
 
     if (settings) {
       return settings
@@ -187,7 +195,7 @@ export const Settings = {
   set: async (
     client: MongoClient,
     path: DbPath,
-    settings: ISettings
+    settings: Settings
   ): Promise<void> => {
     await getPluginDb(client, path, 'settings').updateOne(
       {},

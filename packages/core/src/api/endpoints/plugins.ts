@@ -4,6 +4,7 @@ import * as Db from 'src/db'
 import { installPlugin } from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
 
+import { MaybeError } from './common.types'
 import {
   GetPlugins,
   GetPlugin,
@@ -13,8 +14,6 @@ import {
   GetPluginInstanceSettings,
   PostInstallPlugin
 } from './plugins.types'
-
-type MaybeError<T> = T | string
 
 export function listen(app: Express) {
   app.post<
@@ -121,7 +120,7 @@ export function listen(app: Express) {
       }
 
       const settings = await Db.Plugins.Settings.get(client, {
-        pluginName: definition.service.name,
+        pluginServiceName: definition.service.name,
         instanceName: instance.name
       })
       if (settings) {
@@ -169,7 +168,7 @@ export function listen(app: Express) {
       await Db.Plugins.Settings.set(
         client,
         {
-          pluginName: definition.service.name,
+          pluginServiceName: definition.service.name,
           instanceName: instance.name
         },
         settings

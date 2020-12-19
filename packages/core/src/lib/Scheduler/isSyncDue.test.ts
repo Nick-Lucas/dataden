@@ -6,7 +6,7 @@ describe('isSyncDue', () => {
       new Date(),
       {
         success: true,
-        date: new Date(0),
+        date: new Date(0).toISOString(),
         latestDate: null
       },
       {
@@ -23,7 +23,7 @@ describe('isSyncDue', () => {
       new Date(2020, 5, 15, 16, 0, 59),
       {
         success: true,
-        date: new Date(2020, 5, 15, 16, 0, 0),
+        date: new Date(2020, 5, 15, 16, 0, 0).toISOString(),
         latestDate: null
       },
       {
@@ -40,7 +40,7 @@ describe('isSyncDue', () => {
       new Date(2020, 5, 15, 16, 1, 0),
       {
         success: true,
-        date: new Date(2020, 5, 15, 16, 0, 0),
+        date: new Date(2020, 5, 15, 16, 0, 0).toISOString(),
         latestDate: null
       },
       {

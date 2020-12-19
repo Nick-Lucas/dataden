@@ -2,15 +2,7 @@ import * as Db from 'src/db'
 import { Settings } from '@mydata/sdk'
 import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 
-export namespace Common {
-  export interface PluginParams {
-    pluginId: string
-  }
-
-  export interface PluginInstanceParams extends PluginParams {
-    instanceId: string
-  }
-}
+import { Common } from './common.types'
 
 // Other
 

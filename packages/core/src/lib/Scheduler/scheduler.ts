@@ -7,7 +7,7 @@ import {
   loadPluginServiceDefinitionById
 } from 'src/lib/PluginManager'
 import { isSyncDue } from './isSyncDue'
-import { SyncInfo, SyncSuccessInfo } from '@mydata/sdk'
+import { SyncSuccessInfo } from '@mydata/sdk'
 
 const liveIntervals: NodeJS.Timeout[] = []
 const liveServices: PluginServiceDefinition[] = []
@@ -24,7 +24,7 @@ export async function start() {
   for (const definition of definitions) {
     for (const instance of definition.plugin.instances) {
       const settings = await Db.Plugins.Settings.get(client, {
-        pluginName: definition.service.name,
+        pluginServiceName: definition.service.name,
         instanceName: instance.name
       })
       if (!settings) {
@@ -83,7 +83,7 @@ function queueSchedule(
 
   const pluginId = definition.plugin.id
   const dbPath: DbPath = {
-    pluginName: definition.service.name,
+    pluginServiceName: definition.service.name,
     instanceName: instance.name
   }
 
@@ -93,17 +93,10 @@ function queueSchedule(
     )
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
-    const lastSyncAttempt = await Db.Plugins.Syncs.last<SyncInfo>(
-      client,
-      dbPath
-    )
-    const lastSyncSuccess = await Db.Plugins.Syncs.last<SyncSuccessInfo>(
-      client,
-      dbPath,
-      {
-        success: true
-      }
-    )
+    const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
+    const lastSyncSuccess = (await Db.Plugins.Syncs.last(client, dbPath, {
+      success: true
+    })) as SyncSuccessInfo
 
     const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
     if (!syncDue) {
@@ -137,7 +130,7 @@ function queueSchedule(
           await Db.Plugins.Syncs.track(client, dbPath, {
             success: true,
             latestDate: result.lastDate,
-            date: new Date()
+            date: new Date().toISOString()
           })
 
           if (result.mode === 'append') {
@@ -170,7 +163,7 @@ function queueSchedule(
 
         await Db.Plugins.Syncs.track(client, dbPath, {
           success: false,
-          date: new Date(),
+          date: new Date().toISOString(),
           error: e
         })
       } finally {

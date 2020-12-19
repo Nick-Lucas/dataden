@@ -6,7 +6,8 @@
     "checkJs": true,
     "paths": {
       "src/*": ["src/*"],
-      "@mydata/*": ["../*/src"]
+      "@mydata/*": ["../*/src"],
+      "@mydata/core/dist/api-types": ["../core/src/api/api-types.ts"],
     },
     "esModuleInterop": true,
     "sourceMap": true,
