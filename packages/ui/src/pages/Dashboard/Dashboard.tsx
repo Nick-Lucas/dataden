@@ -69,7 +69,9 @@ const columns: ColumnsType<Data.GetSyncs.ResponseItem> = [
     key: 'timeago',
     render: (value, item) => (
       <Typography.Text style={{ whiteSpace: 'nowrap' }}>
-        {DateTime.fromISO(item.lastSync.date).toFormat('d LLL y, HH:mm')}
+        {item.lastSync.date != null
+          ? DateTime.fromISO(item.lastSync.date).toFormat('d LLL y, HH:mm')
+          : 'Never Run'}
       </Typography.Text>
     )
   },

@@ -162,7 +162,7 @@ export const Syncs = {
     } else {
       return {
         success: true,
-        date: new Date(0).toISOString(),
+        date: null,
         latestDate: null
       }
     }

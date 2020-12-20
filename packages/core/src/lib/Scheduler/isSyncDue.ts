@@ -9,6 +9,12 @@ export function isSyncDue(
 ): boolean {
   const nowLux = DateTime.fromJSDate(now)
   const last = DateTime.fromISO(lastSync.date ?? new Date(0).toISOString())
+  if (!last.isValid) {
+    console.warn(
+      `[isSyncDue]: Last Date "${lastSync.date}" Invalid: "${last.invalidExplanation}"`
+    )
+    return false
+  }
 
   const diffSinceLastSync = nowLux.diff(last)
 
