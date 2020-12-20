@@ -1,6 +1,6 @@
 import { Express } from 'express'
 
-import * as data from './data'
+import * as data from './dashboard'
 import * as plugins from './plugins'
 import * as registry from './registry'
 

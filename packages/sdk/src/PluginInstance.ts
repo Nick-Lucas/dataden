@@ -35,17 +35,17 @@ export type SyncSuccessInfo = {
   success: true
 
   /** The date of the sync attempt */
-  date: Date
+  date: string
 
   /** the date to feed into the next sync, for instance the date of the newest record retrieved during the last sync */
-  latestDate: Date
+  latestDate: string
 }
 export type SyncFailureInfo = {
   /** Outcome */
   success: false
 
   /** The date of the sync attempt */
-  date: Date
+  date: string
 
   /** Error if the outcome was a failure */
   error?: string
@@ -59,7 +59,7 @@ export interface DataRequest {
 export interface DataPayload {
   mode: 'append' | 'replace'
   data: DataRow[]
-  lastDate: Date
+  lastDate: string
 }
 
 //

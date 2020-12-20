@@ -7,53 +7,105 @@ import {
   loadPluginServiceDefinitionById
 } from 'src/lib/PluginManager'
 import { isSyncDue } from './isSyncDue'
-import { SyncInfo, SyncSuccessInfo } from '@mydata/sdk'
+import { SyncSuccessInfo } from '@mydata/sdk'
 
-const liveIntervals: NodeJS.Timeout[] = []
-const liveServices: PluginServiceDefinition[] = []
+export interface PluginServiceStatus {
+  running: boolean
+  status: 'OK' | 'Not Started' | 'Not Configured'
+}
+export interface PluginService extends PluginServiceStatus {
+  definition: PluginServiceDefinition
+  instance: PluginInstance
+
+  interval?: NodeJS.Timeout
+}
+const services: PluginService[] = []
+
+export function getStatus(
+  pluginId: string,
+  instanceName: string
+): PluginServiceStatus {
+  const service = services.find(
+    (service) =>
+      service.definition.plugin.id === pluginId &&
+      service.instance.name === instanceName
+  )
+
+  return service
+    ? {
+        running: service.running,
+        status: service.status
+      }
+    : {
+        running: false,
+        status: 'Not Started'
+      }
+}
 
 export async function start() {
+  if (services.length > 0) {
+    throw 'Cannot start plugin services as they are already started. Did you mean to restart()?'
+  }
+
   const definitions = await loadPluginServiceDefinitions()
   if (!definitions.length) {
     return
   }
 
-  liveServices.push(...definitions)
-
   const client = await Db.getClient()
   for (const definition of definitions) {
     for (const instance of definition.plugin.instances) {
+      const service: PluginService = {
+        definition,
+        instance,
+        running: true,
+        status: 'OK'
+      }
+
       const settings = await Db.Plugins.Settings.get(client, {
-        pluginName: definition.service.name,
+        pluginServiceName: definition.service.name,
         instanceName: instance.name
       })
-      if (!settings) {
+
+      if (settings) {
+        service.interval = queueSchedule(client, definition, instance)
+      } else {
+        service.running = false
+        service.status = 'Not Configured'
+
         console.warn(
           `[Scheduler] ${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
         )
-        continue
       }
 
-      const interval = queueSchedule(client, definition, instance)
-
-      liveIntervals.push(interval)
+      services.push(service)
     }
   }
 }
 
 export async function stop() {
-  while (liveServices.length > 0) liveServices.pop()
-  liveIntervals.forEach((interval) => clearInterval(interval))
+  while (services.length > 0) {
+    const service = services.pop()
+    if (service.interval) {
+      clearInterval(service.interval)
+    }
+  }
+}
+
+export async function restart() {
+  console.log('[Scheduler] ❗️❗️❗️ Restarting all Plugins ❗️❗️❗️')
+  await stop()
+  await start()
 }
 
 export async function getPluginDefinition(
   pluginId: string
 ): Promise<PluginServiceDefinition> {
-  const existingInstance = liveServices.find(
-    (instance) => instance.plugin.id === pluginId
+  const existingInstance = services.find(
+    (service) => service.definition.plugin.id === pluginId
   )
   if (existingInstance) {
-    return existingInstance
+    return existingInstance.definition
   }
 
   const definition = await loadPluginServiceDefinitionById(pluginId)
@@ -61,9 +113,9 @@ export async function getPluginDefinition(
     return null
   }
 
-  liveServices.push(definition)
+  await restart()
 
-  return definition
+  return getPluginDefinition(pluginId)
 }
 
 function queueSchedule(
@@ -75,7 +127,7 @@ function queueSchedule(
 
   const pluginId = definition.plugin.id
   const dbPath: DbPath = {
-    pluginName: definition.service.name,
+    pluginServiceName: definition.service.name,
     instanceName: instance.name
   }
 
@@ -85,17 +137,10 @@ function queueSchedule(
     )
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
-    const lastSyncAttempt = await Db.Plugins.Syncs.last<SyncInfo>(
-      client,
-      dbPath
-    )
-    const lastSyncSuccess = await Db.Plugins.Syncs.last<SyncSuccessInfo>(
-      client,
-      dbPath,
-      {
-        success: true
-      }
-    )
+    const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
+    const lastSyncSuccess = (await Db.Plugins.Syncs.last(client, dbPath, {
+      success: true
+    })) as SyncSuccessInfo
 
     const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
     if (!syncDue) {
@@ -129,7 +174,7 @@ function queueSchedule(
           await Db.Plugins.Syncs.track(client, dbPath, {
             success: true,
             latestDate: result.lastDate,
-            date: new Date()
+            date: new Date().toISOString()
           })
 
           if (result.mode === 'append') {
@@ -162,7 +207,7 @@ function queueSchedule(
 
         await Db.Plugins.Syncs.track(client, dbPath, {
           success: false,
-          date: new Date(),
+          date: new Date().toISOString(),
           error: e
         })
       } finally {
@@ -176,5 +221,5 @@ function queueSchedule(
 
   maybeLoadData()
 
-  return setInterval(maybeLoadData, 30000)
+  return global.setInterval(maybeLoadData, 30000)
 }

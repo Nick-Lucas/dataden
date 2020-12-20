@@ -1,61 +1,47 @@
 import { Express } from 'express'
 
 import * as Db from 'src/db'
-import {
-  installPlugin,
-  LocalPlugin,
-  RegistryPlugin
-} from 'src/lib/PluginManager'
+import { installPlugin } from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
-import { Settings } from '@mydata/sdk'
 
-interface PluginParams {
-  pluginId: string
-}
-
-interface PluginInstanceParams extends PluginParams {
-  instanceId: string
-}
-
-type PutPluginRequest = RegistryPlugin | LocalPlugin
-type PutPluginResponse = Db.Plugins.Plugin | string
-
-interface GetPluginsResponse {
-  plugins: Db.Plugins.Plugin[]
-}
-
-interface GetPluginResponse {
-  plugin: Db.Plugins.Plugin
-}
-
-type GetSettingsResponse = Settings | string
-type SetSettingsRequest = Settings
+import { MaybeError } from './common.types'
+import {
+  GetPlugins,
+  GetPlugin,
+  PutPlugin,
+  Reload,
+  PutPluginInstanceSettings,
+  GetPluginInstanceSettings,
+  PostInstallPlugin
+} from './plugins.types'
 
 export function listen(app: Express) {
-  app.put<void, PutPluginResponse, PutPluginRequest, void>(
-    '/v1.0/plugins',
-    async (request, response) => {
-      const plugin = request.body
+  app.post<
+    void,
+    MaybeError<PostInstallPlugin.Response>,
+    PostInstallPlugin.Body,
+    void
+  >(PostInstallPlugin.path, async (request, response) => {
+    const plugin = request.body
 
-      // TODO: check if already installed and reject if so
+    // TODO: check if already installed and reject if so
 
-      try {
-        const installedPlugin = await installPlugin(plugin)
-        await response.send(installedPlugin)
-      } catch (e) {
-        response.status(500)
-        await response.send(String(e))
-      }
+    try {
+      const installedPlugin = await installPlugin(plugin)
+      await response.send(installedPlugin)
+    } catch (e) {
+      response.status(500)
+      await response.send(String(e))
     }
-  )
+  })
 
-  app.get<void, GetPluginsResponse | string, any, any>(
-    '/v1.0/plugins',
+  app.get<void, MaybeError<GetPlugins.Response>, any, any>(
+    GetPlugins.path,
     async (request, response) => {
       const client = await Db.getClient()
       try {
         const plugins = await Db.Plugins.Installed.list(client)
-        await response.send({ plugins })
+        await response.send(plugins)
       } catch (e) {
         response.status(500)
         await response.send(String(e))
@@ -63,15 +49,15 @@ export function listen(app: Express) {
     }
   )
 
-  app.get<PluginParams, GetPluginResponse | string, any, any>(
-    '/v1.0/plugins/:pluginId',
+  app.get<GetPlugin.RouteParams, MaybeError<GetPlugin.Response>, any, any>(
+    GetPlugin.path,
     async (request, response) => {
       const { pluginId } = request.params
 
       const client = await Db.getClient()
       try {
         const plugin = await Db.Plugins.Installed.get(client, pluginId)
-        await response.send({ plugin })
+        await response.send(plugin)
       } catch (e) {
         response.status(500)
         await response.send(String(e))
@@ -79,111 +65,120 @@ export function listen(app: Express) {
     }
   )
 
-  app.put<PluginParams, PutPluginResponse, Db.Plugins.Plugin, any>(
-    '/v1.0/plugins/:pluginId',
-    async (request, response) => {
-      const { pluginId } = request.params
-      const pluginDto = request.body
+  app.put<
+    PutPlugin.RouteParams,
+    MaybeError<PutPlugin.Response>,
+    PutPlugin.Body,
+    any
+  >(PutPlugin.path, async (request, response) => {
+    const { pluginId } = request.params
+    const pluginDto = request.body
 
-      if (pluginId !== pluginDto.id) {
-        response.status(400)
-        await response.send(`${pluginId} != ${pluginDto.id}`)
-        return
-      }
-
-      const client = await Db.getClient()
-      try {
-        await Db.Plugins.Installed.upsert(client, pluginDto)
-        await response.send(pluginDto)
-      } catch (e) {
-        response.status(500)
-        await response.send(String(e))
-      }
+    if (pluginId !== pluginDto.id) {
+      response.status(400)
+      await response.send(`${pluginId} != ${pluginDto.id}`)
+      return
     }
-  )
 
-  app.post(`/v1.0/plugins/reload`, async (request, response) => {
-    await Scheduler.stop()
-    await Scheduler.start()
+    const client = await Db.getClient()
+    try {
+      await Db.Plugins.Installed.upsert(client, pluginDto)
+      await Scheduler.restart()
+
+      await response.send(pluginDto)
+    } catch (e) {
+      response.status(500)
+      await response.send(String(e))
+    }
+  })
+
+  app.post(Reload.path, async (request, response) => {
+    await Scheduler.restart()
 
     response.sendStatus(200)
   })
 
-  app.get<PluginInstanceParams, GetSettingsResponse, void, void>(
-    `/v1.0/plugins/:pluginId/:instanceId/settings`,
-    async (request, response, next) => {
-      try {
-        const { pluginId, instanceId } = request.params
+  app.get<
+    GetPluginInstanceSettings.RouteParams,
+    MaybeError<GetPluginInstanceSettings.Response>,
+    void,
+    void
+  >(GetPluginInstanceSettings.path, async (request, response, next) => {
+    try {
+      const { pluginId, instanceId } = request.params
 
-        const client = await Db.getClient()
+      const client = await Db.getClient()
 
-        const definition = await Scheduler.getPluginDefinition(pluginId)
-        const instance = definition.plugin.instances.find(
-          (instance) => instance.name === instanceId
-        )
-        if (!instance) {
-          response.status(404)
-          response.send(`Plugin instance id ${instanceId} not found`)
-          return
-        }
+      const definition = await Scheduler.getPluginDefinition(pluginId)
+      const instance = definition.plugin.instances.find(
+        (instance) => instance.name === instanceId
+      )
+      if (!instance) {
+        response.status(404)
+        response.send(`Plugin instance id ${instanceId} not found`)
+        return
+      }
 
-        const settings = await Db.Plugins.Settings.get(client, {
-          pluginName: definition.service.name,
+      const settings = await Db.Plugins.Settings.get(client, {
+        pluginServiceName: definition.service.name,
+        instanceName: instance.name
+      })
+      if (settings) {
+        response.send(settings)
+        return
+      }
+
+      if (!definition) {
+        response.status(404)
+        response.send('Could not get Plugin instance')
+        return
+      }
+
+      const defaultSettings = await definition.service.getDefaultSettings()
+
+      response.send(defaultSettings)
+    } catch (e) {
+      next(e)
+    }
+  })
+
+  app.post<
+    PutPluginInstanceSettings.RouteParams,
+    MaybeError<PutPluginInstanceSettings.Response>,
+    PutPluginInstanceSettings.Body,
+    void
+  >(PutPluginInstanceSettings.path, async (request, response, next) => {
+    try {
+      const { pluginId, instanceId } = request.params
+      const settings = request.body
+
+      const client = await Db.getClient()
+
+      const definition = await Scheduler.getPluginDefinition(pluginId)
+
+      const instance = definition.plugin.instances.find(
+        (instance) => instance.name === instanceId
+      )
+      if (!instance) {
+        response.status(404)
+        response.send(`Plugin instance id ${instanceId} not found`)
+        return
+      }
+
+      await Db.Plugins.Settings.set(
+        client,
+        {
+          pluginServiceName: definition.service.name,
           instanceName: instance.name
-        })
-        if (settings) {
-          response.send(settings)
-          return
-        }
+        },
+        settings
+      )
 
-        if (!definition) {
-          response.status(404)
-          response.send('Could not get Plugin instance')
-          return
-        }
+      await Scheduler.restart()
 
-        const defaultSettings = await definition.service.getDefaultSettings()
-
-        response.send(defaultSettings)
-      } catch (e) {
-        next(e)
-      }
+      response.sendStatus(200)
+    } catch (e) {
+      next(e)
     }
-  )
-
-  app.post<PluginInstanceParams, void | string, SetSettingsRequest, void>(
-    `/v1.0/plugins/:pluginId/:instanceId/settings`,
-    async (request, response, next) => {
-      try {
-        const { pluginId, instanceId } = request.params
-        const settings = request.body
-
-        const client = await Db.getClient()
-
-        const definition = await Scheduler.getPluginDefinition(pluginId)
-
-        const instance = definition.plugin.instances.find(
-          (instance) => instance.name === instanceId
-        )
-        if (!instance) {
-          response.status(404)
-          response.send(`Plugin instance id ${instanceId} not found`)
-          return
-        }
-
-        await Db.Plugins.Settings.set(
-          client,
-          {
-            pluginName: definition.service.name,
-            instanceName: instance.name
-          },
-          settings
-        )
-
-        response.sendStatus(200)
-      } catch (e) {
-        next(e)
-      }
-    }
-  )
+  })
 }

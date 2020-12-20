@@ -1,11 +1,11 @@
 import { Express } from 'express'
-import { getRegistry, Registry } from 'src/lib/PluginManager'
+import { getRegistry } from 'src/lib/PluginManager'
 
-type RegistryResponse = Registry
+import { GetRegistry } from './registry.types'
 
 export function listen(app: Express) {
-  app.get<void, RegistryResponse, void, void>(
-    '/v1.0/registry',
+  app.get<void, GetRegistry.Response, void, void>(
+    GetRegistry.path,
     async (request, response, next) => {
       try {
         const registry = await getRegistry()

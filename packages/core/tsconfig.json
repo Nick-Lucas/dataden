@@ -6,20 +6,23 @@
     "checkJs": true,
     "paths": {
       "src/*": ["src/*"],
-      "@mydata/*": ["../*/src"]
+      "@mydata/*": ["../*/src"],
+      "@mydata/core/dist/api-types": ["../core/src/api/api-types.ts"],
     },
     "esModuleInterop": true,
     "sourceMap": true,
     "module": "ES2015",
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "outDir": "dist"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
   ],
   "typeAcquisition": {
-    "enable": true
+    "enable": true,
+    "include": ["node"]
   }
 }
