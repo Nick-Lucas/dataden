@@ -9,6 +9,7 @@
   },
   "proxy": "http://localhost:8001",
   "dependencies": {
+    "@ant-design/colors": "^5.0.1",
     "@ant-design/icons": "^4.3.0",
     "@babel/core": "7.12.3",
     "@monaco-editor/react": "^3.7.2",

@@ -4,18 +4,18 @@ import * as Db from 'src/db'
 import { Scheduler } from 'src/lib/Scheduler'
 
 import { MaybeError } from './common.types'
-import { GetSyncs } from './data.types'
+import { GetStatus } from './dashboard.types'
 
 // type GetDataResponse = Db.PagingResult<DataRow>
 
 export function listen(app: Express) {
-  app.get<void, MaybeError<GetSyncs.Response>, void, void>(
-    GetSyncs.path,
+  app.get<void, MaybeError<GetStatus.Response>, void, void>(
+    GetStatus.path,
     async (request, response) => {
       try {
         const client = await Db.getClient()
 
-        const result: GetSyncs.Response = []
+        const result: GetStatus.Response = []
         const plugins = await Db.Plugins.Installed.list(client)
         for (const plugin of plugins) {
           const definition = await Scheduler.getPluginDefinition(plugin.id)
@@ -30,10 +30,13 @@ export function listen(app: Express) {
               {}
             )
 
+            const status = Scheduler.getStatus(plugin.id, instance.name)
+
             result.push({
               plugin,
               pluginInstance: instance,
-              lastSync
+              lastSync,
+              status
             })
           }
         }

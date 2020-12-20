@@ -4,10 +4,10 @@ import * as Api from '@mydata/core/dist/api-types'
 
 export function useSyncsSummary() {
   return useQuery(
-    Api.Data.GetSyncs.path,
+    Api.Data.GetStatus.path,
     async () => {
       return (
-        await axios.get<Api.Data.GetSyncs.Response>(Api.Data.GetSyncs.path)
+        await axios.get<Api.Data.GetStatus.Response>(Api.Data.GetStatus.path)
       ).data
     },
     {
