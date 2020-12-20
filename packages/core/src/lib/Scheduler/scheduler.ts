@@ -67,17 +67,16 @@ export async function start() {
         instanceName: instance.name
       })
 
-      if (!settings) {
+      if (settings) {
+        service.interval = queueSchedule(client, definition, instance)
+      } else {
         service.running = false
         service.status = 'Not Configured'
 
         console.warn(
           `[Scheduler] ${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
         )
-        continue
       }
-
-      service.interval = queueSchedule(client, definition, instance)
 
       services.push(service)
     }
