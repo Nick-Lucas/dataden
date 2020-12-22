@@ -3,6 +3,7 @@ import { Express } from 'express'
 import * as Db from 'src/db'
 import { installPlugin } from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
+import { Logger } from 'src/logging'
 
 import { MaybeError } from './common.types'
 import {
@@ -15,7 +16,7 @@ import {
   PostInstallPlugin
 } from './plugins.types'
 
-export function listen(app: Express) {
+export function listen(app: Express, log: Logger) {
   app.post<
     void,
     MaybeError<PostInstallPlugin.Response>,

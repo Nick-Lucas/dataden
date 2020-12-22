@@ -9,6 +9,9 @@ import {
 import { isSyncDue } from './isSyncDue'
 import { SyncSuccessInfo } from '@mydata/sdk'
 
+import { getScoped, getPluginLogger } from 'src/logging'
+const log = getScoped('Scheduler')
+
 export interface PluginServiceStatus {
   running: boolean
   status: 'OK' | 'Not Started' | 'Not Configured'
@@ -73,8 +76,8 @@ export async function start() {
         service.running = false
         service.status = 'Not Configured'
 
-        console.warn(
-          `[Scheduler] ${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
+        log.warn(
+          `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
         )
       }
 
@@ -93,7 +96,7 @@ export async function stop() {
 }
 
 export async function restart() {
-  console.log('[Scheduler] ❗️❗️❗️ Restarting all Plugins ❗️❗️❗️')
+  log.info('❗️❗️❗️ Restarting all Plugins ❗️❗️❗️')
   await stop()
   await start()
 }
@@ -132,9 +135,7 @@ function queueSchedule(
   }
 
   async function maybeLoadData() {
-    console.log(
-      `[Scheduler] ${pluginId}->${instance.name}: Checking if sync is due`
-    )
+    log.info(`${pluginId}->${instance.name}: Checking if sync is due`)
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
     const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
@@ -144,15 +145,15 @@ function queueSchedule(
 
     const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
     if (!syncDue) {
-      console.log(`[Scheduler] ${pluginId}->${instance.name}: Sync not due yet`)
+      log.info(`${pluginId}->${instance.name}: Sync not due yet`)
       return
     }
 
-    console.log(`[Scheduler] ${pluginId}->${instance.name}: Will attempt sync`)
+    log.info(`${pluginId}->${instance.name}: Will attempt sync`)
 
     if (isRunning) {
-      console.warn(
-        `[Scheduler] ${pluginId}->${instance.name}: ❗️ Last Sync is still in progress! Bailing.`
+      log.warn(
+        `${pluginId}->${instance.name}: ❗️ Last Sync is still in progress! Bailing.`
       )
       return
     }
@@ -161,13 +162,17 @@ function queueSchedule(
     let dbSession: ClientSession = null
     for (const loader of definition.service.loaders) {
       try {
-        console.log(
-          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: Will Load Data`
+        log.info(
+          `${pluginId}->${instance.name}->${loader.name}: Will Load Data`
         )
 
-        const result = await loader.load(settings, {
-          lastSync: lastSyncSuccess
-        })
+        const result = await loader.load(
+          settings,
+          {
+            lastSync: lastSyncSuccess
+          },
+          getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
+        )
 
         dbSession = client.startSession()
         await dbSession.withTransaction(async () => {
@@ -196,12 +201,12 @@ function queueSchedule(
           }
         })
 
-        console.log(
-          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
+        log.info(
+          `${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
         )
       } catch (e) {
-        console.error(
-          `[Scheduler] ${pluginId}->${instance.name}->${loader.name}: ❗️ Data Load Failed with error.`,
+        log.error(
+          `${pluginId}->${instance.name}->${loader.name}: ❗️ Data Load Failed with error.`,
           e
         )
 

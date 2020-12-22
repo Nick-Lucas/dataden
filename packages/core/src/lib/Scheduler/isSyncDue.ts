@@ -2,6 +2,9 @@ import { DateTime, Duration } from 'luxon'
 
 import { Schedule, SyncInfo } from '@mydata/sdk'
 
+import { getScoped } from 'src/logging'
+const log = getScoped('IsSyncDue')
+
 export function isSyncDue(
   now: Date,
   lastSync: SyncInfo,
@@ -10,7 +13,7 @@ export function isSyncDue(
   const nowLux = DateTime.fromJSDate(now)
   const last = DateTime.fromISO(lastSync.date ?? new Date(0).toISOString())
   if (!last.isValid) {
-    console.warn(
+    log.warn(
       `[isSyncDue]: Last Date "${lastSync.date}" Invalid: "${last.invalidExplanation}"`
     )
     return false
@@ -49,7 +52,7 @@ export function isSyncDue(
       break
     }
     default: {
-      console.error(`Unknown frequency ${JSON.stringify(schedule)}`)
+      log.error(`Unknown frequency ${JSON.stringify(schedule)}`)
       return false
     }
   }
