@@ -2,11 +2,13 @@ import axios from 'axios'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import * as Api from '@mydata/core/dist/api-types'
 
+import { getUri } from './common'
+
 export function useInstalledPluginsList() {
   return useQuery(Api.Plugins.GetPlugins.path, async () => {
     return (
       await axios.get<Api.Plugins.GetPlugins.Response>(
-        Api.Plugins.GetPlugins.path
+        getUri(Api.Plugins.GetPlugins.path)
       )
     ).data
   })
@@ -16,7 +18,7 @@ export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
   return useQuery(Api.Plugins.GetPlugin.getPath(params), async () => {
     return (
       await axios.get<Api.Plugins.GetPlugin.Response>(
-        Api.Plugins.GetPlugin.getPath(params)
+        getUri(Api.Plugins.GetPlugin.getPath(params))
       )
     ).data
   })
@@ -29,9 +31,11 @@ export function useInstalledPluginUpdate() {
     async function ({ data }: { data: Api.Plugins.PutPlugin.Body }) {
       return (
         await axios.put<Api.Plugins.PutPlugin.Response>(
-          Api.Plugins.PutPlugin.getPath({
-            pluginId: data.id
-          }),
+          getUri(
+            Api.Plugins.PutPlugin.getPath({
+              pluginId: data.id
+            })
+          ),
           data
         )
       ).data
@@ -57,7 +61,7 @@ export function usePluginInstanceSettings(
     async function () {
       return (
         await axios.get<Api.Plugins.GetPluginInstanceSettings.Response>(
-          Api.Plugins.GetPluginInstanceSettings.getPath(params)
+          getUri(Api.Plugins.GetPluginInstanceSettings.getPath(params))
         )
       ).data
     }
@@ -77,7 +81,7 @@ export function usePluginInstanceSettingsUpdate() {
     }) {
       return (
         await axios.post<Api.Plugins.PutPluginInstanceSettings.Response>(
-          Api.Plugins.PutPluginInstanceSettings.getPath(params),
+          getUri(Api.Plugins.PutPluginInstanceSettings.getPath(params)),
           settings
         )
       ).data

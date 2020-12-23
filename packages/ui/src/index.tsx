@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from 'react-query-devtools'
 
 import './index.css'
 import 'antd/dist/antd.css'
+import './config'
 
 import type {} from 'styled-components/cssprop'
 
