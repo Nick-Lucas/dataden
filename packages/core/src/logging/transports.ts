@@ -18,7 +18,7 @@ export const transportConsole = new winston.transports.Console({
 // TODO: allow these to be set via application or environment config.
 export const transportFile = new winston.transports.DailyRotateFile({
   filename: 'application-%DATE%.log',
-  datePattern: 'YYYY-MM-DD-HH',
+  datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
   frequency: '1d',
   maxFiles: '14d',
