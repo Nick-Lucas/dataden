@@ -2,11 +2,11 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import morgan from 'morgan'
-import Websockets from 'ws'
 
 import { API_PORT } from 'src/config'
 
 import * as endpoints from './endpoints'
+import * as websockets from './websockets'
 
 import { getScoped } from 'src/logging'
 
@@ -43,34 +43,7 @@ export function start() {
   // Listen
   endpoints.listen(app, log)
   const server = app.listen(API_PORT)
+  websockets.listen(server)
+
   log.info('[API] Listening on port ' + API_PORT)
-
-  // Set up websockets connection
-
-  const wss = new Websockets.Server({ clientTracking: false, noServer: true })
-
-  server.on('upgrade', function (request, socket, head) {
-    log.info('Parsing session from request...', request, socket, head)
-
-    // TODO: check session as in: https://github.com/websockets/ws/blob/master/examples/express-session-parse/index.js
-    wss.handleUpgrade(request, socket, head, function (ws) {
-      wss.emit('connection', ws, request)
-    })
-  })
-
-  wss.on('connection', function (ws, request) {
-    ws.send('HELLO!')
-    log.info('WS Connected ' + JSON.stringify(request))
-
-    ws.on('message', function (message) {
-      //
-      // Here we can now use session parameters.
-      //
-      console.log(`Received message: ${message}`)
-    })
-
-    ws.on('close', function () {
-      //
-    })
-  })
 }
