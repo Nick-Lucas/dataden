@@ -15,7 +15,7 @@ export function listen(server: http.Server) {
     log.info('Connected')
 
     // TODO: send logs since startup
-    ws.send('HELLO!')
+    // ws.send('HELLO!')
 
     const stopListening = Logging.listen((infos) => {
       ws.send(JSON.stringify(infos))
