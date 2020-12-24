@@ -71,7 +71,7 @@ export const Dashboard: FC = () => {
   }, [pluginsSummary.data])
 
   return (
-    <Layout title="Dashboard" limitWidth>
+    <Layout title="Dashboard">
       <ContentCard>
         <Typography.Title level={4}>Summary</Typography.Title>
         <List
@@ -96,7 +96,9 @@ export const Dashboard: FC = () => {
           ))}
         </List>
       </ContentCard>
+
       <br />
+
       <ContentCard>
         <LogOutput />
       </ContentCard>

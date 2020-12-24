@@ -6,7 +6,6 @@ export const transportConsole = new winston.transports.Console({
       (info) =>
         info.timestamp +
         ' ' +
-        (info.level + ': ').padEnd(7) +
         `[${info.scope ?? 'General'}${info.plugin ? `->${info.plugin}` : ''}]` +
         ` ${info.message}`
     ),
