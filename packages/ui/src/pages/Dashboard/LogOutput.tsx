@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { Terminal, ITheme } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import 'xterm/css/xterm.css'
+import _ from 'lodash'
 
 import * as colors from '@ant-design/colors'
 
@@ -17,7 +18,7 @@ const theme: ITheme = {
 }
 
 export function LogOutput() {
-  const termRef = useRef()
+  const termRef = useRef<HTMLDivElement>()
   const { term, fitAddon } = useMemo(() => {
     const term = new Terminal({
       theme,
@@ -38,6 +39,23 @@ export function LogOutput() {
       fitAddon.dispose()
     }
   }, [fitAddon, term])
+
+  useLayoutEffect(() => {
+    const refit = _.throttle(
+      () => {
+        fitAddon.fit()
+      },
+      50,
+      { leading: true, trailing: true }
+    )
+    window.addEventListener('resize', refit)
+
+    return () => {
+      try {
+        window.removeEventListener('resize', refit)
+      } catch (e) {}
+    }
+  }, [fitAddon])
 
   useEffect(() => {
     const ws = new WebSocket(WS_URI + '/v1.0/console')
