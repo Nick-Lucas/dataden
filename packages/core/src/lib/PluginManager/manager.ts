@@ -13,6 +13,9 @@ import * as Db from 'src/db'
 
 import { PluginService, pluginInstanceIsValid } from '@mydata/sdk'
 
+import { getScoped } from 'src/logging'
+const log = getScoped('PluginManager')
+
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
 
@@ -26,7 +29,7 @@ export async function installPlugin(
   registryPlugin: RegistryPlugin | LocalPlugin
 ): Promise<Db.Plugins.Plugin> {
   if (!registryPlugin.source) {
-    console.warn(`Source not defined for plugin ${registryPlugin.id}`)
+    log.warn(`Source not defined for plugin ${registryPlugin.id}`)
     return
   }
 
@@ -65,7 +68,7 @@ export async function loadPluginServiceDefinitions(): Promise<
   const client = await Db.getClient()
   const plugins = await Db.Plugins.Installed.list(client)
 
-  console.log(`[loadPlugins] ${plugins?.length ?? 0} Plugins will be loaded`)
+  log.info(`${plugins?.length ?? 0} Plugins will be loaded`)
 
   const definitions: PluginServiceDefinition[] = []
   for (const plugin of plugins) {
@@ -96,30 +99,28 @@ async function loadPluginServiceDefinition(
   plugin: Db.Plugins.Plugin
 ): Promise<PluginServiceDefinition | null> {
   if (!plugin.location) {
-    console.warn(
-      `[loadPlugins] 😒 Plugin ${plugin.id} as location is not provided.`
-    )
+    log.warn(`😒 Plugin ${plugin.id} as location is not provided.`)
     return null
   }
 
   const exists = fs.existsSync(plugin.location)
   if (!exists) {
-    console.warn(
-      `[loadPlugins] 😒 Plugin ${plugin.id} at location ${plugin.location} has disappeared. Please re-install.`
+    log.warn(
+      `😒 Plugin ${plugin.id} at location ${plugin.location} has disappeared. Please re-install.`
     )
     return null
   }
 
   const service = (await require(plugin.location)) as PluginService
   if (!pluginInstanceIsValid(service)) {
-    console.error(
-      `[loadPlugins] ❗️ Bad PluginInstance definition for ${plugin.id} at ${plugin.location}.`
+    log.error(
+      `❗️ Bad PluginInstance definition for ${plugin.id} at ${plugin.location}.`
     )
     return null
   }
 
-  console.log(
-    `[loadPlugins] 😃 Loaded Plugin ${plugin.id} with ${service.loaders.length} loaders`
+  log.info(
+    `😃 Loaded Plugin ${plugin.id} with ${service.loaders.length} loaders`
   )
 
   return {

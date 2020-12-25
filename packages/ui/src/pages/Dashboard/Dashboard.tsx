@@ -12,6 +12,7 @@ import { AntdIconProps } from '@ant-design/icons/lib/components/AntdIcon'
 import { Layout, ContentCard } from 'src/Layout'
 import { useSyncsSummary } from 'src/queries'
 import { Data } from '@mydata/core/dist/api-types'
+import { LogOutput } from './LogOutput'
 
 type Sentiment = 'Positive' | 'Neutral' | 'Negative'
 type PluginSummary = Data.GetStatus.ResponseItem & {
@@ -70,7 +71,7 @@ export const Dashboard: FC = () => {
   }, [pluginsSummary.data])
 
   return (
-    <Layout title="Dashboard" limitWidth>
+    <Layout title="Dashboard">
       <ContentCard>
         <Typography.Title level={4}>Summary</Typography.Title>
         <List
@@ -94,6 +95,12 @@ export const Dashboard: FC = () => {
             </List.Item>
           ))}
         </List>
+      </ContentCard>
+
+      <br />
+
+      <ContentCard>
+        <LogOutput />
       </ContentCard>
     </Layout>
   )

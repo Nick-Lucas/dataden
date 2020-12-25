@@ -63,11 +63,29 @@ export interface DataPayload {
 }
 
 //
+// Logging
+
+export interface SdkLogMethod {
+  (message: string, ...meta: any[]): void
+  (message: any): void
+}
+export interface SdkLogger {
+  error: SdkLogMethod
+  warn: SdkLogMethod
+  info: SdkLogMethod
+  debug: SdkLogMethod
+}
+
+//
 // Plugin Definitions
 
 export type DataLoader = {
   name: string
-  load: (settings: Settings, request: DataRequest) => Promise<DataPayload>
+  load: (
+    settings: Settings,
+    request: DataRequest,
+    log: SdkLogger
+  ) => Promise<DataPayload>
 }
 
 export interface PluginService {

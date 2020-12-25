@@ -2,13 +2,14 @@ import { Express } from 'express'
 // import { DataRow } from '@mydata/sdk'
 import * as Db from 'src/db'
 import { Scheduler } from 'src/lib/Scheduler'
+import { Logger } from 'src/logging'
 
 import { MaybeError } from './common.types'
 import { GetStatus } from './dashboard.types'
 
 // type GetDataResponse = Db.PagingResult<DataRow>
 
-export function listen(app: Express) {
+export function listen(app: Express, log: Logger) {
   app.get<void, MaybeError<GetStatus.Response>, void, void>(
     GetStatus.path,
     async (request, response) => {
@@ -40,7 +41,7 @@ export function listen(app: Express) {
             })
           }
         }
-        // console.log(result)
+
         response.send(result)
       } catch (error) {
         response.sendStatus(500)

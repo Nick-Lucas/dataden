@@ -5,7 +5,8 @@ module.exports = {
     'react-hooks/exhaustive-deps': [
       'error',
       { enableDangerousAutofixThisMayCauseInfiniteLoops: true }
-    ]
+    ],
+    eqeqeq: 'off'
   },
   overrides: [
     {

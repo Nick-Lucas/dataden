@@ -1,4 +1,3 @@
-import { Express } from 'express'
 import * as Db from 'src/db'
 import { Scheduler } from 'src/lib/Scheduler'
 

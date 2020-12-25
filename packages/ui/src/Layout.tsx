@@ -46,7 +46,7 @@ export const Layout: FC<LayoutProps> = ({
           padding: 1rem;
 
           align-self: center;
-          width: ${limitWidth ? '50rem' : 'auto'};
+          width: ${limitWidth ? '50rem' : '100%'};
         `}
         {...props}
       >
