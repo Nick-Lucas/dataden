@@ -12,32 +12,38 @@ export const levels = {
   debug: 3
 }
 
-if (typeof levels[LOG.LEVEL] !== 'number') {
-  throw `Log level ${LOG.LEVEL} is unknown. Must be one of: ${Object.keys(
-    levels
-  ).join(' ')}`
-}
-
 // https://github.com/winstonjs/winston
-const logger = winston.createLogger({
-  level: LOG.LEVEL,
-  levels,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [transportConsole, transportFile]
-})
-
 export type Logger = winston.Logger
 
-export const getLogger = (): Logger => logger
+let _logger: Logger = null
+
+export const getLogger = (): Logger => {
+  if (!_logger) {
+    if (typeof levels[LOG.LEVEL] !== 'number') {
+      throw `Log level ${LOG.LEVEL} is unknown. Must be one of: ${Object.keys(
+        levels
+      ).join(' ')}`
+    }
+
+    _logger = winston.createLogger({
+      level: LOG.LEVEL,
+      levels,
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      transports: [transportConsole, transportFile]
+    })
+  }
+
+  return _logger
+}
 
 export const getScoped = (
   scope: string,
   extraContext: Record<string, string> = {}
 ): Logger => {
-  return logger.child({
+  return getLogger().child({
     scope,
     isPlugin: String(false),
     ...extraContext
