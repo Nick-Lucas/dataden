@@ -4,7 +4,7 @@
   "description": "Build Tools for this Monorepo",
   "main": "dist/index.js",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "rollup -c rollup.config.js --watch"
   },
