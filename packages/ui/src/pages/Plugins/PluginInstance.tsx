@@ -14,7 +14,7 @@ import { css } from 'styled-components/macro'
 
 import { PluginInstanceEdit } from './PluginInstanceEdit'
 import { useInstalledPluginUpdate } from 'src/queries'
-import * as Api from '@mydata/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types'
 
 interface PluginInstanceProps {
   plugin: Api.Plugins.Plugin

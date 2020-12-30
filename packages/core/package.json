@@ -1,5 +1,5 @@
 {
-  "name": "@mydata/core",
+  "name": "@dataden/core",
   "version": "1.0.0",
   "description": "Core Backend Service",
   "main": "index.js",
@@ -10,8 +10,8 @@
     "dev:start": "ROLLUP_RUN=true yarn run dev"
   },
   "dependencies": {
-    "@mydata/build": "1.0.0",
-    "@mydata/sdk": "1.0.0",
+    "@dataden/build": "1.0.0",
+    "@dataden/sdk": "1.0.0",
     "@types/lodash": "^4.14.166",
     "axios": "^0.21.0",
     "body-parser": "^1.19.0",

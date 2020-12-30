@@ -1,4 +1,4 @@
-# mydata (working title)
+# dataden (working title)
 
 Collect all your data into a personal data warehouse for cross-analysis and aggregation.
 

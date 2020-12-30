@@ -1,6 +1,6 @@
 import { DateTime, Duration } from 'luxon'
 
-import { Schedule, SyncInfo } from '@mydata/sdk'
+import { Schedule, SyncInfo } from '@dataden/sdk'
 
 import { getScoped } from 'src/logging'
 const log = getScoped('IsSyncDue')

@@ -6,7 +6,7 @@ import { ContentCard } from 'src/Layout'
 import { PluginInstance } from './PluginInstance'
 import { PluginInstanceCreate } from './PluginInstanceCreate'
 
-import * as Api from '@mydata/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types'
 
 interface PluginProps {
   plugin: Api.Plugins.Plugin

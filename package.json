@@ -1,5 +1,5 @@
 {
-  "name": "mydata",
+  "name": "dataden",
   "version": "1.0.0",
   "description": "Personal and Extensible Data Warehouse",
   "author": "Nick Lucas",
@@ -18,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "@mydata/build": "1.0.0"
+    "@dataden/build": "1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",

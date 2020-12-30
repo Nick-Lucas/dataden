@@ -9,7 +9,7 @@ module.exports = {
     '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}'
   ],
   testEnvironment: 'jsdom',
-  testRunner: '/Users/nick/dev/mydata/node_modules/jest-circus/runner.js',
+  testRunner: '/Users/nick/dev/dataden/node_modules/jest-circus/runner.js',
   transform: {
     '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/jsTransform.js',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',

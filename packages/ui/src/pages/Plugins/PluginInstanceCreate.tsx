@@ -4,7 +4,7 @@ import produce from 'immer'
 import { Rule } from 'antd/lib/form'
 import { useInstalledPlugin, useInstalledPluginUpdate } from 'src/queries'
 
-import * as Api from '@mydata/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types'
 
 interface PluginInstanceCreateProps {
   plugin: Api.Plugins.Plugin

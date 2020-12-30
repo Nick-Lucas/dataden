@@ -1,5 +1,5 @@
 {
-  "name": "@mydata/build",
+  "name": "@dataden/build",
   "version": "1.0.0",
   "description": "Build Tools for this Monorepo",
   "main": "dist/index.js",

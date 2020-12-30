@@ -11,7 +11,7 @@ import { AntdIconProps } from '@ant-design/icons/lib/components/AntdIcon'
 
 import { Layout, ContentCard } from 'src/Layout'
 import { useSyncsSummary } from 'src/queries'
-import { Data } from '@mydata/core/dist/api-types'
+import { Data } from '@dataden/core/dist/api-types'
 import { LogOutput } from './LogOutput'
 
 type Sentiment = 'Positive' | 'Neutral' | 'Negative'

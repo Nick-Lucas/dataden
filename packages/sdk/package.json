@@ -1,5 +1,5 @@
 {
-  "name": "@mydata/sdk",
+  "name": "@dataden/sdk",
   "version": "1.0.0",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
@@ -9,6 +9,6 @@
     "dev": "rollup -c rollup.config.js --watch"
   },
   "dependencies": {
-    "@mydata/build": "1.0.0"
+    "@dataden/build": "1.0.0"
   }
 }

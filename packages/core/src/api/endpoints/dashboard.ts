@@ -1,5 +1,5 @@
 import { Express } from 'express'
-// import { DataRow } from '@mydata/sdk'
+// import { DataRow } from '@dataden/sdk'
 import * as Db from 'src/db'
 import { Scheduler } from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'

@@ -1,4 +1,4 @@
-import { rollup } from '@mydata/build'
+import { rollup } from '@dataden/build'
 
 export default [
   rollup({ includeNodeModules: true, runnable: true }),

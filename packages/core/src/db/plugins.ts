@@ -1,7 +1,7 @@
 import { FilterQuery, MongoClient } from 'mongodb'
 
 import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
-import * as Sdk from '@mydata/sdk'
+import * as Sdk from '@dataden/sdk'
 import { stripMongoId } from './stripMongoId'
 
 // DTOS

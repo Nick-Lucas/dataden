@@ -11,13 +11,13 @@ import {
 
 import * as Db from 'src/db'
 
-import { PluginService, pluginInstanceIsValid } from '@mydata/sdk'
+import { PluginService, pluginInstanceIsValid } from '@dataden/sdk'
 
 import { getScoped } from 'src/logging'
 const log = getScoped('PluginManager')
 
 const REGISTRY_URI =
-  'https://raw.githubusercontent.com/Nick-Lucas/mydata/master/meta/registry.json'
+  'https://raw.githubusercontent.com/Nick-Lucas/dataden/master/meta/registry.json'
 
 // TODO: this will be next to the bundle which may not be ideal during upgrades, perhaps best to select a stable directory elsewhere
 const pluginDir = path.join(__dirname, 'installed')

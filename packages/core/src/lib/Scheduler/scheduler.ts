@@ -7,7 +7,7 @@ import {
   loadPluginServiceDefinitionById
 } from 'src/lib/PluginManager'
 import { isSyncDue } from './isSyncDue'
-import { SyncSuccessInfo } from '@mydata/sdk'
+import { SyncSuccessInfo } from '@dataden/sdk'
 
 import { getScoped, getPluginLogger } from 'src/logging'
 const log = getScoped('Scheduler')

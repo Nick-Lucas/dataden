@@ -2,7 +2,7 @@ import * as winston from 'winston'
 import 'winston-daily-rotate-file'
 
 import { LOG } from 'src/config'
-import { SdkLogger } from '@mydata/sdk'
+import { SdkLogger } from '@dataden/sdk'
 import { transportConsole, transportFile } from './transports'
 
 export const levels = {

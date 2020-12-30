@@ -1,5 +1,5 @@
 import * as Db from 'src/db'
-import { Settings } from '@mydata/sdk'
+import { Settings } from '@dataden/sdk'
 import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 
 import { Common } from './common.types'

@@ -1,5 +1,5 @@
 import { Plugin } from 'src/db/plugins'
-import { PluginService } from '@mydata/sdk'
+import { PluginService } from '@dataden/sdk'
 
 export interface CorePlugin {
   id: string
