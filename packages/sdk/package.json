@@ -4,7 +4,7 @@
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "rollup -c rollup.config.js --watch"
   },

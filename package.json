@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Personal and Extensible Data Warehouse",
   "author": "Nick Lucas",
-  "license": "MIT",
+  "license": "CC-BY-NC-ND-4.0",
   "private": true,
   "scripts": {
     "test": "yarn jest --watch",

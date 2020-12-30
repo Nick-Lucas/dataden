@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Core Backend Service",
   "main": "index.js",
-  "license": "MIT",
+  "license": "CC-BY-NC-ND-4.0",
   "private": true,
   "scripts": {
     "dev": "rollup -c rollup.config.js --watch",
