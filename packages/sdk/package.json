@@ -1,6 +1,6 @@
 {
   "name": "@dataden/sdk",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
@@ -9,6 +9,6 @@
     "dev": "rollup -c rollup.config.js --watch"
   },
   "dependencies": {
-    "@dataden/build": "1.0.0"
+    "@dataden/build": "0.1.0"
   }
 }
