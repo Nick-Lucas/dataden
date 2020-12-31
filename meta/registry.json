@@ -5,8 +5,16 @@
       "id": "example/random-number",
       "name": "Random Number Generator",
       "description": "An example plugin, useful as a test plugin",
-      "source": "TODO",
+      "source": "https://github.com/Nick-Lucas/dataden-plugin-rng/releases/download/v.0.1.0/dataden-plugin-rng.zip",
       "verified": true
+    },
+    {
+      "version": 1,
+      "id": "example/non-installable",
+      "name": "Fake Plugin which cannot be installed",
+      "description": "An example plugin, useful as a test plugin",
+      "source": "",
+      "verified": false
     }
   ]
 }
