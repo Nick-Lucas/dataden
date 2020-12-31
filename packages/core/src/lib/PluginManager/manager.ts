@@ -122,22 +122,25 @@ export async function installPlugin(
 
       fs.unlinkSync(downloadLocation)
 
-      // const files = fs
-      //   .readdirSync(pluginDir, { withFileTypes: true })
-      //   .filter((file) => file.isFile() && file.name.endsWith('.js'))
+      const files = fs
+        .readdirSync(pluginDir, { withFileTypes: true })
+        .filter((file) => file.isFile() && file.name.endsWith('.js'))
 
-      // console.log(files)
-
-      // if (files.length === 1) {
-      //   plugin.location = files[0].name
-      // }
-
-      plugin.location = downloadLocation
+      if (files.length === 1) {
+        plugin.location = path.join(pluginDir, files[0].name)
+      } else {
+        const indexJs = files.find((file) => file.name == 'index.js')
+        if (indexJs) {
+          plugin.location = path.join(pluginDir, indexJs.name)
+        } else {
+          throw new InstallPluginError(
+            'Could not find either an index.js or a solo .js file in the downloaded archive'
+          )
+        }
+      }
     }
 
-    return plugin
-    // TODO: reinstate this
-    // return await Db.Plugins.Installed.upsert(client, plugin)
+    return await Db.Plugins.Installed.upsert(client, plugin)
   }
 }
 
