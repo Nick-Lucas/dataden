@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react'
-import { Button, Row, Spin, Typography } from 'antd'
+import { Button, Col, Row, Space, Spin, Tag, Tooltip, Typography } from 'antd'
+import * as icons from '@ant-design/icons'
 import _ from 'lodash'
 
 import { Layout, ContentCard } from 'src/Layout'
@@ -32,24 +33,53 @@ export const InstallPlugin: FC = () => {
 
           return (
             <ContentCard key={plugin.id}>
-              {/* TODO: support icon display */}
-              <Typography.Title level={4}>{plugin.name}</Typography.Title>
+              <Row>
+                <Col flex={1}>
+                  <Typography.Title level={4}>
+                    <Space>
+                      {/* TODO: support custon icon display from plugin registry */}
+                      <icons.ApiOutlined />
 
-              <Typography.Paragraph>{plugin.description}</Typography.Paragraph>
+                      {plugin.name}
+                    </Space>
+                  </Typography.Title>
 
-              {/* TODO: support project site link */}
+                  <Typography.Paragraph>
+                    {plugin.description}
+                  </Typography.Paragraph>
+                </Col>
+
+                <Col>
+                  {plugin.verified && (
+                    <Tooltip title="This means that the plugin is either 1st party or from a trusted source, and therefore believed to be safe and not abuse access to your data">
+                      <Tag icon={<icons.CheckSquareFilled />} color="success">
+                        Verified
+                      </Tag>
+                    </Tooltip>
+                  )}
+                </Col>
+              </Row>
 
               {/* TODO: support version management, updating and changelog viewing */}
 
               <Row>
-                {isInstalled ? (
-                  // TODO: add uninstall functionality
-                  <Button type="primary" danger>
-                    Uninstall
+                <Space size="small">
+                  {isInstalled ? (
+                    // TODO: add uninstall functionality
+                    <Button type="primary" danger>
+                      Uninstall
+                    </Button>
+                  ) : (
+                    <Button icon={<icons.DownloadOutlined />} type="primary">
+                      Install
+                    </Button>
+                  )}
+
+                  {/* TODO: support project site link */}
+                  <Button icon={<icons.LinkOutlined />} type="dashed" disabled>
+                    Project Link
                   </Button>
-                ) : (
-                  <Button type="primary">Install</Button>
-                )}
+                </Space>
               </Row>
             </ContentCard>
           )
