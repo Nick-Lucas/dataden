@@ -35,6 +35,8 @@ export function listen(app: Express, log: Logger) {
         response.status(StatusCodes.CONFLICT)
         await response.send(String(e))
       } else {
+        log.error(`Error installing plugin: ${String(e)}`)
+
         response.status(500)
         await response.send(String(e))
       }

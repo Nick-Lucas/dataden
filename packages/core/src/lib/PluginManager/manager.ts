@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 import axios, { AxiosResponse } from 'axios'
+import { Stream } from 'stream'
+import _ from 'lodash'
 
 import {
   LocalPlugin,
@@ -23,6 +25,14 @@ const REGISTRY_URI =
 const pluginDir = path.join(__dirname, 'installed')
 if (!fs.existsSync(pluginDir)) {
   fs.mkdirSync(pluginDir)
+}
+function getPluginDir(pluginId: string, ...extra: string[]) {
+  const location = path.join(pluginDir, pluginId, ...extra)
+  if (!fs.existsSync(location)) {
+    fs.mkdirSync(location, { recursive: true })
+  }
+
+  return location
 }
 
 export class PluginConflictError extends Error {
@@ -78,10 +88,35 @@ export async function installPlugin(
 
     return await Db.Plugins.Installed.upsert(client, plugin)
   } else {
-    log.warn('Not Implement')
-    throw '[installPlugin] Remote Plugin Install: Not Implemented'
-    // TODO: download to directory
-    // TODO: register local location
+    const pluginDir = getPluginDir(plugin.id)
+
+    const extension = registryPlugin.source.includes('.')
+      ? _.last(registryPlugin.source.split('.'))
+      : null
+
+    const downloadLocation = path.join(
+      pluginDir,
+      'download' + (extension ? '.' + extension : '')
+    )
+
+    const file = fs.createWriteStream(downloadLocation)
+    const stream = await axios.get<Stream>(registryPlugin.source, {
+      responseType: 'stream'
+    })
+    stream.data.pipe(file)
+
+    if (extension === 'js') {
+      plugin.location = path.join(pluginDir, 'index.js')
+      fs.renameSync(downloadLocation, plugin.location)
+    } else {
+      // TODO: try to unzip
+      // TODO: update location
+      plugin.location = downloadLocation
+    }
+
+    return plugin
+    // TODO: reinstate this
+    // return await Db.Plugins.Installed.upsert(client, plugin)
   }
 }
 
