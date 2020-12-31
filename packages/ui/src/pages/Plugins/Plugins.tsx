@@ -7,6 +7,7 @@ import { Layout } from 'src/Layout'
 import { useInstalledPluginsList } from 'src/queries'
 
 import { Plugin } from './Plugin'
+import { Link } from 'react-router-dom'
 
 export const Plugins: FC = () => {
   const [search, setSearch] = useState('')
@@ -33,9 +34,11 @@ export const Plugins: FC = () => {
 
           <Space>
             <div />
-            <Button type="primary" size="large" disabled>
-              Add New Plugin
-            </Button>
+            <Link to="/registry">
+              <Button type="primary" size="large">
+                Add New Plugin
+              </Button>
+            </Link>
           </Space>
         </Row>
 
