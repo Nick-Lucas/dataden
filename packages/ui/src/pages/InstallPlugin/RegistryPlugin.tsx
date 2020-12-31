@@ -82,7 +82,7 @@ export const RegistryPlugin: FC<{
 
       {pluginInstaller.isError && (
         <Typography.Text type="danger">
-          {String(pluginInstaller.error)}
+          {(pluginInstaller.error as any).response.data}
         </Typography.Text>
       )}
     </ContentCard>

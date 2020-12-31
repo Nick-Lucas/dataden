@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import axios, { AxiosResponse } from 'axios'
 import { Stream } from 'stream'
+import extractZip from 'extract-zip'
 import _ from 'lodash'
 
 import {
@@ -41,6 +42,8 @@ export class PluginConflictError extends Error {
   }
 }
 
+export class InstallPluginError extends Error {}
+
 export async function installPlugin(
   registryPlugin: RegistryPlugin | LocalPlugin
 ): Promise<Db.Plugins.Plugin> {
@@ -48,7 +51,7 @@ export async function installPlugin(
 
   if (!registryPlugin.source) {
     log.warn(`Source not defined for plugin ${registryPlugin.id}`)
-    return
+    throw new InstallPluginError('Plugin source not provided')
   }
 
   const plugin: Db.Plugins.Plugin = {
@@ -103,14 +106,32 @@ export async function installPlugin(
     const stream = await axios.get<Stream>(registryPlugin.source, {
       responseType: 'stream'
     })
-    stream.data.pipe(file)
+    await new Promise((resolve) => {
+      stream.data.pipe(file).on('close', resolve)
+    })
 
     if (extension === 'js') {
       plugin.location = path.join(pluginDir, 'index.js')
       fs.renameSync(downloadLocation, plugin.location)
     } else {
-      // TODO: try to unzip
-      // TODO: update location
+      try {
+        await extractZip(downloadLocation, { dir: pluginDir })
+      } catch (e) {
+        throw `Could not extract '${downloadLocation}' as an archive, is it something else? ${e}`
+      }
+
+      fs.unlinkSync(downloadLocation)
+
+      // const files = fs
+      //   .readdirSync(pluginDir, { withFileTypes: true })
+      //   .filter((file) => file.isFile() && file.name.endsWith('.js'))
+
+      // console.log(files)
+
+      // if (files.length === 1) {
+      //   plugin.location = files[0].name
+      // }
+
       plugin.location = downloadLocation
     }
 

@@ -2,7 +2,11 @@ import { Express } from 'express'
 import StatusCodes from 'http-status-codes'
 
 import * as Db from 'src/db'
-import { installPlugin, PluginConflictError } from 'src/lib/PluginManager'
+import {
+  installPlugin,
+  InstallPluginError,
+  PluginConflictError
+} from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
@@ -34,10 +38,13 @@ export function listen(app: Express, log: Logger) {
       if (e instanceof PluginConflictError) {
         response.status(StatusCodes.CONFLICT)
         await response.send(String(e))
+      } else if (e instanceof InstallPluginError) {
+        response.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        await response.send(String(e))
       } else {
         log.error(`Error installing plugin: ${String(e)}`)
 
-        response.status(500)
+        response.status(StatusCodes.INTERNAL_SERVER_ERROR)
         await response.send(String(e))
       }
     }
