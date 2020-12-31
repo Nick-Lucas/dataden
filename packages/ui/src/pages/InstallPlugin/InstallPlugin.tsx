@@ -1,15 +1,38 @@
-import { FC, useMemo } from 'react'
-import { Button, Col, Row, Space, Spin, Tag, Tooltip, Typography } from 'antd'
-import * as icons from '@ant-design/icons'
+import { ChangeEvent, FC, useMemo, useState } from 'react'
+import { Col, Input, Row, Space, Spin, Typography } from 'antd'
 import _ from 'lodash'
 
-import { Layout, ContentCard } from 'src/Layout'
+import { Layout } from 'src/Layout'
 
 import { useRegistry, useInstalledPluginsList } from 'src/queries'
 
+import { RegistryPlugin } from './RegistryPlugin'
+
 export const InstallPlugin: FC = () => {
+  const [search, setSearch] = useState('')
+  const handleSearchChanged = useMemo(() => {
+    return _.debounce(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+      },
+      300,
+      { leading: false, trailing: true }
+    )
+  }, [])
+
   const registry = useRegistry()
   const installed = useInstalledPluginsList()
+
+  const plugins = useMemo(() => {
+    if (!registry.data) {
+      return []
+    }
+
+    return registry.data.list.filter((plugin) =>
+      (plugin.name?.toLowerCase() ?? '').includes(search.toLowerCase())
+    )
+  }, [registry.data, search])
+
   const installedById = useMemo(() => {
     if (!installed.data) {
       return {}
@@ -18,72 +41,38 @@ export const InstallPlugin: FC = () => {
     return _.keyBy(installed.data, (plugin) => plugin.id)
   }, [installed.data])
 
+  const fetching = registry.isFetching && installed.isFetching
   const loaded = registry.isFetched && installed.isFetched
   const error = registry.error || installed.error
 
   return (
-    <Layout limitWidth>
-      {registry.isFetching && <Spin />}
+    <Layout title="Install Plugin" limitWidth>
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <Row align="stretch">
+          <Col flex={1}>
+            <Input
+              autoFocus
+              size="large"
+              onChange={handleSearchChanged}
+              placeholder="Search"
+              suffix={'...'}
+            />
+          </Col>
+        </Row>
 
-      {error && <Typography.Text type="danger">{error}</Typography.Text>}
+        {fetching && !loaded && <Spin />}
 
-      {loaded &&
-        registry.data.list.map((plugin) => {
-          const isInstalled = !!installedById[plugin.id]
+        {error && <Typography.Text type="danger">{error}</Typography.Text>}
 
-          return (
-            <ContentCard key={plugin.id}>
-              <Row>
-                <Col flex={1}>
-                  <Typography.Title level={4}>
-                    <Space>
-                      {/* TODO: support custon icon display from plugin registry */}
-                      <icons.ApiOutlined />
-
-                      {plugin.name}
-                    </Space>
-                  </Typography.Title>
-
-                  <Typography.Paragraph>
-                    {plugin.description}
-                  </Typography.Paragraph>
-                </Col>
-
-                <Col>
-                  {plugin.verified && (
-                    <Tooltip title="This means that the plugin is either 1st party or from a trusted source, and therefore believed to be safe and not abuse access to your data">
-                      <Tag icon={<icons.CheckSquareFilled />} color="success">
-                        Verified
-                      </Tag>
-                    </Tooltip>
-                  )}
-                </Col>
-              </Row>
-
-              {/* TODO: support version management, updating and changelog viewing */}
-
-              <Row>
-                <Space size="small">
-                  {isInstalled ? (
-                    // TODO: add uninstall functionality
-                    <Button type="primary" danger>
-                      Uninstall
-                    </Button>
-                  ) : (
-                    <Button icon={<icons.DownloadOutlined />} type="primary">
-                      Install
-                    </Button>
-                  )}
-
-                  {/* TODO: support project site link */}
-                  <Button icon={<icons.LinkOutlined />} type="dashed" disabled>
-                    Project Link
-                  </Button>
-                </Space>
-              </Row>
-            </ContentCard>
-          )
-        })}
+        {loaded &&
+          plugins.map((plugin) => (
+            <RegistryPlugin
+              key={plugin.id}
+              isInstalled={!!installedById[plugin.id]}
+              plugin={plugin}
+            />
+          ))}
+      </Space>
     </Layout>
   )
 }

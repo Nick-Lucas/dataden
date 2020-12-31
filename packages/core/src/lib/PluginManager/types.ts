@@ -21,8 +21,10 @@ export interface LocalPlugin extends CorePlugin {
   local: true
 }
 
+export type RegistryPluginList = RegistryPlugin[]
+
 export interface Registry {
-  list: RegistryPlugin[]
+  list: RegistryPluginList
 }
 
 export type PluginServiceDefinition = {

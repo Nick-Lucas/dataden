@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import {
   LocalPlugin,
@@ -25,9 +25,17 @@ if (!fs.existsSync(pluginDir)) {
   fs.mkdirSync(pluginDir)
 }
 
+export class PluginConflictError extends Error {
+  constructor() {
+    super('Plugin is already installed')
+  }
+}
+
 export async function installPlugin(
   registryPlugin: RegistryPlugin | LocalPlugin
 ): Promise<Db.Plugins.Plugin> {
+  log.info(`Will attempt install of plugin ${registryPlugin.id}`)
+
   if (!registryPlugin.source) {
     log.warn(`Source not defined for plugin ${registryPlugin.id}`)
     return
@@ -45,13 +53,32 @@ export async function installPlugin(
   }
 
   const client = await Db.getClient()
+
+  const installedPlugin = await Db.Plugins.Installed.get(
+    client,
+    registryPlugin.id
+  )
+  if (installedPlugin) {
+    log.warn(
+      `Plugin was alrady installed \n${JSON.stringify(
+        installedPlugin,
+        null,
+        2
+      )}`
+    )
+    throw new PluginConflictError()
+  }
+
   if (registryPlugin.local) {
     if (!fs.existsSync(registryPlugin.source)) {
-      throw `[installPlugin] Local Plugin ${registryPlugin.id} Cannot Be Installed. Does not exist.`
+      const message = `[installPlugin] Local Plugin ${registryPlugin.id} Cannot Be Installed. Does not exist.`
+      log.warn(message)
+      throw message
     }
 
     return await Db.Plugins.Installed.upsert(client, plugin)
   } else {
+    log.warn('Not Implement')
     throw '[installPlugin] Remote Plugin Install: Not Implemented'
     // TODO: download to directory
     // TODO: register local location
@@ -129,7 +156,7 @@ async function loadPluginServiceDefinition(
   }
 }
 
-export async function getRegistry() {
+export async function getRegistry(): Promise<AxiosResponse<Registry>> {
   return await axios.get<Registry>(REGISTRY_URI, {
     validateStatus: (status) => status === 200
   })

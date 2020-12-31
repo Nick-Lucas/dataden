@@ -68,6 +68,28 @@ export function usePluginInstanceSettings(
   )
 }
 
+export function usePluginInstaller() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function ({
+      plugin
+    }: {
+      plugin: Api.Plugins.PostInstallPlugin.Body
+    }) {
+      return await axios.post<Api.Plugins.PostInstallPlugin.Response>(
+        getUri(Api.Plugins.PostInstallPlugin.path),
+        plugin
+      )
+    },
+    {
+      onSuccess: (response, { plugin }) => {
+        client.invalidateQueries(Api.Plugins.GetPlugins.path)
+      }
+    }
+  )
+}
+
 export function usePluginInstanceSettingsUpdate() {
   const client = useQueryClient()
 

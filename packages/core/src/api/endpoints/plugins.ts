@@ -1,7 +1,8 @@
 import { Express } from 'express'
+import StatusCodes from 'http-status-codes'
 
 import * as Db from 'src/db'
-import { installPlugin } from 'src/lib/PluginManager'
+import { installPlugin, PluginConflictError } from 'src/lib/PluginManager'
 import { Scheduler } from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
@@ -25,14 +26,18 @@ export function listen(app: Express, log: Logger) {
   >(PostInstallPlugin.path, async (request, response) => {
     const plugin = request.body
 
-    // TODO: check if already installed and reject if so
-
     try {
       const installedPlugin = await installPlugin(plugin)
+
       await response.send(installedPlugin)
     } catch (e) {
-      response.status(500)
-      await response.send(String(e))
+      if (e instanceof PluginConflictError) {
+        response.status(StatusCodes.CONFLICT)
+        await response.send(String(e))
+      } else {
+        response.status(500)
+        await response.send(String(e))
+      }
     }
   })
 
