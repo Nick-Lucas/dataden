@@ -4,21 +4,15 @@
     "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
-    "paths": {
-      "src/*": ["src/*"]
-    },
     "esModuleInterop": true,
     "sourceMap": true,
     "module": "ES2020",
     "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "dist",
-    "outDir": "dist"
+    "outDir": "dist",
+    
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.js",
-  ],
   "typeAcquisition": {
     "enable": true
   }
