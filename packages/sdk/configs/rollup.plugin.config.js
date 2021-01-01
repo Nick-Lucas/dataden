@@ -20,5 +20,8 @@ export default () => ({
     commonjs({
       include: /node_modules/
     })
-  ]
+  ],
+
+  // Important when using a `yarn link` version of the package, while deveoping the sdk against a plugin
+  preserveSymlinks: true
 })
