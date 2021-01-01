@@ -84,9 +84,9 @@ export async function installPlugin(
 
   if (registryPlugin.local) {
     if (!fs.existsSync(registryPlugin.source)) {
-      const message = `[installPlugin] Local Plugin ${registryPlugin.id} Cannot Be Installed. Does not exist.`
+      const message = `Local plugin at '${registryPlugin.source}' cannot be installed. File does not exist on server.`
       log.warn(message)
-      throw message
+      throw new InstallPluginError(message)
     }
 
     return await Db.Plugins.Installed.upsert(client, plugin)

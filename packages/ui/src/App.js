@@ -5,7 +5,7 @@ import { ContentCard, Layout } from './Layout'
 
 import { Dashboard } from './pages/Dashboard'
 import { Plugins } from './pages/Plugins'
-import { InstallPlugin } from './pages/InstallPlugin'
+import { InstallPlugin, InstallLocal } from './pages/InstallPlugin'
 
 export function App() {
   return (
@@ -16,7 +16,13 @@ export function App() {
 
         <Route exact path="/plugins" component={Plugins} />
 
-        <Route exact path="/registry" component={InstallPlugin} />
+        <Route
+          exact
+          path="/install-plugin/registry"
+          component={InstallPlugin}
+        />
+
+        <Route exact path="/install-plugin/local" component={InstallLocal} />
 
         <Route
           path="*"

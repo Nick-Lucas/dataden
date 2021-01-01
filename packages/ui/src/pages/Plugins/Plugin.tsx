@@ -30,7 +30,7 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
             marginBottom: 0
           }}
         >
-          {plugin.id} {plugin.version >= 0 && `(version: {plugin.version})`}
+          {plugin.id} {plugin.version >= 0 && `(version: ${plugin.version})`}
         </Typography.Title>
 
         <Space>

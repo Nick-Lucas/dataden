@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { Input, Button, Row, Space } from 'antd'
+import { Input, Button, Row, Space, Popover, Col } from 'antd'
+import * as icons from '@ant-design/icons'
 
 import { css } from 'styled-components/macro'
 
@@ -34,11 +35,40 @@ export const Plugins: FC = () => {
 
           <Space>
             <div />
-            <Link to="/registry">
+            <Popover
+              trigger="click"
+              content={
+                <Space direction="vertical">
+                  <Row>
+                    <Link
+                      to="/install-plugin/registry"
+                      style={{ flex: '1 1 auto' }}
+                    >
+                      <Space>
+                        <icons.CloudFilled />
+                        From Registry
+                      </Space>
+                    </Link>
+                  </Row>
+
+                  <Row>
+                    <Link
+                      to="/install-plugin/local"
+                      style={{ flex: '1 1 auto' }}
+                    >
+                      <Space>
+                        <icons.FolderFilled />
+                        Local
+                      </Space>
+                    </Link>
+                  </Row>
+                </Space>
+              }
+            >
               <Button type="primary" size="large">
                 Add New Plugin
               </Button>
-            </Link>
+            </Popover>
           </Space>
         </Row>
 
