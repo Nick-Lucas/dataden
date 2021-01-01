@@ -1,6 +1,9 @@
 import fs from 'fs'
 import path from 'path'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
+import { Stream } from 'stream'
+import extractZip from 'extract-zip'
+import _ from 'lodash'
 
 import {
   LocalPlugin,
@@ -24,37 +27,121 @@ const pluginDir = path.join(__dirname, 'installed')
 if (!fs.existsSync(pluginDir)) {
   fs.mkdirSync(pluginDir)
 }
+function getPluginDir(pluginId: string, ...extra: string[]) {
+  const location = path.join(pluginDir, pluginId, ...extra)
+  if (!fs.existsSync(location)) {
+    fs.mkdirSync(location, { recursive: true })
+  }
+
+  return location
+}
+
+export class PluginConflictError extends Error {
+  constructor() {
+    super('Plugin is already installed')
+  }
+}
+
+export class InstallPluginError extends Error {}
 
 export async function installPlugin(
   registryPlugin: RegistryPlugin | LocalPlugin
 ): Promise<Db.Plugins.Plugin> {
+  log.info(`Will attempt install of plugin ${registryPlugin.id}`)
+
   if (!registryPlugin.source) {
     log.warn(`Source not defined for plugin ${registryPlugin.id}`)
-    return
+    throw new InstallPluginError('Plugin source not provided')
   }
 
   const plugin: Db.Plugins.Plugin = {
     id: registryPlugin.id,
     location: registryPlugin.source,
-    version: (registryPlugin as RegistryPlugin).version ?? -1,
+    version: (registryPlugin as RegistryPlugin).version ?? null,
     instances: [
       {
         name: 'default'
       }
-    ]
+    ],
+    local: registryPlugin.local ?? false
   }
 
   const client = await Db.getClient()
+
+  const installedPlugin = await Db.Plugins.Installed.get(
+    client,
+    registryPlugin.id
+  )
+  if (installedPlugin) {
+    log.warn(
+      `Plugin was alrady installed \n${JSON.stringify(
+        installedPlugin,
+        null,
+        2
+      )}`
+    )
+    throw new PluginConflictError()
+  }
+
   if (registryPlugin.local) {
     if (!fs.existsSync(registryPlugin.source)) {
-      throw `[installPlugin] Local Plugin ${registryPlugin.id} Cannot Be Installed. Does not exist.`
+      const message = `Local plugin at '${registryPlugin.source}' cannot be installed. File does not exist on server.`
+      log.warn(message)
+      throw new InstallPluginError(message)
     }
 
     return await Db.Plugins.Installed.upsert(client, plugin)
   } else {
-    throw '[installPlugin] Remote Plugin Install: Not Implemented'
-    // TODO: download to directory
-    // TODO: register local location
+    const pluginDir = getPluginDir(plugin.id)
+
+    const extension = registryPlugin.source.includes('.')
+      ? _.last(registryPlugin.source.split('.'))
+      : null
+
+    const downloadLocation = path.join(
+      pluginDir,
+      'download' + (extension ? '.' + extension : '')
+    )
+
+    const file = fs.createWriteStream(downloadLocation)
+    const stream = await axios.get<Stream>(registryPlugin.source, {
+      responseType: 'stream'
+    })
+    await new Promise((resolve) => {
+      stream.data.pipe(file).on('close', resolve)
+    })
+
+    if (extension === 'js') {
+      plugin.location = path.join(pluginDir, 'index.js')
+      fs.renameSync(downloadLocation, plugin.location)
+    } else {
+      try {
+        await extractZip(downloadLocation, { dir: pluginDir })
+      } catch (e) {
+        throw `Could not extract '${downloadLocation}' as an archive, is it something else? ${e}`
+      }
+
+      fs.unlinkSync(downloadLocation)
+
+      const files = fs
+        .readdirSync(pluginDir, { withFileTypes: true })
+        .filter((file) => file.isFile() && file.name.endsWith('.js'))
+
+      if (files.length === 1) {
+        plugin.location = path.join(pluginDir, files[0].name)
+      } else {
+        const indexJs = files.find((file) => file.name == 'index.js')
+        if (indexJs) {
+          plugin.location = path.join(pluginDir, indexJs.name)
+        } else {
+          throw new InstallPluginError(
+            'Could not find either an index.js or a solo .js file in the downloaded archive'
+          )
+        }
+      }
+    }
+
+    return await Db.Plugins.Installed.upsert(client, plugin)
   }
 }
 
@@ -129,7 +216,7 @@ async function loadPluginServiceDefinition(
   }
 }
 
-export async function getRegistry() {
+export async function getRegistry(): Promise<AxiosResponse<Registry>> {
   return await axios.get<Registry>(REGISTRY_URI, {
     validateStatus: (status) => status === 200
   })

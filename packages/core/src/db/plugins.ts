@@ -9,7 +9,8 @@ import { stripMongoId } from './stripMongoId'
 interface PluginBase {
   id: string
   location: string
-  version: number
+  version?: number
+  local: boolean
 }
 
 export type PluginInstallRequest = PluginBase
@@ -33,12 +34,12 @@ export type Settings = Sdk.Settings
 type Collection = 'syncs' | 'settings' | string
 
 export interface DbPath {
-  pluginServiceName: string
+  pluginId: string
   instanceName: string
 }
 
 function getDatabaseName(info: DbPath) {
-  return (info.pluginServiceName + '__' + info.instanceName)
+  return (info.pluginId + '__' + info.instanceName)
     .toLowerCase()
     .replace(/[^a-z0-9]/, '_')
 }

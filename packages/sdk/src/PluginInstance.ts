@@ -89,12 +89,10 @@ export type DataLoader = {
 }
 
 export interface PluginService {
-  name: string
-
   //
   // Configuration
 
-  /** Used when initilising the plugin for the first time. Provide sensible (or no) defaults for plugin settings */
+  /** Used when initialising the plugin for the first time. Provide sensible (or no) defaults for plugin settings */
   getDefaultSettings?: () => Promise<Settings>
 
   //
@@ -119,16 +117,9 @@ export class DataLoaderValidationError extends Error {}
 // Constructors
 
 export function createPlugin({
-  name = null,
   getDefaultSettings = null,
   loaders = null
 }: PluginServiceRequest): PluginService {
-  if (!nameIsValid(name)) {
-    throw new PluginValidationError(
-      `Plugin name is invalid, must be a-z 0-9 _ but received: ${name}`
-    )
-  }
-
   if (!getDefaultSettings) {
     throw new PluginValidationError('getDefaultSettings must be defined')
   }
@@ -149,7 +140,6 @@ export function createPlugin({
   }
 
   return {
-    name,
     getDefaultSettings,
     loaders
   }

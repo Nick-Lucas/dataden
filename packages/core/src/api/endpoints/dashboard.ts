@@ -25,7 +25,7 @@ export function listen(app: Express, log: Logger) {
             const lastSync = await Db.Plugins.Syncs.last(
               client,
               {
-                pluginServiceName: definition.service.name,
+                pluginId: definition.plugin.id,
                 instanceName: instance.name
               },
               {}

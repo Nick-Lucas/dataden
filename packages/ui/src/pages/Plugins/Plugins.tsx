@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { Input, Button, Row, Space } from 'antd'
+import { Input, Button, Row, Space, Popover, Col } from 'antd'
+import * as icons from '@ant-design/icons'
 
 import { css } from 'styled-components/macro'
 
@@ -7,6 +8,7 @@ import { Layout } from 'src/Layout'
 import { useInstalledPluginsList } from 'src/queries'
 
 import { Plugin } from './Plugin'
+import { Link } from 'react-router-dom'
 
 export const Plugins: FC = () => {
   const [search, setSearch] = useState('')
@@ -33,9 +35,40 @@ export const Plugins: FC = () => {
 
           <Space>
             <div />
-            <Button type="primary" size="large" disabled>
-              Add New Plugin
-            </Button>
+            <Popover
+              trigger="click"
+              content={
+                <Space direction="vertical">
+                  <Row>
+                    <Link
+                      to="/install-plugin/registry"
+                      style={{ flex: '1 1 auto' }}
+                    >
+                      <Space>
+                        <icons.CloudFilled />
+                        From Registry
+                      </Space>
+                    </Link>
+                  </Row>
+
+                  <Row>
+                    <Link
+                      to="/install-plugin/local"
+                      style={{ flex: '1 1 auto' }}
+                    >
+                      <Space>
+                        <icons.FolderFilled />
+                        Local
+                      </Space>
+                    </Link>
+                  </Row>
+                </Space>
+              }
+            >
+              <Button type="primary" size="large">
+                Add New Plugin
+              </Button>
+            </Popover>
           </Space>
         </Row>
 
