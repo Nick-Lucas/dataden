@@ -1,6 +1,5 @@
 import { FC, useState } from 'react'
-import { Typography, List, Button, Row, Space, Modal, Col, Tooltip } from 'antd'
-import * as icons from '@ant-design/icons'
+import { Typography, List, Button, Row, Space, Modal } from 'antd'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'

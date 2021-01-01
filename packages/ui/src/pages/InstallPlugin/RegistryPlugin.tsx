@@ -1,7 +1,6 @@
 import { FC, useCallback } from 'react'
 import { Button, Col, Row, Space, Tag, Tooltip, Typography } from 'antd'
 import * as icons from '@ant-design/icons'
-import _ from 'lodash'
 
 import { ContentCard } from 'src/Layout'
 
