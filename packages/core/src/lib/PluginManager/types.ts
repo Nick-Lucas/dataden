@@ -3,21 +3,19 @@ import { PluginService } from '@dataden/sdk'
 
 export interface CorePlugin {
   id: string
+  name: string
+  description: string
+  source: string
+  local: boolean
 }
 
 export interface RegistryPlugin extends CorePlugin {
-  name: string
-  description: string
   version: number
-  source: string
   verified: boolean
   local: false
 }
 
 export interface LocalPlugin extends CorePlugin {
-  name: string
-  description: string
-  source: string
   local: true
 }
 

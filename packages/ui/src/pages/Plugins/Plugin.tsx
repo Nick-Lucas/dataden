@@ -1,5 +1,5 @@
 import { FC, useState } from 'react'
-import { Typography, List, Button, Row, Space, Modal } from 'antd'
+import { Typography, List, Button, Row, Space, Modal, Col } from 'antd'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'
@@ -23,39 +23,51 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
         margin-top: 1rem;
       `}
     >
-      <Row justify="space-between">
-        <Typography.Title
-          level={4}
-          style={{
-            marginBottom: 0
-          }}
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <Col>
+          <Row justify="space-between">
+            <Typography.Title
+              level={4}
+              style={{
+                marginBottom: 0
+              }}
+            >
+              {plugin.id}{' '}
+              {plugin.version >= 0 && `(version: ${plugin.version})`}
+            </Typography.Title>
+
+            <Space>
+              <Button type="primary" onClick={() => setAddingInstance(true)}>
+                Add Instance
+              </Button>
+
+              <Button danger disabled>
+                Uninstall
+              </Button>
+            </Space>
+          </Row>
+
+          <Row>
+            <Typography.Text type="secondary">
+              {plugin.location}
+            </Typography.Text>
+          </Row>
+        </Col>
+
+        <List
+          header={<Typography.Text strong>Instances:</Typography.Text>}
+          bordered
+          size="small"
         >
-          {plugin.id} {plugin.version >= 0 && `(version: ${plugin.version})`}
-        </Typography.Title>
-
-        <Space>
-          <Button type="primary" onClick={() => setAddingInstance(true)}>
-            Add Instance
-          </Button>
-
-          <Button danger disabled>
-            Uninstall
-          </Button>
-        </Space>
-      </Row>
-      <Row>
-        <Typography.Text type="secondary">{plugin.location}</Typography.Text>
-      </Row>
-
-      <List>
-        {plugin.instances.map((instance) => (
-          <PluginInstance
-            key={instance.name}
-            plugin={plugin}
-            instance={instance}
-          />
-        ))}
-      </List>
+          {plugin.instances.map((instance) => (
+            <PluginInstance
+              key={instance.name}
+              plugin={plugin}
+              instance={instance}
+            />
+          ))}
+        </List>
+      </Space>
 
       <Modal
         visible={addingInstance}

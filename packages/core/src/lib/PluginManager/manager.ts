@@ -57,12 +57,13 @@ export async function installPlugin(
   const plugin: Db.Plugins.Plugin = {
     id: registryPlugin.id,
     location: registryPlugin.source,
-    version: (registryPlugin as RegistryPlugin).version ?? -1,
+    version: (registryPlugin as RegistryPlugin).version ?? null,
     instances: [
       {
         name: 'default'
       }
-    ]
+    ],
+    local: registryPlugin.local ?? false
   }
 
   const client = await Db.getClient()

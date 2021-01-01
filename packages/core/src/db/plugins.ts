@@ -9,7 +9,8 @@ import { stripMongoId } from './stripMongoId'
 interface PluginBase {
   id: string
   location: string
-  version: number
+  version?: number
+  local: boolean
 }
 
 export type PluginInstallRequest = PluginBase
