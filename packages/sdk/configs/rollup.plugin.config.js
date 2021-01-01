@@ -1,5 +1,6 @@
 import typescript from '@wessberg/rollup-plugin-ts'
 import commonjs from '@rollup/plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
 
 /** @type {() => import('rollup').RollupOptions} */
 export default () => ({
@@ -15,6 +16,9 @@ export default () => ({
       tsconfig: __dirname + '/tsconfig.plugin.json',
       exclude: ['node_modules/**/*', '*/**/node_modules/**/*']
     }),
-    commonjs()
+    resolve(),
+    commonjs({
+      include: /node_modules/
+    })
   ]
 })
