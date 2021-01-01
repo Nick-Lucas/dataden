@@ -66,7 +66,7 @@ export async function start() {
       }
 
       const settings = await Db.Plugins.Settings.get(client, {
-        pluginServiceName: definition.service.name,
+        pluginId: definition.plugin.id,
         instanceName: instance.name
       })
 
@@ -130,7 +130,7 @@ function queueSchedule(
 
   const pluginId = definition.plugin.id
   const dbPath: DbPath = {
-    pluginServiceName: definition.service.name,
+    pluginId: pluginId,
     instanceName: instance.name
   }
 

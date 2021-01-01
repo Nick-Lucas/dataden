@@ -135,7 +135,7 @@ export function listen(app: Express, log: Logger) {
       }
 
       const settings = await Db.Plugins.Settings.get(client, {
-        pluginServiceName: definition.service.name,
+        pluginId: definition.plugin.id,
         instanceName: instance.name
       })
       if (settings) {
@@ -183,7 +183,7 @@ export function listen(app: Express, log: Logger) {
       await Db.Plugins.Settings.set(
         client,
         {
-          pluginServiceName: definition.service.name,
+          pluginId: definition.plugin.id,
           instanceName: instance.name
         },
         settings
