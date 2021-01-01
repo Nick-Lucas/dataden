@@ -9,9 +9,8 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "declaration": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
-    
+    "declarationDir": "./dist",
+    "outDir": "./dist"
   },
   "typeAcquisition": {
     "enable": true
