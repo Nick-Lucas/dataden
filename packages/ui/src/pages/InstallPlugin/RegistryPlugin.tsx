@@ -7,6 +7,7 @@ import { ContentCard } from 'src/Layout'
 
 import { usePluginInstaller } from 'src/queries'
 import * as Api from '@dataden/core/dist/api-types'
+import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 
 export const RegistryPlugin: FC<{
   plugin: Api.Registry.RegistryPlugin
@@ -27,7 +28,7 @@ export const RegistryPlugin: FC<{
           <Typography.Title level={4}>
             <Space>
               {/* TODO: support custon icon display from plugin registry */}
-              <icons.ApiOutlined />
+              <PluginLocalityIcon local={plugin.local} />
 
               {plugin.name}
             </Space>
@@ -53,7 +54,7 @@ export const RegistryPlugin: FC<{
         <Space size="small">
           {isInstalled ? (
             // TODO: add uninstall functionality
-            <Button type="primary" danger>
+            <Button type="primary" danger disabled>
               Uninstall
             </Button>
           ) : (

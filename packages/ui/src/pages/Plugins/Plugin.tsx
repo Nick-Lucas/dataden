@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { Typography, List, Button, Row, Space, Modal, Col } from 'antd'
+import { Typography, List, Button, Row, Space, Modal, Col, Tooltip } from 'antd'
+import * as icons from '@ant-design/icons'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'
@@ -7,6 +8,7 @@ import { PluginInstance } from './PluginInstance'
 import { PluginInstanceCreate } from './PluginInstanceCreate'
 
 import * as Api from '@dataden/core/dist/api-types'
+import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 
 interface PluginProps {
   plugin: Api.Plugins.Plugin
@@ -24,35 +26,42 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
       `}
     >
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Col>
-          <Row justify="space-between">
-            <Typography.Title
-              level={4}
-              style={{
-                marginBottom: 0
-              }}
-            >
-              {plugin.id}{' '}
-              {plugin.version >= 0 && `(version: ${plugin.version})`}
-            </Typography.Title>
-
+        <Row justify="space-between">
+          <Typography.Title
+            level={4}
+            style={{
+              marginBottom: 0
+            }}
+          >
             <Space>
-              <Button type="primary" onClick={() => setAddingInstance(true)}>
-                Add Instance
-              </Button>
+              <PluginLocalityIcon local={plugin.local} />
 
-              <Button danger disabled>
-                Uninstall
-              </Button>
+              <Typography.Title
+                level={4}
+                style={{
+                  marginBottom: 0
+                }}
+              >
+                {plugin.id}{' '}
+                {plugin.version >= 0 && `(version: ${plugin.version})`}
+              </Typography.Title>
             </Space>
-          </Row>
+          </Typography.Title>
 
-          <Row>
-            <Typography.Text type="secondary">
-              {plugin.location}
-            </Typography.Text>
-          </Row>
-        </Col>
+          <Space>
+            <Button type="primary" onClick={() => setAddingInstance(true)}>
+              Add Instance
+            </Button>
+
+            <Button danger disabled>
+              Uninstall
+            </Button>
+          </Space>
+        </Row>
+
+        <Row>
+          <Typography.Text type="secondary">{plugin.location}</Typography.Text>
+        </Row>
 
         <List
           header={<Typography.Text strong>Instances:</Typography.Text>}
