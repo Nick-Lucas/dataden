@@ -2,6 +2,7 @@ import { FC, useEffect } from 'react'
 import { Layout as AntLayout, Menu, Typography } from 'antd'
 import { useHistory } from 'react-router-dom'
 import styled, { css } from 'styled-components/macro'
+import { useIsAuthenticated } from './queries/auth'
 
 export interface LayoutProps {
   title?: string
@@ -16,6 +17,7 @@ export const Layout: FC<LayoutProps> = ({
   ...props
 }) => {
   const history = useHistory()
+  const [, isAuthenticated] = useIsAuthenticated()
 
   useEffect(() => {
     const buffer = document.title
@@ -31,14 +33,16 @@ export const Layout: FC<LayoutProps> = ({
   return (
     <AntLayout style={{ height: '100%', overflow: 'auto' }}>
       <AntLayout.Header>
-        <Menu theme="dark" mode="horizontal">
-          <Menu.Item onClick={() => history.push('/dashboard')}>
-            Dashboard
-          </Menu.Item>
-          <Menu.Item onClick={() => history.push('/plugins')}>
-            Installed Plugins
-          </Menu.Item>
-        </Menu>
+        {isAuthenticated && (
+          <Menu theme="dark" mode="horizontal">
+            <Menu.Item onClick={() => history.push('/dashboard')}>
+              Dashboard
+            </Menu.Item>
+            <Menu.Item onClick={() => history.push('/plugins')}>
+              Installed Plugins
+            </Menu.Item>
+          </Menu>
+        )}
       </AntLayout.Header>
 
       <AntLayout.Content

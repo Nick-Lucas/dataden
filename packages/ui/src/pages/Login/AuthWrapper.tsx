@@ -1,8 +1,10 @@
 import { FC } from 'react'
-import { useAuth } from 'src/queries/auth'
-import { Login } from './Login'
+import { Layout } from 'antd'
 import * as icons from '@ant-design/icons'
 import * as colors from '@ant-design/colors'
+
+import { useAuth } from 'src/queries/auth'
+import { Login } from './Login'
 
 export const AuthWrapper: FC = ({ children }) => {
   const auth = useAuth()
@@ -27,7 +29,7 @@ export const AuthWrapper: FC = ({ children }) => {
   }
 
   if (auth.data?.username) {
-    return <>{children}</>
+    return <Layout>{children}</Layout>
   } else {
     return <Login />
   }

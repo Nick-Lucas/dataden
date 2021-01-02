@@ -26,6 +26,15 @@ export function useAuth() {
   )
 }
 
+export function useIsAuthenticated(): [
+  loading: boolean,
+  isAuthenticated: boolean
+] {
+  const auth = useAuth()
+
+  return [auth.isFetched, !!auth.data?.username]
+}
+
 export function useLogin() {
   const client = useQueryClient()
 
