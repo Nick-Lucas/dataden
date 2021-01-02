@@ -10,7 +10,10 @@ export function useSyncsSummary() {
     async () => {
       return (
         await axios.get<Api.Data.GetStatus.Response>(
-          getUri(Api.Data.GetStatus.path)
+          getUri(Api.Data.GetStatus.path),
+          {
+            withCredentials: true
+          }
         )
       ).data
     },

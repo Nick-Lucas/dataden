@@ -60,7 +60,13 @@ passport.deserializeUser((username, done) => {
 })
 
 export function init(app: express.Application) {
-  app.use(expressSession({ secret: 'TODO:changeme' }))
+  app.use(
+    expressSession({
+      secret: 'TODO:changeme',
+      resave: true,
+      saveUninitialized: false
+    })
+  )
 
   app.use(passport.initialize())
   app.use(passport.session())

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 import * as Api from '@dataden/core/dist/api-types'
 
 import { getUri } from './common'
@@ -10,7 +10,10 @@ export function useAuth() {
     async () => {
       const result = await axios.get<Api.Auth.GetProfile.Response>(
         getUri(Api.Auth.GetProfile.path),
-        { validateStatus: (status) => [200, 401].includes(status) }
+        {
+          validateStatus: (status) => [200, 401].includes(status),
+          withCredentials: true
+        }
       )
 
       if (result.status === 200) {
@@ -20,5 +23,20 @@ export function useAuth() {
       }
     },
     {}
+  )
+}
+
+export function useLogin() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function ({ credentials }: { credentials: Api.Auth.PostLogin.Body }) {
+      return await axios.post(Api.Auth.PostLogin.path, credentials)
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Auth.GetProfile.path)
+      }
+    }
   )
 }

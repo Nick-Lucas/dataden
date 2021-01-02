@@ -8,7 +8,10 @@ export function useInstalledPluginsList() {
   return useQuery(Api.Plugins.GetPlugins.path, async () => {
     return (
       await axios.get<Api.Plugins.GetPlugins.Response>(
-        getUri(Api.Plugins.GetPlugins.path)
+        getUri(Api.Plugins.GetPlugins.path),
+        {
+          withCredentials: true
+        }
       )
     ).data
   })
@@ -18,7 +21,10 @@ export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
   return useQuery(Api.Plugins.GetPlugin.getPath(params), async () => {
     return (
       await axios.get<Api.Plugins.GetPlugin.Response>(
-        getUri(Api.Plugins.GetPlugin.getPath(params))
+        getUri(Api.Plugins.GetPlugin.getPath(params)),
+        {
+          withCredentials: true
+        }
       )
     ).data
   })
@@ -36,7 +42,10 @@ export function useInstalledPluginUpdate() {
               pluginId: data.id
             })
           ),
-          data
+          data,
+          {
+            withCredentials: true
+          }
         )
       ).data
     },
@@ -61,7 +70,10 @@ export function usePluginInstanceSettings(
     async function () {
       return (
         await axios.get<Api.Plugins.GetPluginInstanceSettings.Response>(
-          getUri(Api.Plugins.GetPluginInstanceSettings.getPath(params))
+          getUri(Api.Plugins.GetPluginInstanceSettings.getPath(params)),
+          {
+            withCredentials: true
+          }
         )
       ).data
     }
@@ -79,7 +91,10 @@ export function usePluginInstaller() {
     }) {
       return await axios.post<Api.Plugins.PostInstallPlugin.Response>(
         getUri(Api.Plugins.PostInstallPlugin.path),
-        plugin
+        plugin,
+        {
+          withCredentials: true
+        }
       )
     },
     {
@@ -104,7 +119,10 @@ export function usePluginInstanceSettingsUpdate() {
       return (
         await axios.post<Api.Plugins.PutPluginInstanceSettings.Response>(
           getUri(Api.Plugins.PutPluginInstanceSettings.getPath(params)),
-          settings
+          settings,
+          {
+            withCredentials: true
+          }
         )
       ).data
     },
