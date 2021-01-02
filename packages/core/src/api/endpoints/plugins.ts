@@ -10,7 +10,7 @@ import {
 import { Scheduler } from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
-import { MaybeError } from './common.types'
+import { MaybeError } from './common'
 import {
   GetPlugins,
   GetPlugin,

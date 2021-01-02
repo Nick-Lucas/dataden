@@ -1,3 +1,5 @@
+export { authenticatedEndpoint } from 'src/api/auth'
+
 export namespace Common {
   export interface PluginParams {
     pluginId: string
