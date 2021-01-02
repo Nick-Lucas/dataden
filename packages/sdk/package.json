@@ -1,15 +1,31 @@
 {
   "name": "@dataden/sdk",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
+  "bin": {
+    "dataden-scripts": "./bin/dataden-scripts.js"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch"
   },
-  "dependencies": {
+  "engines": {
+    "node": ">=10.23.0"
+  },
+  "devDependencies": {
     "@dataden/build": "0.1.0"
+  },
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "@wessberg/rollup-plugin-ts": "^1.3.8",
+    "rollup": "2.33.1",
+    "tslib": "^2.0.3",
+    "typescript": "4.0.5",
+    "yargs": "^16.2.0"
   }
 }
