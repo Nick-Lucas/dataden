@@ -58,9 +58,20 @@ export const Layout: FC<LayoutProps> = ({
   )
 }
 
-export const ContentCard = styled.div`
+export interface ContentCardProps {
+  pad?: boolean
+}
+
+export const ContentCard = styled.div<ContentCardProps>`
   padding: 0.5rem 1rem;
   background-color: white;
 
   box-shadow: 0px 2px 3px 0px gray;
+
+  ${({ pad }: ContentCardProps) =>
+    pad &&
+    css`
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    `}
 `
