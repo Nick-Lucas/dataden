@@ -18,9 +18,13 @@ export interface Schedule {
 
 export type SettingId = string
 
-export interface Settings {
+export interface Settings<
+  PluginType = Record<SettingId, any>,
+  SecretsType = Record<SettingId, string>
+> {
   schedule: Schedule
-  plugin: Record<SettingId, any>
+  plugin: PluginType
+  secrets: SecretsType
 }
 
 //

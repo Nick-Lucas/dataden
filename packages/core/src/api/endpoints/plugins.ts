@@ -1,5 +1,6 @@
 import { Express } from 'express'
 import StatusCodes from 'http-status-codes'
+import _ from 'lodash'
 
 import * as Db from 'src/db'
 import {
@@ -143,15 +144,6 @@ export function listen(app: Express, log: Logger) {
           return
         }
 
-        const settings = await Db.Plugins.Settings.get(client, {
-          pluginId: definition.plugin.id,
-          instanceName: instance.name
-        })
-        if (settings) {
-          response.send(settings)
-          return
-        }
-
         if (!definition) {
           response.status(404)
           response.send('Could not get Plugin instance')
@@ -160,7 +152,15 @@ export function listen(app: Express, log: Logger) {
 
         const defaultSettings = await definition.service.getDefaultSettings()
 
-        response.send(defaultSettings)
+        const settings = await Db.Plugins.Settings.get(client, {
+          pluginId: definition.plugin.id,
+          instanceName: instance.name
+        })
+
+        // Merge settings onto default settings to bring forward any newly added keys
+        response.send(
+          _.merge(defaultSettings, settings ?? {}, { _id: undefined })
+        )
       } catch (e) {
         next(e)
       }

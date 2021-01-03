@@ -1,6 +1,6 @@
 {
   "name": "@dataden/sdk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "dev": "rollup -c rollup.config.js --watch"
+    "dev": "rollup -c rollup.config.js --watch",
+    "prepublishOnly": "yarn run build"
   },
   "engines": {
     "node": ">=10.23.0"
