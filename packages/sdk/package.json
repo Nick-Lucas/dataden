@@ -1,6 +1,6 @@
 {
   "name": "@dataden/sdk",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
