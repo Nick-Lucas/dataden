@@ -72,16 +72,30 @@ export function init(app: express.Application) {
   app.use(passport.session())
 }
 
-export function authenticatedEndpoint<P, ResBody, ReqBody, ReqQuery>(
-  request: express.Request<P, ResBody, ReqBody, ReqQuery>,
-  response: express.Response<ResBody>,
-  next: express.NextFunction
-) {
-  const user = request.user as User | undefined
-  if (!user?.username) {
-    response.sendStatus(StatusCodes.UNAUTHORIZED)
-    return
-  }
+interface AuthenticatedEndpointOptions {
+  permitWhenPasswordResetIsRequired?: boolean
+}
 
-  next()
+export function authenticatedEndpoint({
+  permitWhenPasswordResetIsRequired = false
+}: AuthenticatedEndpointOptions = {}) {
+  return function <P, ResBody, ReqBody, ReqQuery>(
+    request: express.Request<P, ResBody, ReqBody, ReqQuery>,
+    response: express.Response<ResBody>,
+    next: express.NextFunction
+  ) {
+    const user = request.user as User | undefined
+    if (!user?.username) {
+      response.sendStatus(StatusCodes.UNAUTHORIZED)
+      return
+    }
+
+    if (!permitWhenPasswordResetIsRequired && user.resetRequired) {
+      response.status(StatusCodes.FORBIDDEN)
+      response.send(('Password Reset Required' as unknown) as ResBody)
+      return
+    }
+
+    next()
+  }
 }

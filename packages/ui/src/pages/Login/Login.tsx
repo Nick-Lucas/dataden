@@ -21,11 +21,15 @@ export const Login: FC = () => {
           }}
         >
           <Form.Item name="username" label="Username" required>
-            <Input placeholder="Enter username" autoFocus />
+            <Input placeholder="Enter username" autoFocus autoComplete="on" />
           </Form.Item>
 
           <Form.Item name="password" label="Password" required>
-            <Input type="password" placeholder="Enter password" />
+            <Input
+              type="password"
+              placeholder="Enter password"
+              autoComplete="on"
+            />
           </Form.Item>
 
           <Space>

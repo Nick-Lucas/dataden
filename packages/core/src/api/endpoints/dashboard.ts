@@ -9,7 +9,7 @@ import { GetStatus } from './dashboard.types'
 export function listen(app: Express, log: Logger) {
   app.get<void, MaybeError<GetStatus.Response>, void, void>(
     GetStatus.path,
-    authenticatedEndpoint,
+    authenticatedEndpoint(),
     async (request, response) => {
       try {
         const client = await Db.getClient()

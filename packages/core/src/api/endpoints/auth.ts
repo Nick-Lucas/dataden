@@ -6,7 +6,8 @@ import { Logger } from 'src/logging'
 import * as Db from 'src/db'
 
 import { MaybeError } from './common'
-import { PostLogin, GetProfile, PostLogout } from './auth.types'
+import { PostLogin, PostProfile, GetProfile, PostLogout } from './auth.types'
+import { getClient, Users, hashPassword } from 'src/db'
 
 export function listen(app: Express, log: Logger) {
   app.post<void, MaybeError<PostLogin.Response>, PostLogin.Body, void>(
@@ -22,9 +23,27 @@ export function listen(app: Express, log: Logger) {
     }
   )
 
+  app.post<void, MaybeError<void>, PostProfile.Body, void>(
+    PostProfile.path,
+    authenticatedEndpoint({ permitWhenPasswordResetIsRequired: true }),
+    async (request, response) => {
+      const user = request.user as Db.User
+      const userUpdate = request.body
+
+      const client = await getClient()
+      await Users.upsert(client, {
+        ...user,
+        passwordHash: hashPassword(userUpdate.password)
+      })
+
+      request.logout()
+      response.sendStatus(200)
+    }
+  )
+
   app.get<void, MaybeError<GetProfile.Response>, void, void>(
     GetProfile.path,
-    authenticatedEndpoint,
+    authenticatedEndpoint(),
     (request, response) => {
       const user = request.user as Db.User
 
@@ -37,7 +56,7 @@ export function listen(app: Express, log: Logger) {
 
   app.post<void, void, void, void>(
     PostLogout.path,
-    authenticatedEndpoint,
+    authenticatedEndpoint({ permitWhenPasswordResetIsRequired: true }),
     (request, response) => {
       log.info(
         `User ${(request.user as any)?.username ?? 'NOT SIGNED IN'} signing out`

@@ -4,35 +4,47 @@ import * as Api from '@dataden/core/dist/api-types'
 
 import { getUri } from './common'
 
-export function useAuth() {
+export function useProfile() {
   return useQuery(
     Api.Auth.GetProfile.path,
     async () => {
       const result = await axios.get<Api.Auth.GetProfile.Response>(
         getUri(Api.Auth.GetProfile.path),
         {
-          validateStatus: (status) => [200, 401].includes(status),
           withCredentials: true
         }
       )
 
-      if (result.status === 200) {
-        return result.data
-      } else {
-        return null
-      }
+      return result.data
     },
-    {}
+    {
+      retry: (count, error: any) => {
+        return ![401, 403].includes(error?.response?.status)
+      }
+    }
   )
 }
 
+type IsAuthenticated = boolean | 'reset-password'
 export function useIsAuthenticated(): [
   loading: boolean,
-  isAuthenticated: boolean
+  isAuthenticated: IsAuthenticated
 ] {
-  const auth = useAuth()
+  const auth = useProfile()
 
-  return [auth.isFetched, !!auth.data?.username]
+  let isAuthenticated: IsAuthenticated = null
+  if (auth.isError) {
+    const status = (auth.error as any).response.status
+    if (status === 403) {
+      isAuthenticated = 'reset-password'
+    } else {
+      isAuthenticated = false
+    }
+  } else if (auth.isFetched) {
+    isAuthenticated = true
+  }
+
+  return [auth.isFetched || auth.isError, isAuthenticated]
 }
 
 export function useLogin() {
@@ -41,6 +53,21 @@ export function useLogin() {
   return useMutation(
     async function ({ credentials }: { credentials: Api.Auth.PostLogin.Body }) {
       return await axios.post(Api.Auth.PostLogin.path, credentials)
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Auth.GetProfile.path)
+      }
+    }
+  )
+}
+
+export function useProfileUpdate() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function ({ profile }: { profile: Api.Auth.PostProfile.Body }) {
+      return await axios.post(Api.Auth.PostProfile.path, profile)
     },
     {
       onSuccess: () => {

@@ -3,13 +3,14 @@ import { Layout } from 'antd'
 import * as icons from '@ant-design/icons'
 import * as colors from '@ant-design/colors'
 
-import { useAuth } from 'src/queries/auth'
+import { useIsAuthenticated } from 'src/queries/auth'
 import { Login } from './Login'
+import { ResetPassword } from './ResetPassword'
 
 export const AuthWrapper: FC = ({ children }) => {
-  const auth = useAuth()
+  const [checked, isAuthenticated] = useIsAuthenticated()
 
-  if (auth.isFetching && !auth.isFetched) {
+  if (!checked) {
     return (
       <div
         style={{
@@ -28,9 +29,13 @@ export const AuthWrapper: FC = ({ children }) => {
     )
   }
 
-  if (auth.data?.username) {
-    return <Layout>{children}</Layout>
-  } else {
+  if (isAuthenticated === 'reset-password') {
+    return <ResetPassword />
+  }
+
+  if (isAuthenticated === false) {
     return <Login />
   }
+
+  return <Layout>{children}</Layout>
 }
