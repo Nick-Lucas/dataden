@@ -1,5 +1,6 @@
 import { FC, useEffect } from 'react'
 import { Col, Layout as AntLayout, Menu, Typography } from 'antd'
+import * as icons from '@ant-design/icons'
 import { useHistory } from 'react-router-dom'
 import styled, { css } from 'styled-components/macro'
 import { useIsAuthenticated, useLogOut } from './queries/auth'
@@ -37,10 +38,16 @@ export const Layout: FC<LayoutProps> = ({
         {isAuthenticated && (
           <>
             <Menu theme="dark" mode="horizontal">
-              <Menu.Item onClick={() => history.push('/dashboard')}>
+              <Menu.Item
+                icon={<icons.HomeFilled />}
+                onClick={() => history.push('/dashboard')}
+              >
                 Dashboard
               </Menu.Item>
-              <Menu.Item onClick={() => history.push('/plugins')}>
+              <Menu.Item
+                icon={<icons.DatabaseFilled />}
+                onClick={() => history.push('/plugins')}
+              >
                 Installed Plugins
               </Menu.Item>
             </Menu>
@@ -48,7 +55,12 @@ export const Layout: FC<LayoutProps> = ({
             <Col flex={1} />
 
             <Menu theme="dark" mode="horizontal">
-              <Menu.Item onClick={() => logout.mutate()}>Sign Out</Menu.Item>
+              <Menu.Item
+                icon={<icons.LogoutOutlined />}
+                onClick={() => logout.mutate()}
+              >
+                Sign Out
+              </Menu.Item>
             </Menu>
           </>
         )}
