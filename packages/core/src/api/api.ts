@@ -10,12 +10,20 @@ import * as websockets from './websockets'
 
 import { getScoped } from 'src/logging'
 
+import * as auth from './auth'
+
 export function start() {
   const app = express()
   const log = getScoped('API')
 
-  // cors
-  app.use(cors())
+  app.use(
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true
+    })
+  )
+
+  auth.init(app)
 
   // parse application/x-www-form-urlencoded
   app.use(bodyParser.urlencoded({ extended: false }))
@@ -33,10 +41,14 @@ export function start() {
       }
     })
   )
-
-  // Log request bodies
   app.use((req, res, next) => {
-    log.debug('BODY: \n' + JSON.stringify(req.body, null, 2))
+    const body = {
+      ...req.body
+    }
+    if (body.password) {
+      body.password = '**********'
+    }
+    log.debug('BODY: \n' + JSON.stringify(body, null, 2))
     next()
   })
 

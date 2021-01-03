@@ -1,7 +1,9 @@
 import { FC, useEffect } from 'react'
-import { Layout as AntLayout, Menu, Typography } from 'antd'
+import { Col, Layout as AntLayout, Menu, Typography } from 'antd'
+import * as icons from '@ant-design/icons'
 import { useHistory } from 'react-router-dom'
 import styled, { css } from 'styled-components/macro'
+import { useIsAuthenticated, useLogOut } from './queries/auth'
 
 export interface LayoutProps {
   title?: string
@@ -16,6 +18,8 @@ export const Layout: FC<LayoutProps> = ({
   ...props
 }) => {
   const history = useHistory()
+  const [, isAuthenticated] = useIsAuthenticated()
+  const logout = useLogOut()
 
   useEffect(() => {
     const buffer = document.title
@@ -30,15 +34,36 @@ export const Layout: FC<LayoutProps> = ({
 
   return (
     <AntLayout style={{ height: '100%', overflow: 'auto' }}>
-      <AntLayout.Header>
-        <Menu theme="dark" mode="horizontal">
-          <Menu.Item onClick={() => history.push('/dashboard')}>
-            Dashboard
-          </Menu.Item>
-          <Menu.Item onClick={() => history.push('/plugins')}>
-            Installed Plugins
-          </Menu.Item>
-        </Menu>
+      <AntLayout.Header style={{ display: 'flex', flexDirection: 'row' }}>
+        {isAuthenticated && (
+          <>
+            <Menu theme="dark" mode="horizontal">
+              <Menu.Item
+                icon={<icons.HomeFilled />}
+                onClick={() => history.push('/dashboard')}
+              >
+                Dashboard
+              </Menu.Item>
+              <Menu.Item
+                icon={<icons.DatabaseFilled />}
+                onClick={() => history.push('/plugins')}
+              >
+                Installed Plugins
+              </Menu.Item>
+            </Menu>
+
+            <Col flex={1} />
+
+            <Menu theme="dark" mode="horizontal">
+              <Menu.Item
+                icon={<icons.LogoutOutlined />}
+                onClick={() => logout.mutate()}
+              >
+                Sign Out
+              </Menu.Item>
+            </Menu>
+          </>
+        )}
       </AntLayout.Header>
 
       <AntLayout.Content
@@ -58,9 +83,20 @@ export const Layout: FC<LayoutProps> = ({
   )
 }
 
-export const ContentCard = styled.div`
+export interface ContentCardProps {
+  pad?: boolean
+}
+
+export const ContentCard = styled.div<ContentCardProps>`
   padding: 0.5rem 1rem;
   background-color: white;
 
   box-shadow: 0px 2px 3px 0px gray;
+
+  ${({ pad }: ContentCardProps) =>
+    pad &&
+    css`
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    `}
 `

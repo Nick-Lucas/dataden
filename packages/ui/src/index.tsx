@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { QueryClientProvider, QueryClient } from 'react-query'
-import { ReactQueryDevtools } from 'react-query-devtools'
+import { ReactQueryDevtools } from 'react-query/devtools'
 
 import './index.css'
 import 'antd/dist/antd.css'
@@ -19,7 +19,7 @@ ReactDOM.render(
   <QueryClientProvider client={queryClient}>
     <App />
 
-    <ReactQueryDevtools position="bottom-right" />
+    <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
   </QueryClientProvider>,
   // </React.StrictMode>,
   document.getElementById('root')

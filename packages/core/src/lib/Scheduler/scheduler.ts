@@ -206,8 +206,9 @@ function queueSchedule(
         )
       } catch (e) {
         log.error(
-          `${pluginId}->${instance.name}->${loader.name}: ❗️ Data Load Failed with error.`,
-          e
+          `${pluginId}->${instance.name}->${
+            loader.name
+          }: ❗️ Data Load Failed with error: "${String(e)}"`
         )
 
         await Db.Plugins.Syncs.track(client, dbPath, {

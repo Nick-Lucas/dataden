@@ -2,7 +2,7 @@ import * as Db from 'src/db'
 import { Settings } from '@dataden/sdk'
 import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 
-import { Common } from './common.types'
+import { Common } from './common'
 
 // Other
 

@@ -13,8 +13,8 @@
     "@ant-design/colors": "^5.0.1",
     "@ant-design/icons": "^4.3.0",
     "@babel/core": "7.12.3",
-    "@monaco-editor/react": "^3.7.2",
     "@dataden/core": "1.0.0",
+    "@monaco-editor/react": "^3.7.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.2",
     "@svgr/webpack": "5.4.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -92,7 +92,6 @@
     "@babel/preset-react": "^7.12.10",
     "@types/react": "^17.0.0",
     "@types/styled-components": "^5.1.5",
-    "canvas": "^2.6.1",
-    "react-query-devtools": "^2.6.3"
+    "canvas": "^2.6.1"
   }
 }

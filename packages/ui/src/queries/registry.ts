@@ -10,7 +10,10 @@ export function useRegistry() {
     async () => {
       return (
         await axios.get<Api.Registry.GetRegistry.Response>(
-          getUri(Api.Registry.GetRegistry.path)
+          getUri(Api.Registry.GetRegistry.path),
+          {
+            withCredentials: true
+          }
         )
       ).data
     },
