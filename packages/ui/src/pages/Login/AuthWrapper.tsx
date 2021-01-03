@@ -1,5 +1,4 @@
 import { FC } from 'react'
-import { Layout } from 'antd'
 import * as icons from '@ant-design/icons'
 import * as colors from '@ant-design/colors'
 
@@ -37,5 +36,5 @@ export const AuthWrapper: FC = ({ children }) => {
     return <Login />
   }
 
-  return <Layout>{children}</Layout>
+  return <>{children}</>
 }
