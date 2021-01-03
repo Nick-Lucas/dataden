@@ -1,5 +1,8 @@
 import path from 'path'
 import fs from 'fs'
+
+import chalk from 'chalk'
+
 import {
   PluginService,
   pluginInstanceIsValid as pluginIsValid,
@@ -56,8 +59,8 @@ export async function run({
 
     const { name, load } = plugin.loaders[l]
     console.log('')
-    console.log('_______')
-    console.log('Running loader', name)
+    console.log(chalk.gray('_______'))
+    console.log(chalk.green('Running loader'), name)
 
     try {
       const payload = await load(
@@ -72,7 +75,7 @@ export async function run({
           (output ? output : 'output') + '_' + name + '.json'
         )
       )
-      console.log('Writing result to', writeOutput)
+      console.log(chalk.green('Writing result to'), writeOutput)
 
       const payloadJson = JSON.stringify(payload, null, 2)
       if (fs.existsSync(writeOutput)) {
@@ -81,7 +84,9 @@ export async function run({
       fs.mkdirSync(path.dirname(writeOutput), { recursive: true })
       fs.writeFileSync(writeOutput, payloadJson)
     } catch (e) {
-      console.error('Loader', name, 'failed with', String(e))
+      console.error(chalk.red('Loader', name, 'failed with', String(e)))
     }
+
+    console.log(chalk.gray('_______'))
   }
 }
