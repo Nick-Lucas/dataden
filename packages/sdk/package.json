@@ -1,6 +1,6 @@
 {
   "name": "@dataden/sdk",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "SDK for building plugins",
   "main": "dist/index.js",
   "license": "MIT",
@@ -24,6 +24,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
     "@wessberg/rollup-plugin-ts": "^1.3.8",
+    "chalk": "^4.1.0",
     "rollup": "2.33.1",
     "tslib": "^2.0.3",
     "typescript": "4.0.5",
