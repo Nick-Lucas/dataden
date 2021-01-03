@@ -1,8 +1,8 @@
 import { FC, useEffect } from 'react'
-import { Layout as AntLayout, Menu, Typography } from 'antd'
+import { Col, Layout as AntLayout, Menu, Typography } from 'antd'
 import { useHistory } from 'react-router-dom'
 import styled, { css } from 'styled-components/macro'
-import { useIsAuthenticated } from './queries/auth'
+import { useIsAuthenticated, useLogOut } from './queries/auth'
 
 export interface LayoutProps {
   title?: string
@@ -18,6 +18,7 @@ export const Layout: FC<LayoutProps> = ({
 }) => {
   const history = useHistory()
   const [, isAuthenticated] = useIsAuthenticated()
+  const logout = useLogOut()
 
   useEffect(() => {
     const buffer = document.title
@@ -32,16 +33,24 @@ export const Layout: FC<LayoutProps> = ({
 
   return (
     <AntLayout style={{ height: '100%', overflow: 'auto' }}>
-      <AntLayout.Header>
+      <AntLayout.Header style={{ display: 'flex', flexDirection: 'row' }}>
         {isAuthenticated && (
-          <Menu theme="dark" mode="horizontal">
-            <Menu.Item onClick={() => history.push('/dashboard')}>
-              Dashboard
-            </Menu.Item>
-            <Menu.Item onClick={() => history.push('/plugins')}>
-              Installed Plugins
-            </Menu.Item>
-          </Menu>
+          <>
+            <Menu theme="dark" mode="horizontal">
+              <Menu.Item onClick={() => history.push('/dashboard')}>
+                Dashboard
+              </Menu.Item>
+              <Menu.Item onClick={() => history.push('/plugins')}>
+                Installed Plugins
+              </Menu.Item>
+            </Menu>
+
+            <Col flex={1} />
+
+            <Menu theme="dark" mode="horizontal">
+              <Menu.Item onClick={() => logout.mutate()}>Sign Out</Menu.Item>
+            </Menu>
+          </>
         )}
       </AntLayout.Header>
 

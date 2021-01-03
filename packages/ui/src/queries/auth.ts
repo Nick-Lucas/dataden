@@ -62,12 +62,31 @@ export function useLogin() {
   )
 }
 
+export function useLogOut() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function () {
+      return await axios.post(Api.Auth.PostLogout.path, null, {
+        withCredentials: true
+      })
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Auth.GetProfile.path)
+      }
+    }
+  )
+}
+
 export function useProfileUpdate() {
   const client = useQueryClient()
 
   return useMutation(
     async function ({ profile }: { profile: Api.Auth.PostProfile.Body }) {
-      return await axios.post(Api.Auth.PostProfile.path, profile)
+      return await axios.post(Api.Auth.PostProfile.path, profile, {
+        withCredentials: true
+      })
     },
     {
       onSuccess: () => {
