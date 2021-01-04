@@ -65,7 +65,12 @@ export async function run({
     try {
       const payload = await load(
         settings,
-        { lastSync: { date: new Date(0).toISOString(), success: false } },
+        {
+          lastSync: { date: new Date(0).toISOString(), success: false },
+          auth: {
+            /* TODO: include auth credentials */
+          }
+        },
         console
       )
 

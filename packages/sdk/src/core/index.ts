@@ -1,2 +1,5 @@
-export * from './PluginService'
 export * from './validation'
+export * from './PluginService'
+export * from './PluginSettings'
+export * from './PluginAuth'
+export * from './PluginLogger'

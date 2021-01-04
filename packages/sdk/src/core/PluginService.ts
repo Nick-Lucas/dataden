@@ -1,31 +1,8 @@
 import { nameIsValid } from './validation'
 
-export interface Schedule {
-  every: number
-  grain:
-    | 'minutes'
-    | 'minute'
-    | 'hours'
-    | 'hour'
-    | 'days'
-    | 'day'
-    | 'weeks'
-    | 'week'
-}
-
-//
-// Settings
-
-export type SettingId = string
-
-export interface Settings<
-  PluginType = Record<SettingId, any>,
-  SecretsType = Record<SettingId, string>
-> {
-  schedule: Schedule
-  plugin: PluginType
-  secrets: SecretsType
-}
+import { PluginAuth } from './PluginAuth'
+import { Settings } from './PluginSettings'
+import { SdkLogger } from './PluginLogger'
 
 //
 // Data Loader
@@ -58,26 +35,13 @@ export type SyncInfo = SyncSuccessInfo | SyncFailureInfo
 
 export interface DataRequest {
   lastSync: SyncInfo
+  auth: PluginAuth.AuthState
 }
 
 export interface DataPayload {
   mode: 'append' | 'replace'
   data: DataRow[]
   lastDate: string
-}
-
-//
-// Logging
-
-export interface SdkLogMethod {
-  (message: string, ...meta: any[]): void
-  (message: any): void
-}
-export interface SdkLogger {
-  error: SdkLogMethod
-  warn: SdkLogMethod
-  info: SdkLogMethod
-  debug: SdkLogMethod
 }
 
 //
@@ -98,6 +62,9 @@ export interface PluginService {
 
   /** Used when initialising the plugin for the first time. Provide sensible (or no) defaults for plugin settings */
   getDefaultSettings?: () => Promise<Settings>
+
+  /** Auth method definition, used to manage authorization of the plugin with 3rd parties, for instance an OAuth2 API which requires user interaction */
+  authMethod?: PluginAuth.AuthMethod
 
   //
   // Data
@@ -122,6 +89,7 @@ export class DataLoaderValidationError extends Error {}
 
 export function createPlugin({
   getDefaultSettings = null,
+  authMethod = { type: 'none' },
   loaders = null
 }: PluginServiceRequest): PluginService {
   if (!getDefaultSettings) {
@@ -145,6 +113,7 @@ export function createPlugin({
 
   return {
     getDefaultSettings,
+    authMethod,
     loaders
   }
 }
