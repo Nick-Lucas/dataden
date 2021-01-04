@@ -1,2 +1,2 @@
-export * from './PluginInstance'
+export * from './PluginService'
 export * from './validation'
