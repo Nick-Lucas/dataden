@@ -7,21 +7,22 @@ import { Logger } from 'src/logging'
 
 import { MaybeError, authenticatedEndpoint } from './common'
 import {
-  GetPluginAuthInteraction,
+  PostPluginAuthInteraction,
   PostPluginAuthInteractionResult
 } from './plugins-auth.types'
 
 export function listen(app: Express, log: Logger) {
-  app.get<
-    GetPluginAuthInteraction.RouteParams,
-    MaybeError<GetPluginAuthInteraction.Response>,
-    void,
+  app.post<
+    PostPluginAuthInteraction.RouteParams,
+    MaybeError<PostPluginAuthInteraction.Response>,
+    PostPluginAuthInteraction.Body,
     void
   >(
-    GetPluginAuthInteraction.path,
+    PostPluginAuthInteraction.path,
     authenticatedEndpoint(),
     async (request, response) => {
-      const { pluginId, redirectUri } = request.params
+      const { pluginId } = request.params
+      const { redirectUri } = request.body
       if (!pluginId || !redirectUri) {
         response.sendStatus(400)
         return
@@ -30,6 +31,7 @@ export function listen(app: Express, log: Logger) {
       try {
         const service = await Scheduler.getPluginService(pluginId)
         if (!service) {
+          log.warn(`Could not find service for plugin "${pluginId}"`)
           response.sendStatus(404)
           return
         }
@@ -56,7 +58,9 @@ export function listen(app: Express, log: Logger) {
           throw authUri.error ?? 'Plugin Auth Failed'
         }
 
-        response.send(authUri.value)
+        response.send({
+          uri: authUri.value
+        })
       } catch (error) {
         response.status(500)
         response.send(String(error))

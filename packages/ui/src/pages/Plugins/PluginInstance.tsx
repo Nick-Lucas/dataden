@@ -9,11 +9,12 @@ import {
   message,
   Popconfirm
 } from 'antd'
+import * as icons from '@ant-design/icons'
 import produce from 'immer'
 import { css } from 'styled-components/macro'
 
 import { PluginInstanceEdit } from './PluginInstanceEdit'
-import { useInstalledPluginUpdate } from 'src/queries'
+import { useInstalledPluginUpdate, usePluginAuthInteraction } from 'src/queries'
 import * as Api from '@dataden/core/dist/api-types'
 
 interface PluginInstanceProps {
@@ -27,6 +28,9 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
 }) => {
   const [editing, setEditing] = useState(false)
   const pluginUpdate = useInstalledPluginUpdate()
+  const pluginAuthInteraction = usePluginAuthInteraction({
+    pluginId: plugin.id
+  })
 
   const handleRemove = useCallback(async () => {
     const update = produce(plugin, (draft) => {
@@ -56,6 +60,17 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
         <Typography.Text>{instance.name}</Typography.Text>
 
         <Space>
+          {pluginAuthInteraction.isFetched && pluginAuthInteraction.data?.uri && (
+            <Button
+              icon={<icons.WarningFilled />}
+              type="link"
+              danger
+              href={pluginAuthInteraction.data?.uri}
+            >
+              Click to Sign In
+            </Button>
+          )}
+
           <Button type="text" onClick={() => setEditing(true)}>
             Edit
           </Button>
