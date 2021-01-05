@@ -1,9 +1,15 @@
 import { PluginInstance } from 'src/db/plugins'
 import { PluginServiceDefinition } from 'src/lib/PluginManager'
 
+export type PluginServiceStatusType =
+  | 'OK'
+  | 'Not Started'
+  | 'Not Configured'
+  | 'Authentication Required'
+
 export interface PluginServiceStatus {
   running: boolean
-  status: 'OK' | 'Not Started' | 'Not Configured' | 'Authentication Required'
+  status: PluginServiceStatusType
 }
 
 export interface PluginService extends PluginServiceStatus {

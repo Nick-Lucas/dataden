@@ -1,5 +1,6 @@
+export * from './types'
 export * from './Data'
 export * from './Installed'
 export * from './Settings'
 export * from './Syncs'
-export * from './types'
+export * from './Auth'

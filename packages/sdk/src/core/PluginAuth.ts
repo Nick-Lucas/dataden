@@ -1,13 +1,11 @@
 import { Settings } from './PluginSettings'
 
+// TODO: also add a un/pw->key auth method, so that multiple loaders can share a token
+
 export namespace PluginAuth {
   export type AuthMethodType = 'none' | 'oauth2_authorizationcode'
   export type AuthState<T = Record<string, string | string[]>> = T &
     Record<string, string | string[]>
-
-  //
-  // Union Type
-  // TODO: also add a un/pw->key auth method, so that multiple loaders can share a token
 
   export type AuthMethod = NoAuthMethod | OAuth2AuthMethod
 
@@ -23,7 +21,7 @@ export namespace PluginAuth {
 
   export interface OAuth2AuthUriParams {
     redirectUri: string
-    state: string
+    state: Record<string, string>
   }
   export interface OAuth2AuthMethod {
     type: 'oauth2_authorizationcode'

@@ -1,4 +1,4 @@
-export type Collection = 'syncs' | 'settings' | string
+export type Collection = 'syncs' | 'settings' | 'auth' | string
 
 export interface DbPath {
   pluginId: string
