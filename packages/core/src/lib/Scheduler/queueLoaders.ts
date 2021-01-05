@@ -1,0 +1,118 @@
+import { ClientSession, MongoClient } from 'mongodb'
+import * as Db from 'src/db'
+import { DbPath, PluginInstance } from 'src/db/plugins'
+import { PluginServiceDefinition } from 'src/lib/PluginManager'
+import { isSyncDue } from './isSyncDue'
+import { SyncSuccessInfo } from '@dataden/sdk'
+
+import { getScoped, getPluginLogger } from 'src/logging'
+const log = getScoped('QueueLoaders')
+
+export function queueLoaders(
+  client: MongoClient,
+  definition: PluginServiceDefinition,
+  instance: PluginInstance
+): NodeJS.Timeout {
+  let isRunning = false
+
+  const pluginId = definition.plugin.id
+  const dbPath: DbPath = {
+    pluginId: pluginId,
+    instanceName: instance.name
+  }
+
+  async function maybeLoadData() {
+    log.info(`${pluginId}->${instance.name}: Checking if sync is due`)
+
+    const settings = await Db.Plugins.Settings.get(client, dbPath)
+    const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
+    const lastSyncSuccess = (await Db.Plugins.Syncs.last(client, dbPath, {
+      success: true
+    })) as SyncSuccessInfo
+
+    const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
+    if (!syncDue) {
+      log.info(`${pluginId}->${instance.name}: Sync not due yet`)
+      return
+    }
+
+    log.info(`${pluginId}->${instance.name}: Will attempt sync`)
+
+    if (isRunning) {
+      log.warn(
+        `${pluginId}->${instance.name}: ❗️ Last Sync is still in progress! Bailing.`
+      )
+      return
+    }
+
+    isRunning = true
+    let dbSession: ClientSession = null
+    for (const loader of definition.service.loaders) {
+      try {
+        log.info(
+          `${pluginId}->${instance.name}->${loader.name}: Will Load Data`
+        )
+
+        const result = await loader.load(
+          settings,
+          {
+            lastSync: lastSyncSuccess
+          },
+          getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
+        )
+
+        dbSession = client.startSession()
+        await dbSession.withTransaction(async () => {
+          await Db.Plugins.Syncs.track(client, dbPath, {
+            success: true,
+            latestDate: result.lastDate,
+            date: new Date().toISOString()
+          })
+
+          if (result.mode === 'append') {
+            await Db.Plugins.Data.append(
+              client,
+              dbPath,
+              loader.name,
+              result.data
+            )
+          } else if (result.mode === 'replace') {
+            await Db.Plugins.Data.replace(
+              client,
+              dbPath,
+              loader.name,
+              result.data
+            )
+          } else {
+            throw `Unknown Result Mode: "${result.mode}"`
+          }
+        })
+
+        log.info(
+          `${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
+        )
+      } catch (e) {
+        log.error(
+          `${pluginId}->${instance.name}->${
+            loader.name
+          }: ❗️ Data Load Failed with error: "${String(e)}"`
+        )
+
+        await Db.Plugins.Syncs.track(client, dbPath, {
+          success: false,
+          date: new Date().toISOString(),
+          error: e
+        })
+      } finally {
+        isRunning = false
+        if (dbSession) {
+          dbSession.endSession()
+        }
+      }
+    }
+  }
+
+  maybeLoadData()
+
+  return global.setInterval(maybeLoadData, 30000)
+}

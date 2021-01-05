@@ -1,6 +1,6 @@
 import { Express } from 'express'
 import * as Db from 'src/db'
-import { Scheduler } from 'src/lib/Scheduler'
+import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
 import { MaybeError, authenticatedEndpoint } from './common'

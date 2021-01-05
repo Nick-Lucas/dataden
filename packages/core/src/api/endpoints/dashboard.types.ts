@@ -1,5 +1,5 @@
 import * as Db from 'src/db'
-import { Scheduler } from 'src/lib/Scheduler'
+import * as Scheduler from 'src/lib/Scheduler/types'
 
 export namespace GetStatus {
   export const path = '/v1.0/status'
@@ -10,5 +10,6 @@ export namespace GetStatus {
     lastSync: Db.Plugins.Sync
     status: Scheduler.PluginServiceStatus
   }
+
   export type Response = ResponseItem[]
 }
