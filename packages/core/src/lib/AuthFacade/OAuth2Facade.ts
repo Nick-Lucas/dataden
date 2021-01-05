@@ -16,10 +16,7 @@ export const createOAuth2Facade = (
   const log = getScoped('PluginOAuth2Facade->' + plugin.definition.plugin.id)
 
   return {
-    onUserInteractionPossible: async ({
-      /* TODO: remove this default */
-      redirectUri = 'http://localhost:3000'
-    }) => {
+    onUserInteractionPossible: async ({ redirectUri }) => {
       log.info('Fetching User Interaction URI')
 
       const settings = await getSettings(client, plugin)

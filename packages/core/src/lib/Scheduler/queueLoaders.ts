@@ -56,7 +56,8 @@ export function queueLoaders(
     )?.onCredentialsRequired()
 
     if (authState && authState.status !== 'OK') {
-      // TODO: how to handle unhappy cases like reauthentication?
+      // TODO: how to handle unhappy cases other than reauthentication?
+      pluginService.status = 'Authentication Required'
 
       log.error(
         `Auth failed with "${authState.status}". Bailing. \n` + authState.error

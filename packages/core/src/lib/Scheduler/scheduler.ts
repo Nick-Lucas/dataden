@@ -10,6 +10,7 @@ const log = getScoped('Scheduler')
 
 import { PluginService, PluginServiceStatus } from './types'
 import { queueLoaders } from './queueLoaders'
+import { createAuthFacade } from 'src/lib/AuthFacade'
 
 const services: PluginService[] = []
 
@@ -59,15 +60,31 @@ export async function start() {
         instanceName: instance.name
       })
 
-      if (settings) {
+      const authState = await createAuthFacade(
+        client,
+        service
+      )?.onCredentialsRequired()
+
+      const authOK = authState ? authState.status === 'OK' : true
+
+      if (settings && authOK) {
         service.interval = queueLoaders(client, service)
       } else {
         service.running = false
-        service.status = 'Not Configured'
 
-        log.warn(
-          `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
-        )
+        if (!settings) {
+          service.status = 'Not Configured'
+
+          log.warn(
+            `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
+          )
+        } else if (!authOK) {
+          service.status = authState.status
+
+          log.warn(
+            `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start due to an Auth issue: ${service.status}`
+          )
+        }
       }
 
       services.push(service)
@@ -93,19 +110,19 @@ export async function restart() {
 export async function getPluginDefinition(
   pluginId: string
 ): Promise<PluginServiceDefinition> {
-  const existingInstance = services.find(
+  const service = await getPluginService(pluginId)
+
+  return service?.definition
+}
+
+export async function getPluginService(pluginId) {
+  const existingService = services.find(
     (service) => service.definition.plugin.id === pluginId
   )
-  if (existingInstance) {
-    return existingInstance.definition
+
+  if (!existingService) {
+    await restart()
   }
 
-  const definition = await loadPluginServiceDefinitionById(pluginId)
-  if (!definition) {
-    return null
-  }
-
-  await restart()
-
-  return getPluginDefinition(pluginId)
+  return services.find((service) => service.definition.plugin.id === pluginId)
 }

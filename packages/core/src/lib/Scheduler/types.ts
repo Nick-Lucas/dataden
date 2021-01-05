@@ -6,6 +6,7 @@ export type PluginServiceStatusType =
   | 'Not Started'
   | 'Not Configured'
   | 'Authentication Required'
+  | 'Error'
 
 export interface PluginServiceStatus {
   running: boolean
