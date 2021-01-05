@@ -42,7 +42,7 @@ export function listen(app: Express, log: Logger) {
 
         response.send(result)
       } catch (error) {
-        response.sendStatus(500)
+        response.status(500)
         response.send(String(error))
       }
     }

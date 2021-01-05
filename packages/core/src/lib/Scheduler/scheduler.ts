@@ -1,8 +1,7 @@
 import * as Db from 'src/db'
 import {
   PluginServiceDefinition,
-  loadPluginServiceDefinitions,
-  loadPluginServiceDefinitionById
+  loadPluginServiceDefinitions
 } from 'src/lib/PluginManager'
 
 import { getScoped } from 'src/logging'

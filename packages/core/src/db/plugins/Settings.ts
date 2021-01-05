@@ -17,7 +17,7 @@ export const Settings = {
     ).findOne<Settings | null>({})
 
     if (settings) {
-      return settings
+      return stripMongoId(settings)
     } else {
       return null
     }
