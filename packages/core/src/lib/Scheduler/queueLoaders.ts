@@ -1,19 +1,24 @@
 import { ClientSession, MongoClient } from 'mongodb'
-import * as Db from 'src/db'
-import { DbPath, PluginInstance } from 'src/db/plugins'
-import { PluginServiceDefinition } from 'src/lib/PluginManager'
-import { isSyncDue } from './isSyncDue'
+
 import { SyncSuccessInfo } from '@dataden/sdk'
+
+import * as Db from 'src/db'
+import { DbPath } from 'src/db/plugins'
+import { createAuthFacade } from 'src/lib/AuthFacade'
+
+import { PluginService } from './types'
+import { isSyncDue } from './isSyncDue'
 
 import { getScoped, getPluginLogger } from 'src/logging'
 const log = getScoped('QueueLoaders')
 
 export function queueLoaders(
   client: MongoClient,
-  definition: PluginServiceDefinition,
-  instance: PluginInstance
+  pluginService: PluginService
 ): NodeJS.Timeout {
   let isRunning = false
+
+  const { definition, instance } = pluginService
 
   const pluginId = definition.plugin.id
   const dbPath: DbPath = {
@@ -45,6 +50,21 @@ export function queueLoaders(
       return
     }
 
+    const authState = await createAuthFacade(
+      client,
+      pluginService
+    )?.onCredentialsRequired()
+
+    if (authState && authState.status !== 'OK') {
+      // TODO: how to handle unhappy cases like reauthentication?
+
+      log.error(
+        `Auth failed with "${authState.status}". Bailing. \n` + authState.error
+      )
+
+      return
+    }
+
     isRunning = true
     let dbSession: ClientSession = null
     for (const loader of definition.service.loaders) {
@@ -56,7 +76,8 @@ export function queueLoaders(
         const result = await loader.load(
           settings,
           {
-            lastSync: lastSyncSuccess
+            lastSync: lastSyncSuccess,
+            auth: authState?.value ?? {}
           },
           getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
         )

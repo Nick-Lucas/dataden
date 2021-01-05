@@ -1,13 +1,16 @@
 import { MongoClient } from 'mongodb'
 
-import { PluginService } from './types'
+import { PluginService } from 'src/lib/Scheduler/types'
 
-import { AuthFacade, createOAuth2Facade } from './AuthFacades'
+import { AuthFacade } from './common'
+import { createOAuth2Facade } from './OAuth2Facade'
+
+export { AuthFacade }
 
 export const createAuthFacade = (
   client: MongoClient,
   plugin: PluginService
-): AuthFacade => {
+): AuthFacade | null => {
   switch (plugin.definition.service.authMethod.type) {
     case 'oauth2_authorizationcode': {
       const oauth2 = plugin.definition.service.authMethod
@@ -16,7 +19,7 @@ export const createAuthFacade = (
     }
 
     case 'none': {
-      return {}
+      return null
     }
   }
 }

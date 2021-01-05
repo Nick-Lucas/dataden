@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { PluginAuth } from '@dataden/sdk'
 
 import { Settings } from 'src/db/plugins'
-import { PluginService } from '../types'
+import { PluginService } from 'src/lib/Scheduler/types'
 
 export type AuthResultType =
   | 'OK'
@@ -13,7 +13,7 @@ export type AuthResultType =
   | 'Error'
 
 export interface AuthResult<T> {
-  serviceStatus: AuthResultType
+  status: AuthResultType
 
   value?: T
   error?: string

@@ -60,7 +60,7 @@ export async function start() {
       })
 
       if (settings) {
-        service.interval = queueLoaders(client, definition, instance)
+        service.interval = queueLoaders(client, service)
       } else {
         service.running = false
         service.status = 'Not Configured'

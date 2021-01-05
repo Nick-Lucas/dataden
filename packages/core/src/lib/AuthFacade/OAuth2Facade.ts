@@ -5,7 +5,7 @@ import { PluginAuth } from '@dataden/sdk'
 import { Auth } from 'src/db/plugins'
 import { getScoped } from 'src/logging'
 
-import { PluginService } from '../types'
+import { PluginService } from 'src/lib/Scheduler/types'
 import { AuthFacade, getSettings } from './common'
 
 export const createOAuth2Facade = (
@@ -37,14 +37,14 @@ export const createOAuth2Facade = (
         )
 
         return {
-          serviceStatus: 'OK',
+          status: 'OK',
           value: authUri
         }
       } catch (e) {
         log.error('getAuthUri failed. ' + String(e))
 
         return {
-          serviceStatus: 'Error',
+          status: 'Error',
           error: String(e)
         }
       }
@@ -70,19 +70,19 @@ export const createOAuth2Facade = (
 
         if (!auth) {
           return {
-            serviceStatus: 'Authentication Required'
+            status: 'Authentication Required'
           }
         }
 
         return {
-          serviceStatus: 'OK',
+          status: 'OK',
           value: auth
         }
       } catch (e) {
         log.error('exchangeAuthorizationForAuthState failed. ' + String(e))
 
         return {
-          serviceStatus: 'Error',
+          status: 'Error',
           error: String(e)
         }
       }
@@ -98,7 +98,7 @@ export const createOAuth2Facade = (
 
       if (!auth) {
         return {
-          serviceStatus: 'Authentication Required'
+          status: 'Authentication Required'
         }
       }
 
@@ -106,19 +106,19 @@ export const createOAuth2Facade = (
         const updatedAuth = await oauth2.updateAuthState(settings, auth)
         if (updatedAuth === 'reauthorization_required') {
           return {
-            serviceStatus: 'Authentication Required'
+            status: 'Authentication Required'
           }
         }
 
         return {
-          serviceStatus: 'OK',
+          status: 'OK',
           value: updatedAuth
         }
       } catch (e) {
         log.error('updateAuthState failed. ' + String(e))
 
         return {
-          serviceStatus: 'Error',
+          status: 'Error',
           error: String(e)
         }
       }
