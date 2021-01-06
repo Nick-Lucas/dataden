@@ -25,7 +25,7 @@ export interface AuthFacade {
   }) => Promise<AuthResult<string | null>>
 
   onUserInteractionComplete?: (
-    result: Record<string, string>
+    result: PluginAuth.OAuth2AuthResultParams
   ) => Promise<AuthResult<PluginAuth.AuthState>>
 
   onCredentialsRequired?: () => Promise<AuthResult<PluginAuth.AuthState>>

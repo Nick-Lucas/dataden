@@ -24,7 +24,10 @@ export const createOAuth2Facade = (
       try {
         const authUri = await oauth2.getAuthUri(settings, {
           redirectUri,
-          state: { pluginId: plugin.definition.plugin.id }
+          state: JSON.stringify({
+            pluginId: plugin.definition.plugin.id,
+            instanceName: plugin.instance.name
+          })
         })
 
         log.info(
@@ -38,7 +41,7 @@ export const createOAuth2Facade = (
           value: authUri
         }
       } catch (e) {
-        log.error('getAuthUri failed. ' + String(e))
+        log.error(e)
 
         return {
           status: 'Error',
@@ -47,7 +50,9 @@ export const createOAuth2Facade = (
       }
     },
 
-    onUserInteractionComplete: async (result: Record<string, string>) => {
+    onUserInteractionComplete: async (
+      result: PluginAuth.OAuth2AuthResultParams
+    ) => {
       const settings = await getSettings(client, plugin)
 
       try {
@@ -76,7 +81,7 @@ export const createOAuth2Facade = (
           value: auth
         }
       } catch (e) {
-        log.error('exchangeAuthorizationForAuthState failed. ' + String(e))
+        log.error(e)
 
         return {
           status: 'Error',
@@ -112,7 +117,7 @@ export const createOAuth2Facade = (
           value: updatedAuth
         }
       } catch (e) {
-        log.error('updateAuthState failed. ' + String(e))
+        log.error(e)
 
         return {
           status: 'Error',

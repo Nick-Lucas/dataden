@@ -107,21 +107,28 @@ export async function restart() {
 }
 
 export async function getPluginDefinition(
-  pluginId: string
+  pluginId: string,
+  instanceName: string = null
 ): Promise<PluginServiceDefinition> {
-  const service = await getPluginService(pluginId)
+  const service = await getPluginService(pluginId, instanceName)
 
   return service?.definition
 }
 
-export async function getPluginService(pluginId) {
+export async function getPluginService(pluginId, instanceName: string = null) {
   const existingService = services.find(
-    (service) => service.definition.plugin.id === pluginId
+    (service) =>
+      service.definition.plugin.id === pluginId &&
+      (instanceName ? service.instance.name === instanceName : true)
   )
 
   if (!existingService) {
     await restart()
   }
 
-  return services.find((service) => service.definition.plugin.id === pluginId)
+  return services.find(
+    (service) =>
+      service.definition.plugin.id === pluginId &&
+      (instanceName ? service.instance.name === instanceName : true)
+  )
 }

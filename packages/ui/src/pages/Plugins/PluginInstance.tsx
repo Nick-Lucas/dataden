@@ -29,7 +29,8 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
   const [editing, setEditing] = useState(false)
   const pluginUpdate = useInstalledPluginUpdate()
   const pluginAuthInteraction = usePluginAuthInteraction({
-    pluginId: plugin.id
+    pluginId: plugin.id,
+    instanceId: instance.name
   })
 
   const handleRemove = useCallback(async () => {
@@ -66,6 +67,8 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
               type="link"
               danger
               href={pluginAuthInteraction.data?.uri}
+              target="_blank"
+              rel="noreferrer"
             >
               Click to Sign In
             </Button>

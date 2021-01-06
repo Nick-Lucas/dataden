@@ -2,12 +2,14 @@ import * as winston from 'winston'
 
 export const transportConsole = new winston.transports.Console({
   format: winston.format.combine(
+    winston.format.errors({ stack: true }),
     winston.format.printf(
       (info) =>
         info.timestamp +
         ' ' +
         `[${info.scope ?? 'General'}${info.plugin ? `->${info.plugin}` : ''}]` +
-        ` ${info.message}`
+        ` ${info.message}` +
+        (info.stack ? '\n' + info.stack : '')
     ),
     winston.format.colorize({ all: true })
   )

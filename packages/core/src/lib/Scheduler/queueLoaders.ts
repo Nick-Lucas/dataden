@@ -60,10 +60,13 @@ export function queueLoaders(
       pluginService.status = 'Authentication Required'
 
       log.error(
-        `Auth failed with "${authState.status}". Bailing. \n` + authState.error
+        `${pluginId}->${instance.name}: Auth failed with "${authState.status}". Bailing. \n` +
+          authState.error
       )
 
       return
+    } else if (authState) {
+      log.info(`${pluginId}->${instance.name}: Auth tokens loaded`)
     }
 
     isRunning = true

@@ -19,10 +19,20 @@ export namespace PluginAuth {
   //
   // OAuth2 Authorization Code Flow
 
+  /**
+   * Parameters to encode into the URI, they should be included as-is, though encodeURIComponent calls may be required
+   */
   export interface OAuth2AuthUriParams {
     redirectUri: string
-    state: Record<string, string>
+    state: string
   }
+
+  export type OAuth2AuthResultParams = Record<string, any> & {
+    redirectUri: string
+    code: string
+    scope: string
+  }
+
   export interface OAuth2AuthMethod {
     type: 'oauth2_authorizationcode'
 
@@ -35,7 +45,7 @@ export namespace PluginAuth {
     /** Step 2: given the final response from step 1, exchange for long lived secrets */
     exchangeAuthorizationForAuthState: <R = AuthState>(
       settings: Settings,
-      recievedParams: Record<string, string>
+      recievedParams: OAuth2AuthResultParams
     ) => Promise<R>
 
     /** Step 3 and all future syncs: given the long lived secrets, attempt to renew the secrets, or notify the user that re-authorization is required */
