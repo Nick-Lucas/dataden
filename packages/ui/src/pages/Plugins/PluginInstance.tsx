@@ -64,13 +64,13 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
           {pluginAuthInteraction.isFetched && pluginAuthInteraction.data?.uri && (
             <Button
               icon={<icons.WarningFilled />}
-              type="link"
+              type="primary"
               danger
               href={pluginAuthInteraction.data?.uri}
               target="_blank"
               rel="noreferrer"
             >
-              Click to Sign In
+              Click to Connect
             </Button>
           )}
 
@@ -84,7 +84,7 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
             okText="Remove"
             onConfirm={handleRemove}
           >
-            <Button type="dashed" danger>
+            <Button type="link" danger>
               Remove
             </Button>
           </Popconfirm>
