@@ -53,6 +53,10 @@ export function getOutputFilePath(loaderName: string, outputFileHint: string) {
   )
 }
 
+export function getAuthCacheFilePath() {
+  return path.normalize(path.join(process.cwd(), '.authcache.json'))
+}
+
 export function writeJson(filePath: string, payload: Record<string, any>) {
   const payloadJson = JSON.stringify(payload, null, 2)
 

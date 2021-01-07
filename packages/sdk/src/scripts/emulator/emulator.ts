@@ -1,3 +1,4 @@
+import express from 'express'
 import chalk from 'chalk'
 
 import {
@@ -6,6 +7,7 @@ import {
   runPlugin,
   writeJson
 } from './files'
+import { getAuthResult } from './auth'
 
 export interface RunOptions {
   inputFile: string
@@ -23,6 +25,13 @@ export async function run({
 }: RunOptions) {
   const plugin = runPlugin(inputFile)
   const settings = await loadAndMergeSettings(plugin, settingsPath)
+
+  const tokens = await getAuthResult(plugin, settings)
+
+  console.log('Tokens recieved', tokens)
+
+  console.log('TEST: exiting')
+  throw 'EXIT'
 
   for (let l = 0; l < plugin.loaders.length; l++) {
     if (loaderIndex >= 0 && l !== loaderIndex) {
