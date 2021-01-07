@@ -50,23 +50,27 @@ export function queueLoaders(
       return
     }
 
-    const authState = await createAuthFacade(
-      client,
-      pluginService
-    )?.onCredentialsRequired()
+    const authFacade = createAuthFacade(client, pluginService)
+    if (authFacade) {
+      log.info(
+        `${pluginId}->${instance.name}: attempting to refresh auth tokens`
+      )
+    }
+
+    const authState = await authFacade?.onCredentialsRequired()
 
     if (authState && authState.status !== 'OK') {
       // TODO: how to handle unhappy cases other than reauthentication?
       pluginService.status = 'Authentication Required'
 
       log.error(
-        `${pluginId}->${instance.name}: Auth failed with "${authState.status}". Bailing. \n` +
+        `${pluginId}->${instance.name}: auth failed with "${authState.status}". Bailing. \n` +
           authState.error
       )
 
       return
     } else if (authState) {
-      log.info(`${pluginId}->${instance.name}: Auth tokens loaded`)
+      log.info(`${pluginId}->${instance.name}: auth refreshed`)
     }
 
     isRunning = true
