@@ -27,11 +27,7 @@ export async function run({
   const settings = await loadAndMergeSettings(plugin, settingsPath)
 
   const tokens = await getAuthResult(plugin, settings)
-
-  console.log('Tokens recieved', tokens)
-
-  console.log('TEST: exiting')
-  throw 'EXIT'
+  console.log('Tokens recieved')
 
   for (let l = 0; l < plugin.loaders.length; l++) {
     if (loaderIndex >= 0 && l !== loaderIndex) {
@@ -48,9 +44,7 @@ export async function run({
         settings,
         {
           lastSync: { date: new Date(0).toISOString(), success: false },
-          auth: {
-            /* TODO: include auth credentials */
-          }
+          auth: tokens
         },
         console
       )
@@ -61,6 +55,10 @@ export async function run({
       writeJson(outputFilePath, payload)
     } catch (e) {
       console.error(chalk.red('Loader', name, 'failed with', String(e)))
+      console.error(e)
+      if (e?.response?.data) {
+        console.error(e?.response?.data)
+      }
     }
 
     console.log(chalk.gray('_______'))

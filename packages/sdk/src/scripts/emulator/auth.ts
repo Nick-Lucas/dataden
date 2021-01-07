@@ -31,6 +31,8 @@ export async function getAuthResult(plugin: PluginService, settings: Settings) {
         const refreshResult = await auth.updateAuthState(settings, authCache)
         if (refreshResult === 'reauthorization_required') {
           authCache = await runOAuth2Flow(auth, settings)
+        } else {
+          authCache = refreshResult
         }
       } else {
         authCache = await runOAuth2Flow(auth, settings)
