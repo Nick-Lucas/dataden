@@ -38,8 +38,8 @@ export const Syncs = {
     sync: Sync
   ): Promise<void> => {
     await getPluginDb(client, path, 'syncs').updateOne(
-      sync,
       { date: sync.date },
+      { $set: sync },
       { upsert: true }
     )
   }

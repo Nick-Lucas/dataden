@@ -12,6 +12,7 @@ import { AntdIconProps } from '@ant-design/icons/lib/components/AntdIcon'
 import { useSyncsSummary } from 'src/queries'
 import { Data } from '@dataden/core/dist/api-types'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
+import { Link } from 'react-router-dom'
 
 type Sentiment = 'Positive' | 'Neutral' | 'Negative'
 type PluginSummary = Data.GetStatus.ResponseItem & {
@@ -31,7 +32,7 @@ export const PluginsSummary: FC = () => {
 
   const pluginSyncs = useMemo(() => {
     if (!pluginsSummary.data) {
-      return {}
+      return []
     }
 
     return _(pluginsSummary.data)
@@ -66,6 +67,7 @@ export const PluginsSummary: FC = () => {
           }
         )
       )
+      .values()
       .value()
   }, [pluginsSummary.data])
 
@@ -77,28 +79,35 @@ export const PluginsSummary: FC = () => {
         itemLayout="vertical"
         loading={pluginsSummary.isFetching && !pluginsSummary.isFetched}
       >
-        {Object.values(pluginSyncs).map((syncs) => (
-          <List.Item key={syncs[0].plugin.id}>
-            <Typography.Title level={5}>
-              <Space>
-                <PluginLocalityIcon local={syncs[0].plugin.local} />
+        {pluginSyncs.length === 0 ? (
+          <Typography.Text type="secondary">
+            {"Nothin' to report boss... maybe "}{' '}
+            <Link to="/plugins">install some plugins?</Link>
+          </Typography.Text>
+        ) : (
+          pluginSyncs.map((syncs) => (
+            <List.Item key={syncs[0].plugin.id}>
+              <Typography.Title level={5}>
+                <Space>
+                  <PluginLocalityIcon local={syncs[0].plugin.local} />
 
-                <Typography.Title level={5} style={{ margin: 0 }}>
-                  {syncs[0].plugin.id}
-                </Typography.Title>
-              </Space>
-            </Typography.Title>
+                  <Typography.Title level={5} style={{ margin: 0 }}>
+                    {syncs[0].plugin.id}
+                  </Typography.Title>
+                </Space>
+              </Typography.Title>
 
-            <Table
-              columns={columns}
-              dataSource={syncs as Data.GetStatus.ResponseItem[]}
-              size="small"
-              pagination={false}
-              showHeader={false}
-              rowKey={(item) => item.pluginInstance.name}
-            />
-          </List.Item>
-        ))}
+              <Table
+                columns={columns}
+                dataSource={syncs as Data.GetStatus.ResponseItem[]}
+                size="small"
+                pagination={false}
+                showHeader={false}
+                rowKey={(item) => item.pluginInstance.name}
+              />
+            </List.Item>
+          ))
+        )}
       </List>
     </>
   )
