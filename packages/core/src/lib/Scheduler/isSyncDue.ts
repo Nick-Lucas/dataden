@@ -1,20 +1,20 @@
 import { DateTime, Duration } from 'luxon'
 
-import { Schedule, SyncInfo } from '@dataden/sdk'
+import { Schedule } from '@dataden/sdk'
 
 import { getScoped } from 'src/logging'
 const log = getScoped('IsSyncDue')
 
 export function isSyncDue(
   now: Date,
-  lastSync: SyncInfo,
+  lastSyncISO: string,
   schedule: Schedule
 ): boolean {
   const nowLux = DateTime.fromJSDate(now)
-  const last = DateTime.fromISO(lastSync.date ?? new Date(0).toISOString())
+  const last = DateTime.fromISO(lastSyncISO ?? new Date(0).toISOString())
   if (!last.isValid) {
     log.warn(
-      `[isSyncDue]: Last Date "${lastSync.date}" Invalid: "${last.invalidExplanation}"`
+      `[isSyncDue]: Last Date "${lastSyncISO}" Invalid: "${last.invalidExplanation}"`
     )
     return false
   }

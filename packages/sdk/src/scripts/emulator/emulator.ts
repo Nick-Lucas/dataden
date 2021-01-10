@@ -1,4 +1,3 @@
-import express from 'express'
 import chalk from 'chalk'
 
 import {
@@ -43,7 +42,7 @@ export async function run({
       const payload = await load(
         settings,
         {
-          lastSync: { date: new Date(0).toISOString(), success: false },
+          lastSync: { success: true, rehydrationData: {} },
           auth: tokens
         },
         console

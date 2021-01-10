@@ -2,59 +2,7 @@ import { nameIsValid } from './validation'
 
 import { PluginAuth } from './PluginAuth'
 import { Settings } from './PluginSettings'
-import { SdkLogger } from './PluginLogger'
-
-//
-// Data Loader
-
-export interface DataRow extends Record<string, any> {
-  uniqueId
-}
-
-export type SyncSuccessInfo = {
-  /** Outcome */
-  success: true
-
-  /** The date of the sync attempt */
-  date: string
-
-  /** the date to feed into the next sync, for instance the date of the newest record retrieved during the last sync */
-  latestDate: string
-}
-export type SyncFailureInfo = {
-  /** Outcome */
-  success: false
-
-  /** The date of the sync attempt */
-  date: string
-
-  /** Error if the outcome was a failure */
-  error?: string
-}
-export type SyncInfo = SyncSuccessInfo | SyncFailureInfo
-
-export interface DataRequest {
-  lastSync: SyncInfo
-  auth: PluginAuth.AuthState
-}
-
-export interface DataPayload {
-  mode: 'append' | 'replace'
-  data: DataRow[]
-  lastDate: string
-}
-
-//
-// Plugin Definitions
-
-export type DataLoader = {
-  name: string
-  load: (
-    settings: Settings,
-    request: DataRequest,
-    log: SdkLogger
-  ) => Promise<DataPayload>
-}
+import { DataLoader } from './DataLoader'
 
 export interface PluginService {
   //

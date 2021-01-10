@@ -30,12 +30,9 @@ export function queueLoaders(
     log.info(`${pluginId}->${instance.name}: Checking if sync is due`)
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
-    const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
-    const lastSyncSuccess = (await Db.Plugins.Syncs.last(client, dbPath, {
-      success: true
-    })) as SyncSuccessInfo
+    const lastSync = await Db.Plugins.Syncs.last(client, dbPath)
 
-    const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
+    const syncDue = isSyncDue(new Date(), lastSync.date, settings.schedule)
     if (!syncDue) {
       log.info(`${pluginId}->${instance.name}: Sync not due yet`)
       return
@@ -50,7 +47,7 @@ export function queueLoaders(
 
     log.info(`${pluginId}->${instance.name}: Will attempt sync`)
     try {
-      await runLoaders(client, pluginService, settings, lastSyncSuccess)
+      await runLoaders(client, pluginService, settings, lastSync)
     } catch (e) {
       log.error(`${pluginId}->${instance.name}: error when loading data`)
       log.error(e)
