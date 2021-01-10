@@ -21,7 +21,7 @@ export function listen(app: Express, log: Logger) {
     PostPluginAuthInteraction.path,
     authenticatedEndpoint(),
     async (request, response) => {
-      const { pluginId } = request.params
+      const { pluginId, instanceId } = request.params
       const { redirectUri } = request.body
       if (!pluginId || !redirectUri) {
         response.sendStatus(400)
@@ -29,7 +29,7 @@ export function listen(app: Express, log: Logger) {
       }
 
       try {
-        const service = await Scheduler.getPluginService(pluginId)
+        const service = await Scheduler.getPluginService(pluginId, instanceId)
         if (!service) {
           log.warn(`Could not find service for plugin "${pluginId}"`)
           response.sendStatus(404)
@@ -37,7 +37,8 @@ export function listen(app: Express, log: Logger) {
         }
 
         if (service.status !== 'Authentication Required') {
-          response.sendStatus(200)
+          response.status(200)
+          response.send('Auth Not Required (Already Authenticated)')
           return
         }
 
@@ -46,7 +47,8 @@ export function listen(app: Express, log: Logger) {
         if (!authFacade) {
           // This endpoint may be called inquisitively as it's the only
           //  way to know if interaction is required or not, so this is fine
-          response.sendStatus(200)
+          response.status(200)
+          response.send('Auth Not Required')
           return
         }
 
@@ -77,7 +79,7 @@ export function listen(app: Express, log: Logger) {
     PostPluginAuthInteractionResult.path,
     authenticatedEndpoint(),
     async (request, response) => {
-      const { pluginId } = request.params
+      const { pluginId, instanceId } = request.params
       const authResultData = request.body
       if (!pluginId || !authResultData) {
         response.sendStatus(400)
@@ -85,7 +87,7 @@ export function listen(app: Express, log: Logger) {
       }
 
       try {
-        const service = await Scheduler.getPluginService(pluginId)
+        const service = await Scheduler.getPluginService(pluginId, instanceId)
         if (!service) {
           response.sendStatus(404)
           return
@@ -110,6 +112,8 @@ export function listen(app: Express, log: Logger) {
         if (result.status !== 'OK') {
           throw result.error ?? 'Plugin Auth Failed'
         }
+
+        await Scheduler.restart()
 
         response.sendStatus(200)
       } catch (error) {

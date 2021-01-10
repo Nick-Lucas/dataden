@@ -116,16 +116,19 @@ export async function getPluginDefinition(
 }
 
 export async function getPluginService(pluginId, instanceName: string = null) {
-  const existingService = services.find(
-    (service) =>
-      service.definition.plugin.id === pluginId &&
-      (instanceName ? service.instance.name === instanceName : true)
-  )
+  const existingService = getLoadedPluginService(pluginId, instanceName)
 
   if (!existingService) {
     await restart()
   }
 
+  return getLoadedPluginService(pluginId, instanceName)
+}
+
+function getLoadedPluginService(
+  pluginId: string,
+  instanceName: string = null
+): PluginService {
   return services.find(
     (service) =>
       service.definition.plugin.id === pluginId &&

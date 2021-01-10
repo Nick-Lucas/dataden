@@ -67,7 +67,7 @@ export function OAuth2() {
                   })
                   .then(() => {
                     notification.success({
-                      message: `Successfully connected plugin ${result.state.pluginId} (${result.state.intanceName}) to 3rd party!`
+                      message: `Successfully connected plugin ${result.state.pluginId} (${result.state.instanceName}) to 3rd party!`
                     })
                     history.push('/')
                   })

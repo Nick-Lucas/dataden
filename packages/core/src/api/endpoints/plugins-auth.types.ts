@@ -1,7 +1,7 @@
 import { Common } from './common'
 
 export namespace PostPluginAuthInteraction {
-  export const path = '/v1.0/plugins/:pluginId/:instanceName/auth-interaction'
+  export const path = '/v1.0/plugins/:pluginId/:instanceId/auth-interaction'
   export const getPath = (params: RouteParams) =>
     '/v1.0/plugins/' +
     encodeURIComponent(params.pluginId) +
@@ -22,7 +22,7 @@ export namespace PostPluginAuthInteraction {
 
 export namespace PostPluginAuthInteractionResult {
   export const path =
-    '/v1.0/plugins/:pluginId/:instanceName/auth-interaction-result'
+    '/v1.0/plugins/:pluginId/:instanceId/auth-interaction-result'
   export const getPath = (params: RouteParams) =>
     '/v1.0/plugins/' +
     encodeURIComponent(params.pluginId) +

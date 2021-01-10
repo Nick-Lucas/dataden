@@ -111,7 +111,9 @@ export async function runLoaders(
         success: false,
         error: String(e),
         rehydrationData:
-          sync.items[lastLoaderSyncIndex].syncInfo.rehydrationData
+          lastLoaderSyncIndex >= 0
+            ? sync.items[lastLoaderSyncIndex].syncInfo.rehydrationData
+            : {}
       })
     }
   }
