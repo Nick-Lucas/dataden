@@ -1,1 +1,2 @@
-export * as Scheduler from './scheduler'
+export * from './scheduler'
+export * from './types'

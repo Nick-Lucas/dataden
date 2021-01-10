@@ -1,27 +1,16 @@
-import { ClientSession, MongoClient } from 'mongodb'
 import * as Db from 'src/db'
-import { DbPath, PluginInstance } from 'src/db/plugins'
 import {
   PluginServiceDefinition,
-  loadPluginServiceDefinitions,
-  loadPluginServiceDefinitionById
+  loadPluginServiceDefinitions
 } from 'src/lib/PluginManager'
-import { isSyncDue } from './isSyncDue'
-import { SyncSuccessInfo } from '@dataden/sdk'
 
-import { getScoped, getPluginLogger } from 'src/logging'
+import { getScoped } from 'src/logging'
 const log = getScoped('Scheduler')
 
-export interface PluginServiceStatus {
-  running: boolean
-  status: 'OK' | 'Not Started' | 'Not Configured'
-}
-export interface PluginService extends PluginServiceStatus {
-  definition: PluginServiceDefinition
-  instance: PluginInstance
+import { PluginService, PluginServiceStatus } from './types'
+import { queueLoaders } from './queueLoaders'
+import { createAuthFacade } from 'src/lib/AuthFacade'
 
-  interval?: NodeJS.Timeout
-}
 const services: PluginService[] = []
 
 export function getStatus(
@@ -70,15 +59,31 @@ export async function start() {
         instanceName: instance.name
       })
 
-      if (settings) {
-        service.interval = queueSchedule(client, definition, instance)
+      const authState = await createAuthFacade(
+        client,
+        service
+      )?.onCredentialsRequired()
+
+      const authOK = authState ? authState.status === 'OK' : true
+
+      if (settings && authOK) {
+        service.interval = queueLoaders(client, service)
       } else {
         service.running = false
-        service.status = 'Not Configured'
 
-        log.warn(
-          `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
-        )
+        if (!settings) {
+          service.status = 'Not Configured'
+
+          log.warn(
+            `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start as it has not been configured`
+          )
+        } else if (!authOK) {
+          service.status = authState.status
+
+          log.warn(
+            `${definition.plugin.id}->${instance.name} ❗️ Plugin can not start due to an Auth issue: ${service.status}`
+          )
+        }
       }
 
       services.push(service)
@@ -102,130 +107,28 @@ export async function restart() {
 }
 
 export async function getPluginDefinition(
-  pluginId: string
+  pluginId: string,
+  instanceName: string = null
 ): Promise<PluginServiceDefinition> {
-  const existingInstance = services.find(
-    (service) => service.definition.plugin.id === pluginId
-  )
-  if (existingInstance) {
-    return existingInstance.definition
-  }
+  const service = await getPluginService(pluginId, instanceName)
 
-  const definition = await loadPluginServiceDefinitionById(pluginId)
-  if (!definition) {
-    return null
-  }
-
-  await restart()
-
-  return getPluginDefinition(pluginId)
+  return service?.definition
 }
 
-function queueSchedule(
-  client: MongoClient,
-  definition: PluginServiceDefinition,
-  instance: PluginInstance
-): NodeJS.Timeout {
-  let isRunning = false
+export async function getPluginService(pluginId, instanceName: string = null) {
+  const existingService = services.find(
+    (service) =>
+      service.definition.plugin.id === pluginId &&
+      (instanceName ? service.instance.name === instanceName : true)
+  )
 
-  const pluginId = definition.plugin.id
-  const dbPath: DbPath = {
-    pluginId: pluginId,
-    instanceName: instance.name
+  if (!existingService) {
+    await restart()
   }
 
-  async function maybeLoadData() {
-    log.info(`${pluginId}->${instance.name}: Checking if sync is due`)
-
-    const settings = await Db.Plugins.Settings.get(client, dbPath)
-    const lastSyncAttempt = await Db.Plugins.Syncs.last(client, dbPath)
-    const lastSyncSuccess = (await Db.Plugins.Syncs.last(client, dbPath, {
-      success: true
-    })) as SyncSuccessInfo
-
-    const syncDue = isSyncDue(new Date(), lastSyncAttempt, settings.schedule)
-    if (!syncDue) {
-      log.info(`${pluginId}->${instance.name}: Sync not due yet`)
-      return
-    }
-
-    log.info(`${pluginId}->${instance.name}: Will attempt sync`)
-
-    if (isRunning) {
-      log.warn(
-        `${pluginId}->${instance.name}: ❗️ Last Sync is still in progress! Bailing.`
-      )
-      return
-    }
-
-    isRunning = true
-    let dbSession: ClientSession = null
-    for (const loader of definition.service.loaders) {
-      try {
-        log.info(
-          `${pluginId}->${instance.name}->${loader.name}: Will Load Data`
-        )
-
-        const result = await loader.load(
-          settings,
-          {
-            lastSync: lastSyncSuccess
-          },
-          getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
-        )
-
-        dbSession = client.startSession()
-        await dbSession.withTransaction(async () => {
-          await Db.Plugins.Syncs.track(client, dbPath, {
-            success: true,
-            latestDate: result.lastDate,
-            date: new Date().toISOString()
-          })
-
-          if (result.mode === 'append') {
-            await Db.Plugins.Data.append(
-              client,
-              dbPath,
-              loader.name,
-              result.data
-            )
-          } else if (result.mode === 'replace') {
-            await Db.Plugins.Data.replace(
-              client,
-              dbPath,
-              loader.name,
-              result.data
-            )
-          } else {
-            throw `Unknown Result Mode: "${result.mode}"`
-          }
-        })
-
-        log.info(
-          `${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
-        )
-      } catch (e) {
-        log.error(
-          `${pluginId}->${instance.name}->${
-            loader.name
-          }: ❗️ Data Load Failed with error: "${String(e)}"`
-        )
-
-        await Db.Plugins.Syncs.track(client, dbPath, {
-          success: false,
-          date: new Date().toISOString(),
-          error: e
-        })
-      } finally {
-        isRunning = false
-        if (dbSession) {
-          dbSession.endSession()
-        }
-      }
-    }
-  }
-
-  maybeLoadData()
-
-  return global.setInterval(maybeLoadData, 30000)
+  return services.find(
+    (service) =>
+      service.definition.plugin.id === pluginId &&
+      (instanceName ? service.instance.name === instanceName : true)
+  )
 }

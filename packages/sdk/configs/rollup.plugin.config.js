@@ -27,7 +27,7 @@ export default () => {
       json()
     ],
 
-    // Important when using a `yarn link` version of the package, while deveoping the sdk against a plugin
+    // Important when using a `yarn link` version of the package, while developing the sdk against a plugin
     preserveSymlinks: true
   }
 }

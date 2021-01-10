@@ -1,6 +1,6 @@
 import { Express } from 'express'
 import * as Db from 'src/db'
-import { Scheduler } from 'src/lib/Scheduler'
+import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
 import { MaybeError, authenticatedEndpoint } from './common'
@@ -20,14 +20,10 @@ export function listen(app: Express, log: Logger) {
           const definition = await Scheduler.getPluginDefinition(plugin.id)
 
           for (const instance of plugin.instances) {
-            const lastSync = await Db.Plugins.Syncs.last(
-              client,
-              {
-                pluginId: definition.plugin.id,
-                instanceName: instance.name
-              },
-              {}
-            )
+            const lastSync = await Db.Plugins.Syncs.last(client, {
+              pluginId: definition.plugin.id,
+              instanceName: instance.name
+            })
 
             const status = Scheduler.getStatus(plugin.id, instance.name)
 
@@ -42,7 +38,7 @@ export function listen(app: Express, log: Logger) {
 
         response.send(result)
       } catch (error) {
-        response.sendStatus(500)
+        response.status(500)
         response.send(String(error))
       }
     }

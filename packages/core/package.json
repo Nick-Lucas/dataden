@@ -10,8 +10,8 @@
     "dev:start": "ROLLUP_RUN=true yarn run dev"
   },
   "dependencies": {
-    "@dataden/build": "0.1.0",
-    "@dataden/sdk": "0.1.0",
+    "@dataden/build": "*",
+    "@dataden/sdk": "*",
     "@types/lodash": "^4.14.166",
     "axios": "^0.21.0",
     "body-parser": "^1.19.0",

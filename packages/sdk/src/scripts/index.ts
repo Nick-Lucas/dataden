@@ -1,5 +1,6 @@
 import * as yargs from 'yargs'
 import child_process from 'child_process'
+import fs from 'fs'
 import path from 'path'
 import { run } from './emulator'
 
@@ -86,7 +87,7 @@ function spawnBuild({ inputFile, watch = false }: BuildConfig) {
   const child = child_process.spawn(
     'node',
     [
-      path.normalize(path.join(__dirname, '../node_modules/.bin', 'rollup')),
+      fs.realpathSync(path.join(__dirname, '../node_modules/.bin', 'rollup')),
       '-c',
       path.normalize(__dirname + '/../configs/rollup.plugin.config.js'),
       inputFile,

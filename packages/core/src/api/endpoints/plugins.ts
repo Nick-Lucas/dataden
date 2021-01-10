@@ -8,7 +8,7 @@ import {
   InstallPluginError,
   PluginConflictError
 } from 'src/lib/PluginManager'
-import { Scheduler } from 'src/lib/Scheduler'
+import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
 import { MaybeError, authenticatedEndpoint } from './common'

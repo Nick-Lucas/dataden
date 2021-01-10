@@ -1,4 +1,4 @@
-import { PluginService } from './PluginInstance'
+import { PluginService } from './PluginService'
 
 export function pluginInstanceIsValid(instance: PluginService) {
   if (!instance) {

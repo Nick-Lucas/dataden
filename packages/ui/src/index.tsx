@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { QueryClientProvider, QueryClient } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
+import { QueryParamProvider } from 'use-query-params'
 
 import './index.css'
 import 'antd/dist/antd.css'
@@ -16,11 +17,13 @@ const queryClient = new QueryClient()
 
 ReactDOM.render(
   // <React.StrictMode>
-  <QueryClientProvider client={queryClient}>
-    <App />
+  <QueryParamProvider>
+    <QueryClientProvider client={queryClient}>
+      <App />
 
-    <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
-  </QueryClientProvider>,
+      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+    </QueryClientProvider>
+  </QueryParamProvider>,
   // </React.StrictMode>,
   document.getElementById('root')
 )
