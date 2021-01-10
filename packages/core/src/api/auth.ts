@@ -2,6 +2,9 @@ import * as express from 'express'
 import passport from 'passport'
 import local from 'passport-local'
 import expressSession from 'express-session'
+import createMongoStore from 'connect-mongo'
+const MongoStore = createMongoStore(expressSession)
+
 import { StatusCodes } from 'http-status-codes'
 
 import { getClient, Users, User } from 'src/db'
@@ -64,7 +67,14 @@ export function init(app: express.Application) {
     expressSession({
       secret: 'TODO:changeme',
       resave: true,
-      saveUninitialized: false
+      saveUninitialized: false,
+      store: new MongoStore({
+        clientPromise: getClient(),
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        dbName: 'express-sessions'
+      })
     })
   )
 
