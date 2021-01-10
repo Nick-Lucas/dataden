@@ -1,4 +1,4 @@
-import { DataLoader, SyncInfo } from '@dataden/sdk'
+import { DataLoader, LoaderPayload, SyncInfo } from '@dataden/sdk'
 import { MongoClient } from 'mongodb'
 
 import * as Db from 'src/db'
@@ -47,6 +47,7 @@ export async function runLoaders(
   const sync: Db.Plugins.Sync = {
     date: new Date().toISOString(),
     items: lastSync.items.map((item) => {
+      // We default the sync to a series of failures, in case of a catastrophic failure, but will ideally capture any failures later
       return {
         ...item,
         syncInfo: {
@@ -64,6 +65,21 @@ export async function runLoaders(
       lastSync,
       loader
     )
+    const updateSyncOnDb = async (syncInfo: SyncInfo) => {
+      const syncItem: Db.Plugins.SyncItem = {
+        type: 'loader',
+        name: loader.name,
+        syncInfo: syncInfo
+      }
+
+      if (lastLoaderSyncIndex >= 0) {
+        sync.items[lastLoaderSyncIndex] = syncItem
+      } else {
+        sync.items.push(syncItem)
+      }
+
+      await Db.Plugins.Syncs.upsert(client, dbPath, sync)
+    }
 
     try {
       log.info(`${pluginId}->${instance.name}->${loader.name}: Will Load Data`)
@@ -77,18 +93,9 @@ export async function runLoaders(
         getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
       )
 
-      // Track sync immediately
-      sync.items[lastLoaderSyncIndex].syncInfo = result.syncInfo
-      await Db.Plugins.Syncs.upsert(client, dbPath, sync)
+      await updateSyncOnDb(result.syncInfo)
 
-      // Store data in DB
-      if (result.mode === 'append') {
-        await Db.Plugins.Data.append(client, dbPath, loader.name, result.data)
-      } else if (result.mode === 'replace') {
-        await Db.Plugins.Data.replace(client, dbPath, loader.name, result.data)
-      } else {
-        throw `Unknown Result Mode: "${result.mode}"`
-      }
+      await updateDataOnDb(client, loader, dbPath, result)
 
       log.info(
         `${pluginId}->${instance.name}->${loader.name}: 👌 Data Load Finished`
@@ -100,16 +107,28 @@ export async function runLoaders(
         }: ❗️ Data Load Failed with error: "${String(e)}"`
       )
 
-      // Track failure
-      const rehydrationData =
-        sync.items[lastLoaderSyncIndex].syncInfo.rehydrationData
-      sync.items[lastLoaderSyncIndex].syncInfo = {
+      await updateSyncOnDb({
         success: false,
         error: String(e),
-        rehydrationData
-      }
-      await Db.Plugins.Syncs.upsert(client, dbPath, sync)
+        rehydrationData:
+          sync.items[lastLoaderSyncIndex].syncInfo.rehydrationData
+      })
     }
+  }
+}
+
+async function updateDataOnDb(
+  client: MongoClient,
+  loader: DataLoader,
+  dbPath: Db.Plugins.DbPath,
+  result: LoaderPayload
+) {
+  if (result.mode === 'append') {
+    await Db.Plugins.Data.append(client, dbPath, loader.name, result.data)
+  } else if (result.mode === 'replace') {
+    await Db.Plugins.Data.replace(client, dbPath, loader.name, result.data)
+  } else {
+    throw `Unknown Result Mode: "${result.mode}"`
   }
 }
 
