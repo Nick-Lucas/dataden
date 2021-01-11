@@ -6,6 +6,7 @@
   "license": "CC-BY-NC-ND-4.0",
   "private": true,
   "scripts": {
+    "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
     "dev:start": "ROLLUP_RUN=true yarn run dev"
   },

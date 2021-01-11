@@ -1,0 +1,33 @@
+{
+  "name": "@dataden/daemon",
+  "version": "0.1.0",
+  "description": "Daemon to be installed on host machines to run DataDen",
+  "main": "index.js",
+  "license": "CC-BY-NC-ND-4.0",
+  "private": false,
+  "bin": {
+    "dataden-daemon": "./bin/dataden-daemon.js"
+  },
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build-core": "cd ../core && yarn build",
+    "cp-core": "mkdir -p ./dist/core && cp -R ../core/dist/index* ./dist/core",
+    "build-ui": "cd ../ui && yarn build",
+    "cp-ui": "mkdir -p ./dist/ui && cp -R ../ui/build/* ./dist/ui",
+    "build-all": "npm run build-core && npm run build-ui",
+    "cp-all": "npm run cp-core && npm run cp-ui",
+    "build": "npm run clean && npm run build-all && npm run cp-all"
+  },
+  "engines": {
+    "node": ">=10.23.0"
+  },
+  "dependencies": {
+    "http-server": "^0.12.3",
+    "pm2": "^4.5.1",
+    "serve-handler": "^6.1.3",
+    "yargs": "^16.2.0"
+  },
+  "devDependencies": {
+    "@types/serve-handler": "^6.1.0"
+  }
+}
