@@ -20,6 +20,10 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
 
   const onSubmit = useCallback(
     async ({ name }) => {
+      if (!pluginQuery.data) {
+        return
+      }
+
       const pluginInstallation = produce(pluginQuery.data, (draft) => {
         draft.instances.push({ name })
       }) as any

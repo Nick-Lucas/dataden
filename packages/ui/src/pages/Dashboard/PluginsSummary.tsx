@@ -99,7 +99,7 @@ export const PluginsSummary: FC = () => {
 
               <Table
                 columns={columns}
-                dataSource={syncs as Data.GetStatus.ResponseItem[]}
+                dataSource={syncs as PluginSummary[]}
                 size="small"
                 pagination={false}
                 showHeader={false}

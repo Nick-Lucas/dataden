@@ -28,11 +28,11 @@ export function useProfile() {
 type IsAuthenticated = boolean | 'reset-password'
 export function useIsAuthenticated(): [
   loading: boolean,
-  isAuthenticated: IsAuthenticated
+  isAuthenticated: IsAuthenticated | null
 ] {
   const auth = useProfile()
 
-  let isAuthenticated: IsAuthenticated = null
+  let isAuthenticated: IsAuthenticated = false
   if (auth.isError) {
     const status = (auth.error as any).response.status
     if (status === 403) {

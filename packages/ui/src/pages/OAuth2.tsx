@@ -22,7 +22,7 @@ export function OAuth2() {
     () =>
       ({
         ...params,
-        state: JSON.parse(params.state)
+        state: JSON.parse(String(params.state))
       } as Api.PluginAuth.PostPluginAuthInteractionResult.OAuthResult),
     [params]
   )

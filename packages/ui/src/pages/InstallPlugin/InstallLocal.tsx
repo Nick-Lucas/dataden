@@ -30,7 +30,7 @@ export const InstallLocal: FC = () => {
                 local: true,
                 id: values.id,
                 name: values.name,
-                description: values.description,
+                description: values.description ?? '',
                 source: values.location
               }
             },
