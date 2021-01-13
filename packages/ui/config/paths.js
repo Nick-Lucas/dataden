@@ -1,13 +1,11 @@
-'use strict';
-
-const path = require('path');
-const fs = require('fs');
-const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath');
+const path = require('path')
+const fs = require('fs')
+const getPublicUrlOrPath = require('react-dev-utils/getPublicUrlOrPath')
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
-const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
+const appDirectory = fs.realpathSync(process.cwd())
+const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath)
 
 // We use `PUBLIC_URL` environment variable or "homepage" field to infer
 // "public path" at which the app is served.
@@ -19,7 +17,7 @@ const publicUrlOrPath = getPublicUrlOrPath(
   process.env.NODE_ENV === 'development',
   require(resolveApp('package.json')).homepage,
   process.env.PUBLIC_URL
-);
+)
 
 const moduleFileExtensions = [
   'web.mjs',
@@ -32,21 +30,21 @@ const moduleFileExtensions = [
   'tsx',
   'json',
   'web.jsx',
-  'jsx',
-];
+  'jsx'
+]
 
 // Resolve file paths in the same order as webpack
 const resolveModule = (resolveFn, filePath) => {
-  const extension = moduleFileExtensions.find(extension =>
+  const extension = moduleFileExtensions.find((extension) =>
     fs.existsSync(resolveFn(`${filePath}.${extension}`))
-  );
+  )
 
   if (extension) {
-    return resolveFn(`${filePath}.${extension}`);
+    return resolveFn(`${filePath}.${extension}`)
   }
 
-  return resolveFn(`${filePath}.js`);
-};
+  return resolveFn(`${filePath}.js`)
+}
 
 // config after eject: we're in ./config/
 module.exports = {
@@ -65,9 +63,7 @@ module.exports = {
   proxySetup: resolveApp('src/setupProxy.js'),
   appNodeModules: resolveApp('node_modules'),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
-  publicUrlOrPath,
-};
+  publicUrlOrPath
+}
 
-
-
-module.exports.moduleFileExtensions = moduleFileExtensions;
+module.exports.moduleFileExtensions = moduleFileExtensions
