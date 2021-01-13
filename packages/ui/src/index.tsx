@@ -1,28 +1,16 @@
-import React from 'react'
+// import React from 'react'
 import ReactDOM from 'react-dom'
 import { QueryClientProvider, QueryClient } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { QueryParamProvider } from 'use-query-params'
 
+import type {} from 'styled-components/cssprop'
 import './index.css'
 import 'antd/dist/antd.css'
 import './config'
 
-import type {} from 'styled-components/cssprop'
-
 import { App } from './App'
 import reportWebVitals from './reportWebVitals'
-
-// import * as types from 'styled-components/cssprop'
-// import 'styled-components/cssprop'
-// import { CSSProp } from 'styled-components'
-// declare global {
-//   namespace JSX {
-//     interface IntrinsicAttributes {
-//       css?: CSSProp
-//     }
-//   }
-// }
 
 const queryClient = new QueryClient()
 
