@@ -2,7 +2,8 @@
   "name": "@dataden/core",
   "version": "1.0.0",
   "description": "Core Backend Service",
-  "main": "index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "license": "CC-BY-NC-ND-4.0",
   "private": true,
   "scripts": {

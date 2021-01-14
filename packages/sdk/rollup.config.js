@@ -8,9 +8,7 @@ export default [
   rollup({
     input: 'src/scripts/index.ts',
     output: {
-      file: 'dist/scripts.js',
-      format: 'cjs',
-      sourcemap: true
+      file: 'dist/scripts.js'
     },
     includeNodeModules: false
   })

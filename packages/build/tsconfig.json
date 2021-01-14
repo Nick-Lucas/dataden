@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "module": "ES2020",
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "dist",

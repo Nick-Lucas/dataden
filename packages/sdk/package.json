@@ -2,7 +2,8 @@
   "name": "@dataden/sdk",
   "version": "0.5.0",
   "description": "SDK for building plugins",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "license": "MIT",
   "private": false,
   "bin": {

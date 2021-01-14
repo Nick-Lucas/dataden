@@ -2,7 +2,8 @@
   "name": "@dataden/build",
   "version": "0.1.0",
   "description": "Build Tools for this Monorepo",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "license": "MIT",
   "private": false,
   "scripts": {
@@ -32,6 +33,8 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
     "tslib": "^2.0.3"
   }
 }

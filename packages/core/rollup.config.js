@@ -5,9 +5,7 @@ export default [
   rollup({
     input: 'src/api/api-types.ts',
     output: {
-      sourcemap: true,
-      file: 'dist/api-types.js',
-      format: 'cjs'
+      file: 'dist/api-types.js'
     }
   })
 ]
