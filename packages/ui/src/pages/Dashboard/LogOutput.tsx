@@ -6,7 +6,7 @@ import _ from 'lodash'
 
 import * as colors from '@ant-design/colors'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 
 import { WS_URI } from 'src/config'
 

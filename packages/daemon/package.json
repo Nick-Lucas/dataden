@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build-core": "cd ../core && yarn build",
-    "cp-core": "mkdir -p ./dist/core && cp -R ../core/dist/index* ./dist/core",
+    "cp-core": "mkdir -p ./dist/core && cp -R ../core/dist/index.cjs* ./dist/core",
     "build-ui": "cd ../ui && yarn build",
     "cp-ui": "mkdir -p ./dist/ui && cp -R ../ui/build/* ./dist/ui",
     "build-all": "npm run build-core && npm run build-ui",

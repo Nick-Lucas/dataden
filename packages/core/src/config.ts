@@ -8,7 +8,7 @@ export function validate() {
     throw env.error
   }
 }
-
+console.log(process.env)
 export const MONGO_URI = process.env.MONGO_URI
 export const API_PORT = process.env.PORT
 

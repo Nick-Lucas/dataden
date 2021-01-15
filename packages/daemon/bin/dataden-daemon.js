@@ -10,11 +10,26 @@ const yargs = require('yargs')
 const path = require('path')
 const child_process = require('child_process')
 
-const pm2Path = path.join(__dirname, '../node_modules', '.bin/pm2')
-const backendPath = path.join(__dirname, '../dist/core/index.js')
-const frontendPath = path.join(__dirname, '../dist/ui')
+const pm2Path = path.normalize(
+  path.join(__dirname, '../node_modules', '.bin/pm2')
+)
+
+const backendName = 'dataden-core'
+const backendPath = path.normalize(
+  path.join(__dirname, '../../core/dist/index.cjs.js')
+)
+
+const reverseProxyName = 'dataden-webserver'
+const reverseProxyPath = path.normalize(path.join(__dirname, '../index.js'))
 
 // TODO: ensure letsencrypt certificate is set up
+
+function spawnPm2(cmd, ...args) {
+  child_process.spawnSync('node', [pm2Path, cmd, ...args], {
+    stdio: 'inherit',
+    env: process.env
+  })
+}
 
 yargs
   .command(
@@ -26,7 +41,8 @@ yargs
     (args) => {
       console.log('Starting service')
 
-      child_process.spawnSync('node', [pm2Path, 'start', backendPath])
+      spawnPm2('start', backendPath, '--name', backendName)
+      spawnPm2('start', reverseProxyPath, '--name', reverseProxyName)
     }
   )
   .command(
@@ -38,7 +54,16 @@ yargs
     (args) => {
       console.log('Stopping service')
 
-      child_process.spawnSync('node', [pm2Path, 'stop', backendPath])
+      spawnPm2('stop', backendName)
+      spawnPm2('stop', reverseProxyName)
+    }
+  )
+  .command(
+    'status',
+    'See process status',
+    (yargs) => {},
+    () => {
+      spawnPm2('list')
     }
   )
   .demandCommand().argv

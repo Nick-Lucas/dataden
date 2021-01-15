@@ -5,7 +5,7 @@ import * as icons from '@ant-design/icons'
 import { ContentCard } from 'src/Layout'
 
 import { usePluginInstaller } from 'src/queries'
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 
 export const RegistryPlugin: FC<{

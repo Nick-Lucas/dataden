@@ -6,7 +6,7 @@ import {
   usePluginInstanceSettingsUpdate
 } from 'src/queries'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 
 interface PluginInstanceEditProps {
   plugin: Api.Plugins.Plugin

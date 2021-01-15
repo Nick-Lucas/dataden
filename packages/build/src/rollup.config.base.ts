@@ -15,7 +15,7 @@ interface CustomOutputOptions {
 interface BuildOptions {
   input?: string
   output?: CustomOutputOptions
-  includeNodeModules?: boolean
+  bundle?: 'code' | 'code+workspace' | 'code+node_modules'
   runnable?: boolean
 }
 
@@ -25,7 +25,7 @@ export default ({
     file: 'dist/index.js',
     overrides: {}
   },
-  includeNodeModules = false,
+  bundle = 'code',
   runnable = false
 }: BuildOptions = {}): RollupOptions => {
   output.file = output.file ?? 'dist/index.js'
@@ -46,14 +46,14 @@ export default ({
     input: input,
     output: [
       {
-        file: getBuildFileName(output.file, 'cjs'),
-        format: 'cjs',
+        file: getBuildFileName(output.file, 'esm'),
+        format: 'esm',
         sourcemap: true,
         ...output.overrides
       },
       {
-        file: getBuildFileName(output.file, 'esm'),
-        format: 'esm',
+        file: getBuildFileName(output.file, 'cjs'),
+        format: 'cjs',
         sourcemap: true,
         ...output.overrides
       }
@@ -77,18 +77,31 @@ export default ({
     plugins: [
       typescript({
         tsconfig: 'tsconfig.json',
-        exclude: ['**/node_modules/**', 'node_modules/*']
+        exclude: ['**/node_modules/**/*.*', 'node_modules/**/*.*']
       }),
-      includeNodeModules &&
+
+      bundle === 'code+node_modules' &&
         resolve({
           preferBuiltins: true
         }),
-      includeNodeModules &&
+      bundle === 'code+node_modules' &&
         commonjs({
           include: /node_modules/
         }),
+
+      bundle === 'code+workspace' &&
+        resolve({
+          preferBuiltins: true,
+          resolveOnly: [/\@dataden/]
+        }),
+      bundle === 'code+workspace' &&
+        commonjs({
+          include: /node_modules/
+        }),
+
       json(),
-      runnable && useRun && run()
+
+      runnable && useRun && run({})
     ].filter(Boolean)
   }
 }
