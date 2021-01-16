@@ -1,9 +1,10 @@
-import { RollupOptions, OutputOptions } from 'rollup'
+import { RollupOptions, OutputOptions, Plugin } from 'rollup'
 import typescript from '@wessberg/rollup-plugin-ts'
 import commonjs from '@rollup/plugin-commonjs'
 import run from '@rollup/plugin-run'
 import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
+import path from 'path'
 
 const useRun = process.env.ROLLUP_RUN === 'true'
 const isProduction = process.env.NODE_ENV === 'production'
@@ -18,7 +19,25 @@ interface BuildOptions {
   output?: CustomOutputOptions
   bundle?: 'code' | 'code+workspace' | 'code+node_modules'
   runnable?: boolean
+  extraWatches?: RegExp[]
 }
+
+const addExtraWatches = (tests: RegExp[]): Plugin => ({
+  name: 'additional-watches',
+  buildStart() {
+    const packageJson = require(path.resolve('package.json'))
+
+    const matchingDepNames = [
+      ...Object.keys(packageJson.dependencies),
+      ...Object.keys(packageJson.devDependencies)
+    ].filter((dep) => tests.some((test) => test.test(dep)))
+
+    for (const depName of matchingDepNames) {
+      const depFileName = path.dirname(require.resolve(depName))
+      this.addWatchFile(depFileName)
+    }
+  }
+})
 
 export default ({
   input = 'src/index.ts',
@@ -27,7 +46,8 @@ export default ({
     overrides: {}
   },
   bundle = 'code',
-  runnable = false
+  runnable = false,
+  extraWatches = [/@dataden\//]
 }: BuildOptions = {}): RollupOptions => {
   output.file = output.file ?? 'dist/index.js'
   output.overrides = output.overrides ?? {}
@@ -76,6 +96,9 @@ export default ({
     },
 
     plugins: [
+      // When developing we want consumers like core to rebuild whenever their dependencies are rebuilt
+      !isProduction && addExtraWatches(extraWatches),
+
       typescript({
         tsconfig: 'tsconfig.json',
         exclude: ['**/node_modules/**/*.*', 'node_modules/**/*.*']
@@ -101,11 +124,10 @@ export default ({
           preferBuiltins: true,
           resolveOnly: [/\@dataden/]
         }),
-      isProduction &&
-        bundle === 'code+workspace' &&
-        commonjs({
-          include: /node_modules/
-        }),
+
+      commonjs({
+        include: /node_modules/
+      }),
 
       json(),
 
