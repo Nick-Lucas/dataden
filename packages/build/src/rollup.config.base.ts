@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import run from '@rollup/plugin-run'
 import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
+import replace from '@rollup/plugin-replace'
 import path from 'path'
 
 const useRun = process.env.ROLLUP_RUN === 'true'
@@ -98,6 +99,14 @@ export default ({
     plugins: [
       // When developing we want consumers like core to rebuild whenever their dependencies are rebuilt
       !isProduction && addExtraWatches(extraWatches),
+
+      replace({
+        values: {
+          'process.env.NODE_ENV': isProduction
+            ? '"production"'
+            : '"development"'
+        }
+      }),
 
       typescript({
         tsconfig: 'tsconfig.json',

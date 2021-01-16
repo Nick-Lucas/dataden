@@ -6,6 +6,9 @@ interface Env {
   LOG_LEVEL: string
 }
 
+// Rollup build will replace the right side and ensure that any form of accessing NODE_ENV is populated
+process.env['NODE_ENV'] = process.env.NODE_ENV
+
 export function validate(): Env {
   try {
     const env = dotenv.config()
