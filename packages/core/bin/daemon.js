@@ -46,8 +46,10 @@ async function start() {
   const apiTest = /^\/v\d+\.\d+\//
   const corePort = await findFreePort({ min: 8700, max: 8799 })
   const coreUri = `http://localhost:${corePort}`
+  const coreUriWs = `ws://localhost:${corePort}`
   const proxyPort = await findFreePort({ min: 8800, max: 8899 })
 
+  // Fork a process for the API
   const core = child_process.fork('../dist/index.cjs.js', {
     env: {
       ...process.env,
@@ -57,14 +59,17 @@ async function start() {
     stdio: 'inherit'
   })
 
+  // Set up a file host for the UI
   const uiPath = path.join(__dirname, '../dist/ui')
   const uiFiles = new nodeStatic.Server(uiPath, { indexFile: 'index.html' })
 
+  // Create a proxy to route requests to the API
   const proxy = httpProxy.createServer({ ws: true })
   proxy.on('error', (err) => {
     console.error('[PROXY]', err)
   })
 
+  // Create a server to recieve all requests
   const server = http
     .createServer((req, res) => {
       if (apiTest.test(req.url)) {
@@ -90,19 +95,23 @@ async function start() {
   server.on('error', (err) => {
     console.error('[SERVER]', err)
   })
-  // server.on('upgrade', function (req, socket, head) {
-  //   console.info('UPGRADING', req.url)
-  //   proxy.ws(req, socket, head)
-  // })
+
+  // Ensure websockets connections are routed to the proxy
+  server.on('upgrade', function (req, socket, head) {
+    console.info('UPGRADING', req.url)
+    proxy.ws(req, socket, head, {
+      target: coreUriWs,
+      ws: true
+    })
+  })
 
   // Ensure we always clean up forked processes
   server.on('close', () => {
+    console.log('server closed')
     process.exit()
   })
   core.on('exit', () => {
-    process.exit()
-  })
-  proxy.on('close', () => {
+    console.log('core exited')
     process.exit()
   })
   process.on('unhandledRejection', (err) => {
@@ -110,6 +119,7 @@ async function start() {
     process.exit()
   })
   process.on('exit', () => {
+    console.log('process is exiting')
     server.close()
     core.kill()
     proxy.close()
