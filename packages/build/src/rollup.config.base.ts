@@ -6,6 +6,7 @@ import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
 
 const useRun = process.env.ROLLUP_RUN === 'true'
+const isProduction = process.env.NODE_ENV === 'production'
 
 interface CustomOutputOptions {
   file: string
@@ -80,21 +81,28 @@ export default ({
         exclude: ['**/node_modules/**/*.*', 'node_modules/**/*.*']
       }),
 
-      bundle === 'code+node_modules' &&
+      // Build a fat bundle of all JS code
+      isProduction &&
+        bundle === 'code+node_modules' &&
         resolve({
           preferBuiltins: true
         }),
-      bundle === 'code+node_modules' &&
+      isProduction &&
+        bundle === 'code+node_modules' &&
         commonjs({
           include: /node_modules/
         }),
 
-      bundle === 'code+workspace' &&
+      // Bundle only @dataden dependencies
+      // TODO: this isn't working great, is including certain node_modules deps from commonjs, but errors without
+      isProduction &&
+        bundle === 'code+workspace' &&
         resolve({
           preferBuiltins: true,
           resolveOnly: [/\@dataden/]
         }),
-      bundle === 'code+workspace' &&
+      isProduction &&
+        bundle === 'code+workspace' &&
         commonjs({
           include: /node_modules/
         }),

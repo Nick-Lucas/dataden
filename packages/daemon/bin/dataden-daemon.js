@@ -61,7 +61,9 @@ yargs
   .command(
     'status',
     'See process status',
-    (yargs) => {},
+    (yargs) => {
+      //
+    },
     () => {
       spawnPm2('list')
     }
