@@ -14,15 +14,8 @@ const pm2Path = path.normalize(
   path.join(__dirname, '../node_modules', '.bin/pm2')
 )
 
-const backendName = 'dataden-core'
-const backendPath = path.normalize(
-  path.join(__dirname, '../../core/dist/index.cjs.js')
-)
-
-const reverseProxyName = 'dataden-webserver'
-const reverseProxyPath = path.normalize(path.join(__dirname, '../index.js'))
-
-// TODO: ensure letsencrypt certificate is set up
+const daemonName = 'dataden-daemon'
+const daemonPath = path.normalize(path.join(__dirname, './reverse-proxy.js'))
 
 function spawnPm2(cmd, ...args) {
   child_process.spawnSync('node', [pm2Path, cmd, ...args], {
@@ -41,8 +34,7 @@ yargs
     (args) => {
       console.log('Starting service')
 
-      spawnPm2('start', backendPath, '--name', backendName)
-      spawnPm2('start', reverseProxyPath, '--name', reverseProxyName)
+      spawnPm2('start', daemonPath, '--name', daemonName)
     }
   )
   .command(
@@ -54,8 +46,7 @@ yargs
     (args) => {
       console.log('Stopping service')
 
-      spawnPm2('stop', backendName)
-      spawnPm2('stop', reverseProxyName)
+      spawnPm2('stop', daemonName)
     }
   )
   .command(
@@ -66,6 +57,17 @@ yargs
     },
     () => {
       spawnPm2('list')
+      spawnPm2('logs', [daemonName])
+    }
+  )
+  .command(
+    'logs',
+    'See process logs',
+    (yargs) => {
+      //
+    },
+    () => {
+      spawnPm2('logs', [daemonName])
     }
   )
   .demandCommand().argv
