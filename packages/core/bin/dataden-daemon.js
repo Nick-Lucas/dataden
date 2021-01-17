@@ -60,7 +60,7 @@ yargs
     }
   )
   .command(
-    'logs',
+    ['logs', 'log'],
     'See process logs',
     (yargs) => {
       //
