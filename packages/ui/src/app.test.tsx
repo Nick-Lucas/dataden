@@ -11,12 +11,14 @@ function Wrapper({ children }: { children: ReactNode }) {
   )
 }
 
-test('renders learn react link', () => {
-  render(
+test('renders app loading spinner since the api is not stubbed', () => {
+  const app = render(
     <Wrapper>
       <App />
     </Wrapper>
   )
-  const linkElement = screen.getAllByText(/Dashboard/i)[0]
-  expect(linkElement).toBeInTheDocument()
+
+  // const linkElement = screen.getAllByText(/Dashboard/i)[0]
+  // expect(linkElement).toBeInTheDocument()
+  app.getByLabelText('loading')
 })

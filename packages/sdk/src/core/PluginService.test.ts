@@ -17,8 +17,11 @@ describe('createPlugin', () => {
         name: 'Dataset',
         load: async () => {
           return {
-            lastDate: new Date().toISOString(),
-            data: [{ uniqueId: 1 }, { uniqueId: 2 }, { uniqueId: 3 }],
+            syncInfo: {
+              success: true,
+              rehydrationData: {}
+            },
+            data: [{ uniqueId: '1' }, { uniqueId: '2' }, { uniqueId: '3' }],
             mode: 'append'
           }
         }
@@ -50,8 +53,8 @@ describe('createPlugin', () => {
           name: 'Dataset_1',
           load: async () => {
             return {
-              lastDate: new Date().toISOString(),
-              data: [{ uniqueId: 1 }, { uniqueId: 2 }, { uniqueId: 3 }],
+              syncInfo: { success: true, rehydrationData: {} },
+              data: [{ uniqueId: '1' }, { uniqueId: '2' }, { uniqueId: '3' }],
               mode: 'append'
             }
           }
@@ -60,8 +63,8 @@ describe('createPlugin', () => {
           name: 'Dataset_2',
           load: async () => {
             return {
-              lastDate: new Date().toISOString(),
-              data: [{ uniqueId: 4 }, { uniqueId: 5 }, { uniqueId: 6 }],
+              syncInfo: { success: true, rehydrationData: {} },
+              data: [{ uniqueId: '4' }, { uniqueId: '5' }, { uniqueId: '6' }],
               mode: 'replace'
             }
           }
