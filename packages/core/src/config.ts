@@ -1,20 +1,75 @@
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import * as dotenv from 'dotenv'
+import _ from 'lodash'
 
-interface Env {
+//
+// Apply build-time environment
+
+const envDev = 'development'
+const envProd = 'production'
+const envs = [envDev, envProd]
+
+process.env['NODE_ENV'] = process.env.NODE_ENV
+if (!envs.includes(process.env['NODE_ENV'])) {
+  process.env['NODE_ENV'] = envDev
+}
+const isProduction = process.env['NODE_ENV'] === envProd
+
+//
+// Load and merge configurations
+
+interface Config {
+  IS_PRODUCTION: boolean
   MONGO_URI: string
-  PORT: number
+  PORT: number | string
   LOG_LEVEL: string
 }
 
-// Rollup build will replace the right side and ensure that any form of accessing NODE_ENV is populated
-process.env['NODE_ENV'] = process.env.NODE_ENV
+function loadDefaults(): Partial<Config> {
+  return {
+    IS_PRODUCTION: isProduction,
+    LOG_LEVEL: 'info'
+  }
+}
 
-export function validate(): Env {
+function loadUserConfig(): Partial<Config> {
+  if (!isProduction) {
+    // We only load machine-wide configs in production mode
+    return {}
+  }
+
+  const homeDir = os.homedir()
+  const configPaths = [path.join(homeDir, '.dataden.json')]
+
+  for (const configPath of configPaths) {
+    if (fs.existsSync(configPath)) {
+      return JSON.parse(fs.readFileSync(configPath).toString()) as Partial<
+        Config
+      >
+    }
+  }
+}
+
+function loadBaseEnvironment(): Partial<Config> {
+  // Although we use dotenv, in production .env may not be provided
+  //  and dotenv doesn't fall back on the existing environment when it fails
+  return {
+    LOG_LEVEL: process.env.LOG_LEVEL || undefined,
+    PORT: process.env.PORT || undefined,
+    MONGO_URI: process.env.MONGO_URI || undefined
+  }
+}
+
+function loadDotEnv(): Partial<Config> {
   try {
     const env = dotenv.config()
     if (env.error) {
       throw env.error
     }
+
+    return (env.parsed as unknown) as Config
   } catch (error) {
     if (error) {
       if (String(error).includes('ENOENT')) {
@@ -25,10 +80,15 @@ export function validate(): Env {
       }
     }
   }
+}
 
-  const config = (process.env as unknown) as Env
-
-  config.LOG_LEVEL = config.LOG_LEVEL ?? 'info'
+function loadAndMergeConfigs(): Config {
+  const config = _.merge(
+    loadDefaults(),
+    loadUserConfig(),
+    loadBaseEnvironment(),
+    loadDotEnv()
+  )
 
   if (!config.PORT) {
     throw 'PORT must be provided through a .env key or environment variable'
@@ -38,15 +98,17 @@ export function validate(): Env {
     throw 'MONGO_URI must be provided through a .env key or environment variable'
   }
 
-  return config
+  return config as Config
 }
 
-const config = validate()
+let config: Config = null
+if (!config) {
+  config = loadAndMergeConfigs()
+}
 
-export const MONGO_URI = config.MONGO_URI
-export const API_PORT = config.PORT
-
-const LEVEL = config.LOG_LEVEL
-export const LOG = {
-  LEVEL
+export const getConfig = (): Config => {
+  if (!config) {
+    config = loadAndMergeConfigs()
+  }
+  return config
 }

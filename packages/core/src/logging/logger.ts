@@ -1,16 +1,9 @@
 import * as winston from 'winston'
 import 'winston-daily-rotate-file'
 
-import { LOG } from 'src/config'
+import { level, levels } from './levels'
 import { SdkLogger } from '@dataden/sdk'
 import { transportConsole, transportFile } from './transports'
-
-export const levels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  debug: 3
-}
 
 // https://github.com/winstonjs/winston
 export type Logger = winston.Logger
@@ -19,14 +12,8 @@ let _logger: Logger = null
 
 export const getLogger = (): Logger => {
   if (!_logger) {
-    if (typeof levels[LOG.LEVEL] !== 'number') {
-      throw `Log level ${LOG.LEVEL} is unknown. Must be one of: ${Object.keys(
-        levels
-      ).join(' ')}`
-    }
-
     _logger = winston.createLogger({
-      level: LOG.LEVEL,
+      level,
       levels,
       format: winston.format.combine(
         winston.format.timestamp(),

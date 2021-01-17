@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import morgan from 'morgan'
 
-import { API_PORT } from 'src/config'
+import { getConfig } from 'src/config'
 
 import * as endpoints from './endpoints'
 import * as websockets from './websockets'
@@ -54,8 +54,8 @@ export function start() {
 
   // Listen
   endpoints.listen(app, log)
-  const server = app.listen(API_PORT)
+  const server = app.listen(getConfig().PORT)
   websockets.listen(server)
 
-  log.info('[API] Listening on port ' + API_PORT)
+  log.info('[API] Listening on port ' + getConfig().PORT)
 }
