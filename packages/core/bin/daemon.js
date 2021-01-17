@@ -4,14 +4,13 @@ const path = require('path')
 const net = require('net')
 const http = require('http')
 const child_process = require('child_process')
+const ssl = require('./setupSslCerts')
 
 const nodeStatic = require('node-static')
 const httpProxy = require('http-proxy')
 
 // Ensure relative paths start from this file's direction
 process.chdir(__dirname)
-
-// TODO: ensure letsencrypt certificate is set up
 
 async function findFreePort({ min = 8000, max = 9000 } = {}) {
   for (let port = min; port <= max; port++) {
@@ -126,6 +125,12 @@ async function start() {
   })
 
   console.log(`Proxy running on port ${proxyPort}`)
+
+  // Initialise SSL through Let's Encrypt
+  const sslSuccess = await ssl.setup()
+  if (!sslSuccess) {
+    process.exit(1)
+  }
 }
 
 start()
