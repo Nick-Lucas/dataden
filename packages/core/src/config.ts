@@ -25,12 +25,16 @@ interface Config {
   MONGO_URI: string
   PORT: number | string
   LOG_LEVEL: string
+  LOG_DIR: string
 }
 
 function loadDefaults(): Partial<Config> {
   return {
     IS_PRODUCTION: isProduction,
-    LOG_LEVEL: 'info'
+    LOG_LEVEL: 'info',
+    LOG_DIR: isProduction
+      ? path.join(os.homedir(), '.dataden-logs')
+      : path.join(process.cwd(), '.logs')
   }
 }
 
