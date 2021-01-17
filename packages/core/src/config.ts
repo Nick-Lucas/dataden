@@ -20,11 +20,14 @@ const isProduction = process.env['NODE_ENV'] === envProd
 //
 // Load and merge configurations
 
-interface Config {
-  IS_PRODUCTION: boolean
+interface UserConfig {
   MONGO_URI: string
-  PORT: number | string
   LOG_LEVEL: string
+}
+
+interface Config extends UserConfig {
+  IS_PRODUCTION: boolean
+  PORT: number | string
   LOG_DIR: string
 }
 

@@ -2,6 +2,10 @@
 
 Collect all your data into a personal data warehouse for cross-analysis and aggregation.
 
+# Getting Started with your own DataDen
+
+Follow the [Getting Started guide](./docs/getting-started.md)
+
 # FAQ
 
 #### I want to write a plugin
@@ -18,10 +22,10 @@ Collect all your data into a personal data warehouse for cross-analysis and aggr
 ## Recommended Tools:
 
 * NVM and nodejs
-* docker and docker-compose - easily up a mongodb instance
+* docker and docker-compose - easily create a mongodb instance
 * Yarn
 
-## Running
+## Running in development
 
 * `/> yarn install`
-* `/> yarn dev`
+* `/> yarn dev:start`

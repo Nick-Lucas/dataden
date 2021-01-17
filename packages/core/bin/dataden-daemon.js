@@ -57,7 +57,6 @@ yargs
     },
     () => {
       spawnPm2('list')
-      spawnPm2('logs', [daemonName])
     }
   )
   .command(
