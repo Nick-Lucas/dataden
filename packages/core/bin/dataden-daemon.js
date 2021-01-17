@@ -15,7 +15,7 @@ const pm2Path = path.normalize(
 )
 
 const daemonName = 'dataden-daemon'
-const daemonPath = path.normalize(path.join(__dirname, './reverse-proxy.js'))
+const daemonPath = path.normalize(path.join(__dirname, './daemon.js'))
 
 function spawnPm2(cmd, ...args) {
   child_process.spawnSync('node', [pm2Path, cmd, ...args], {
