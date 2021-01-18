@@ -6,4 +6,4 @@ process.on('unhandledRejection', (err) => {
   throw err
 })
 
-require('../dist/scripts')
+require('../dist/scripts.cjs')

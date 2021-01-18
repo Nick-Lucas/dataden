@@ -20,10 +20,7 @@ export default () => {
         tsconfig: tsConfig.compilerOptions,
         exclude: ['node_modules/**/*', '*/**/node_modules/**/*']
       }),
-      resolve({}),
-      commonjs({
-        include: /node_modules/
-      }),
+      commonjs(),
       json()
     ],
 
