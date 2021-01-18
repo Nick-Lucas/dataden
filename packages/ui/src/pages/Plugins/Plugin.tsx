@@ -6,7 +6,7 @@ import { ContentCard } from 'src/Layout'
 import { PluginInstance } from './PluginInstance'
 import { PluginInstanceCreate } from './PluginInstanceCreate'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 
 interface PluginProps {
@@ -42,7 +42,7 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
                 }}
               >
                 {plugin.id}{' '}
-                {plugin.version >= 0 && `(version: ${plugin.version})`}
+                {(plugin.version ?? -1) >= 0 && `(version: ${plugin.version})`}
               </Typography.Title>
             </Space>
           </Typography.Title>

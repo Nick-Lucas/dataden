@@ -15,7 +15,7 @@ import { css } from 'styled-components/macro'
 
 import { PluginInstanceEdit } from './PluginInstanceEdit'
 import { useInstalledPluginUpdate, usePluginAuthInteraction } from 'src/queries'
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 
 interface PluginInstanceProps {
   plugin: Api.Plugins.Plugin

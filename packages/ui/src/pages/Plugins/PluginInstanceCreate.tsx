@@ -4,7 +4,7 @@ import produce from 'immer'
 import { Rule } from 'antd/lib/form'
 import { useInstalledPlugin, useInstalledPluginUpdate } from 'src/queries'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 
 interface PluginInstanceCreateProps {
   plugin: Api.Plugins.Plugin
@@ -20,6 +20,10 @@ export const PluginInstanceCreate: FC<PluginInstanceCreateProps> = ({
 
   const onSubmit = useCallback(
     async ({ name }) => {
+      if (!pluginQuery.data) {
+        return
+      }
+
       const pluginInstallation = produce(pluginQuery.data, (draft) => {
         draft.instances.push({ name })
       }) as any

@@ -62,7 +62,9 @@ export const InstallPlugin: FC = () => {
 
         {fetching && !loaded && <Spin />}
 
-        {error && <Typography.Text type="danger">{error}</Typography.Text>}
+        {error && (
+          <Typography.Text type="danger">{String(error)}</Typography.Text>
+        )}
 
         {loaded &&
           plugins.map((plugin) => (

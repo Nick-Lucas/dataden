@@ -1,3 +1,11 @@
 module.exports = require('babel-jest').createTransformer({
-  rootMode: 'upward'
+  rootMode: 'upward',
+  presets: [
+    [
+      require.resolve('babel-preset-react-app'),
+      {
+        runtime: 'automatic'
+      }
+    ]
+  ]
 })

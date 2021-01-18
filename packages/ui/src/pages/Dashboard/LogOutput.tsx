@@ -6,7 +6,7 @@ import _ from 'lodash'
 
 import * as colors from '@ant-design/colors'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 
 import { WS_URI } from 'src/config'
 
@@ -18,7 +18,7 @@ const theme: ITheme = {
 }
 
 export function LogOutput() {
-  const termRef = useRef<HTMLDivElement>()
+  const termRef = useRef<HTMLDivElement>(null)
   const { term, fitAddon } = useMemo(() => {
     const term = new Terminal({
       theme,
@@ -31,8 +31,10 @@ export function LogOutput() {
   }, [])
 
   useLayoutEffect(() => {
-    term.open(termRef.current)
-    fitAddon.fit()
+    if (termRef.current) {
+      term.open(termRef.current)
+      fitAddon.fit()
+    }
 
     return () => {
       term.dispose()

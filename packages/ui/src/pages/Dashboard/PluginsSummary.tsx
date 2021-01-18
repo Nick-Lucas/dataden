@@ -10,7 +10,7 @@ import { BaseType } from 'antd/lib/typography/Base'
 import { AntdIconProps } from '@ant-design/icons/lib/components/AntdIcon'
 
 import { useSyncsSummary } from 'src/queries'
-import { Data } from '@dataden/core/dist/api-types'
+import { Data } from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 import { Link } from 'react-router-dom'
 
@@ -99,7 +99,7 @@ export const PluginsSummary: FC = () => {
 
               <Table
                 columns={columns}
-                dataSource={syncs as Data.GetStatus.ResponseItem[]}
+                dataSource={syncs as PluginSummary[]}
                 size="small"
                 pagination={false}
                 showHeader={false}

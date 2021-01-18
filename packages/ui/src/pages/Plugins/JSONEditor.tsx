@@ -3,7 +3,7 @@ import { ControlledEditor } from '@monaco-editor/react'
 
 export interface JSONEditorProps {
   value?: string
-  onChange?: (string) => void
+  onChange?: (value: string | undefined) => void
 }
 
 export const JSONEditor: FC<JSONEditorProps> = ({ value, onChange }) => {

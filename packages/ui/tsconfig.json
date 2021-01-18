@@ -1,25 +1,31 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     "baseUrl": ".",
-    "allowJs": true,
-    "checkJs": true,
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "paths": {
       "src/*": ["src/*"]
     },
+    "allowJs": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "sourceMap": true,
-    "module": "ES2015",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "declaration": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
-    "jsx": "preserve"
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
   "include": [
-    "src/**/*.js",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "src"
   ],
   "typeAcquisition": {
     "enable": true

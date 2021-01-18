@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb'
-import { MONGO_URI } from 'src/config'
+import { getConfig } from 'src/config'
 
 export const DATABASES = {
   CORE: 'core',
@@ -16,7 +16,7 @@ export const COLLECTIONS = {
 let _client = null
 export async function getClient() {
   if (!_client) {
-    _client = await MongoClient.connect(MONGO_URI, {
+    _client = await MongoClient.connect(getConfig().MONGO_URI, {
       useUnifiedTopology: true
     })
   }

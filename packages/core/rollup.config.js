@@ -1,13 +1,11 @@
 import { rollup } from '@dataden/build'
 
 export default [
-  rollup({ includeNodeModules: true, runnable: true }),
+  rollup({ bundle: 'code+workspace', runnable: true }),
   rollup({
     input: 'src/api/api-types.ts',
     output: {
-      sourcemap: true,
-      file: 'dist/api-types.js',
-      format: 'cjs'
+      file: 'dist/api-types.js'
     }
   })
 ]

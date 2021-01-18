@@ -1,7 +1,6 @@
-export const HTTPS = process.env.REACT_APP_HTTPS == 'true'
+const isHTTPS = window.location.protocol.toLocaleLowerCase().includes('https')
+const hostAndPort = window.location.host
 
-export const API_URI =
-  (HTTPS ? 'https://' : 'http://') + process.env.REACT_APP_API_URI
+export const API_URI = (isHTTPS ? 'https://' : 'http://') + hostAndPort
 
-export const WS_URI =
-  (HTTPS ? 'wss://' : 'ws://') + process.env.REACT_APP_API_URI
+export const WS_URI = (isHTTPS ? 'wss://' : 'ws://') + hostAndPort

@@ -6,11 +6,15 @@
   "license": "CC-BY-NC-ND-4.0",
   "private": true,
   "scripts": {
-    "test": "yarn jest --watch",
+    "build:cp-ui": "mkdir -p ./packages/core/dist/ui && cp -R ./packages/ui/build/* ./packages/core/dist/ui",
+    "build": "NODE_ENV=production wsrun --serial --exclude-missing build && npm run build:cp-ui",
+    "dev": "wsrun --parallel --exclude-missing dev",
+    "dev:start": "ROLLUP_RUN=true yarn run dev",
     "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
     "lint:fix": "yarn run lint --fix",
-    "dev": "wsrun --parallel --exclude-missing dev",
-    "dev:start": "ROLLUP_RUN=true yarn run dev"
+    "test": "yarn jest --watch",
+    "publish:daemon": "yarn run build && wsrun -p @dataden/core -c publish",
+    "publish:sdk": "yarn run build && wsrun -p @dataden/sdk -c publish"
   },
   "workspaces": {
     "packages": [

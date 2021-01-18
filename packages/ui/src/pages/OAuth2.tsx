@@ -4,7 +4,7 @@ import { Button, notification, Space, Typography } from 'antd'
 import { usePluginAuthInteractionResult } from 'src/queries'
 import { useQueryParams, StringParam } from 'use-query-params'
 
-import * as Api from '@dataden/core/dist/api-types'
+import * as Api from '@dataden/core/dist/api-types.esm'
 import { ContentCard, Layout } from 'src/Layout'
 import { useHistory } from 'react-router-dom'
 
@@ -22,7 +22,7 @@ export function OAuth2() {
     () =>
       ({
         ...params,
-        state: JSON.parse(params.state)
+        state: JSON.parse(String(params.state))
       } as Api.PluginAuth.PostPluginAuthInteractionResult.OAuthResult),
     [params]
   )

@@ -1,4 +1,5 @@
 import * as winston from 'winston'
+import { getConfig } from 'src/config'
 
 export const transportConsole = new winston.transports.Console({
   format: winston.format.combine(
@@ -16,7 +17,6 @@ export const transportConsole = new winston.transports.Console({
 })
 
 // https://github.com/winstonjs/winston-daily-rotate-file
-// TODO: allow these to be set via application or environment config.
 export const transportFile = new winston.transports.DailyRotateFile({
   filename: 'application-%DATE%.log',
   datePattern: 'YYYY-MM-DD',
@@ -24,5 +24,6 @@ export const transportFile = new winston.transports.DailyRotateFile({
   frequency: '1d',
   maxFiles: '14d',
   utc: true,
-  json: true
+  json: true,
+  dirname: getConfig().LOG_DIR
 })
