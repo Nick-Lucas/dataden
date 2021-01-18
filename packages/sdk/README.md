@@ -2,13 +2,15 @@
 
 This SDK provides a lot of utilities to help build your plugins:
 
-| Name                         | Built?      |
-| ---------------------------- | ----------- |
-| Plugin Creation Helpers      | ✅ Built     |
-| Typescript interfaces & docs | ✅ Built     |
-| Integrated build tools       | ✅ Built     |
-| Integrated linting tools     | 🟠 Coming... |
-| Integrated test tools        | 🟠 Coming... |
+| Name                                 | Built?      |
+| ------------------------------------ | ----------- |
+| Plugin Creation Helpers              | ✅ Built     |
+| Typescript interfaces & docs         | ✅ Built     |
+| 'dataden-scripts' CLI                  | ✅ Built     |
+| Integrated build tools               | ✅ Built     |
+| Emulator with DataDen feature parity | ✅ Built     |
+| Integrated linting tools             | 🟠 Coming... |
+| Integrated test tools                | 🟠 Coming... |
 
 ## Creating a Plugin
 
