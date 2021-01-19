@@ -6,7 +6,7 @@ This SDK provides a lot of utilities to help build your plugins:
 | ------------------------------------ | ----------- |
 | Plugin Creation Helpers              | ✅ Built     |
 | Typescript interfaces & docs         | ✅ Built     |
-| 'dataden-scripts' CLI                  | ✅ Built     |
+| 'dataden-scripts' CLI                | ✅ Built     |
 | Integrated build tools               | ✅ Built     |
 | Emulator with DataDen feature parity | ✅ Built     |
 | Integrated linting tools             | 🟠 Coming... |
@@ -19,6 +19,7 @@ Check out our [1st party plugins](https://github.com/Nick-Lucas/dataden-plugins)
 * Your entry file exports `createPlugin(...)` as default
 * Your package.json defines a `main` field pointing at your entry file
 * Your plugin is published on NPM if you want to contribute it to our plugin registry for others to use
+* **Important:** It is _highly_ recommended that you use the package.json `files` property to whitelist your `dist/` directory and nothing else for publishing. Don't accidentally publish your `.authcache.json` or `outputs/` from the emulator and leak personal data
 
 ```js
 // index.ts
