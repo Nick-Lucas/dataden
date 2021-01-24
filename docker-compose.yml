@@ -7,3 +7,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpw
     ports: 
       - "27017:27017"
+
+  metabase:
+    image: metabase/metabase
+    ports:
+      - "3001:3000"

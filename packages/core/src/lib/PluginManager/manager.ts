@@ -1,9 +1,5 @@
 import fs from 'fs'
-import path from 'path'
 import axios, { AxiosResponse } from 'axios'
-import { Stream } from 'stream'
-import extractZip from 'extract-zip'
-import _ from 'lodash'
 
 import {
   LocalPlugin,
@@ -15,26 +11,13 @@ import {
 import * as Db from 'src/db'
 
 import { PluginService, pluginInstanceIsValid } from '@dataden/sdk'
+import { getInstallationManager } from './getInstallationManager'
 
 import { getScoped } from 'src/logging'
 const log = getScoped('PluginManager')
 
 const REGISTRY_URI =
   'https://raw.githubusercontent.com/Nick-Lucas/dataden/master/meta/registry.json'
-
-// TODO: this will be next to the bundle which may not be ideal during upgrades, perhaps best to select a stable directory elsewhere
-const pluginDir = path.join(__dirname, 'installed')
-if (!fs.existsSync(pluginDir)) {
-  fs.mkdirSync(pluginDir)
-}
-function getPluginDir(pluginId: string, ...extra: string[]) {
-  const location = path.join(pluginDir, pluginId, ...extra)
-  if (!fs.existsSync(location)) {
-    fs.mkdirSync(location, { recursive: true })
-  }
-
-  return location
-}
 
 export class PluginConflictError extends Error {
   constructor() {
@@ -54,18 +37,6 @@ export async function installPlugin(
     throw new InstallPluginError('Plugin source not provided')
   }
 
-  const plugin: Db.Plugins.Plugin = {
-    id: registryPlugin.id,
-    location: registryPlugin.source,
-    version: (registryPlugin as RegistryPlugin).version ?? null,
-    instances: [
-      {
-        name: 'default'
-      }
-    ],
-    local: registryPlugin.local ?? false
-  }
-
   const client = await Db.getClient()
 
   const installedPlugin = await Db.Plugins.Installed.get(
@@ -74,7 +45,7 @@ export async function installPlugin(
   )
   if (installedPlugin) {
     log.warn(
-      `Plugin was alrady installed \n${JSON.stringify(
+      `Plugin was already installed \n${JSON.stringify(
         installedPlugin,
         null,
         2
@@ -83,69 +54,31 @@ export async function installPlugin(
     throw new PluginConflictError()
   }
 
-  if (registryPlugin.local) {
-    if (!fs.existsSync(registryPlugin.source)) {
-      const message = `Local plugin at '${registryPlugin.source}' cannot be installed. File does not exist on server.`
-      log.warn(message)
-      throw new InstallPluginError(message)
-    }
+  const installationManager = getInstallationManager(
+    registryPlugin.local,
+    registryPlugin.source
+  )
 
-    return await Db.Plugins.Installed.upsert(client, plugin)
-  } else {
-    const pluginDir = getPluginDir(plugin.id)
+  await installationManager.install({ forceUpdate: true })
 
-    const extension = registryPlugin.source.includes('.')
-      ? _.last(registryPlugin.source.split('.'))
-      : null
-
-    const downloadLocation = path.join(
-      pluginDir,
-      'download' + (extension ? '.' + extension : '')
-    )
-
-    const file = fs.createWriteStream(downloadLocation)
-    const stream = await axios.get<Stream>(registryPlugin.source, {
-      responseType: 'stream'
-    })
-    await new Promise((resolve) => {
-      stream.data.pipe(file).on('close', resolve)
-    })
-
-    if (extension === 'js') {
-      plugin.location = path.join(pluginDir, 'index.js')
-      fs.renameSync(downloadLocation, plugin.location)
-    } else {
-      try {
-        await extractZip(downloadLocation, { dir: pluginDir })
-      } catch (e) {
-        throw `Could not extract '${downloadLocation}' as an archive, is it something else? ${e}`
+  const plugin: Db.Plugins.Plugin = {
+    id: registryPlugin.id,
+    location: installationManager.getInstalledPath(),
+    version: installationManager.getInstalledVersion(),
+    instances: [
+      {
+        name: 'default'
       }
-
-      fs.unlinkSync(downloadLocation)
-
-      const files = fs
-        .readdirSync(pluginDir, { withFileTypes: true })
-        .filter((file) => file.isFile() && file.name.endsWith('.js'))
-
-      if (files.length === 1) {
-        plugin.location = path.join(pluginDir, files[0].name)
-      } else {
-        const indexJs = files.find((file) => file.name == 'index.js')
-        if (indexJs) {
-          plugin.location = path.join(pluginDir, indexJs.name)
-        } else {
-          throw new InstallPluginError(
-            'Could not find either an index.js or a solo .js file in the downloaded archive'
-          )
-        }
-      }
-    }
-
-    return await Db.Plugins.Installed.upsert(client, plugin)
+    ],
+    local: registryPlugin.local ?? false
   }
+
+  await Db.Plugins.Installed.upsert(client, plugin)
+
+  return plugin
 }
 
-export function uninstallPlugin(pluginId: string) {
+export function uninstallPlugin() {
   throw '[uninstallPlugin] Not Implemented'
 }
 

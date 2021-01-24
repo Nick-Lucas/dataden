@@ -41,8 +41,7 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
                   marginBottom: 0
                 }}
               >
-                {plugin.id}{' '}
-                {(plugin.version ?? -1) >= 0 && `(version: ${plugin.version})`}
+                {plugin.id} ({plugin.version})
               </Typography.Title>
             </Space>
           </Typography.Title>
@@ -59,7 +58,13 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
         </Row>
 
         <Row>
-          <Typography.Text type="secondary">{plugin.location}</Typography.Text>
+          <Typography.Text
+            type="secondary"
+            ellipsis
+            style={{ direction: 'rtl' }}
+          >
+            {plugin.location}
+          </Typography.Text>
         </Row>
 
         <List

@@ -3,7 +3,8 @@ import { getConfig } from 'src/config'
 
 export const DATABASES = {
   CORE: 'core',
-  PLUGIN_PREFIX: 'plugin__'
+  PLUGIN_PREFIX: 'plugin__',
+  DATA: 'data'
 }
 
 export const COLLECTIONS = {

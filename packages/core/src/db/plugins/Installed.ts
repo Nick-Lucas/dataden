@@ -5,7 +5,7 @@ import { stripMongoId } from '../stripMongoId'
 interface PluginBase {
   id: string
   location: string
-  version?: number
+  version: string
   local: boolean
 }
 
