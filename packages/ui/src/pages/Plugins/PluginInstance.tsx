@@ -7,14 +7,19 @@ import {
   Button,
   Modal,
   message,
-  Popconfirm
+  Popconfirm,
+  Popover
 } from 'antd'
 import * as icons from '@ant-design/icons'
 import produce from 'immer'
 import { css } from 'styled-components/macro'
 
 import { PluginInstanceEdit } from './PluginInstanceEdit'
-import { useInstalledPluginUpdate, usePluginAuthInteraction } from 'src/queries'
+import {
+  useInstalledPluginUpdate,
+  usePluginAuthInteraction,
+  usePluginForceSync
+} from 'src/queries'
 import * as Api from '@dataden/core/dist/api-types.esm'
 
 interface PluginInstanceProps {
@@ -88,6 +93,8 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
               Remove
             </Button>
           </Popconfirm>
+
+          <ExtraOptions plugin={plugin} instance={instance} />
         </Space>
       </Row>
 
@@ -105,5 +112,42 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
         />
       </Modal>
     </List.Item>
+  )
+}
+
+const ExtraOptions = ({ plugin, instance }: PluginInstanceProps) => {
+  const forceSync = usePluginForceSync()
+
+  return (
+    <Popover
+      trigger="click"
+      content={
+        <Space direction="vertical">
+          <Row>
+            <Button
+              style={{ flex: '1 1 auto' }}
+              onClick={() =>
+                forceSync.mutate({
+                  pluginId: plugin.id,
+                  instanceId: instance.name
+                })
+              }
+              disabled={forceSync.isLoading}
+            >
+              <Space>
+                <icons.SyncOutlined />
+                Sync Now
+              </Space>
+            </Button>
+          </Row>
+        </Space>
+      }
+    >
+      <Button
+        type="ghost"
+        size="large"
+        icon={<icons.EllipsisOutlined />}
+      ></Button>
+    </Popover>
   )
 }

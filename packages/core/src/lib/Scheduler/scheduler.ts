@@ -67,7 +67,7 @@ export async function start() {
       const authOK = authState ? authState.status === 'OK' : true
 
       if (settings && authOK) {
-        service.interval = queueLoaders(client, service)
+        service.loaderScheduler = queueLoaders(client, service)
       } else {
         service.running = false
 
@@ -94,8 +94,8 @@ export async function start() {
 export async function stop() {
   while (services.length > 0) {
     const service = services.pop()
-    if (service.interval) {
-      clearInterval(service.interval)
+    if (service.loaderScheduler?.interval) {
+      clearInterval(service.loaderScheduler.interval)
     }
   }
 }

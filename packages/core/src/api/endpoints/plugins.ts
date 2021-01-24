@@ -19,7 +19,8 @@ import {
   Reload,
   PutPluginInstanceSettings,
   GetPluginInstanceSettings,
-  PostInstallPlugin
+  PostInstallPlugin,
+  PostForceSync
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -119,6 +120,28 @@ export function listen(app: Express, log: Logger) {
 
     response.sendStatus(200)
   })
+
+  app.post<PostForceSync.RouteParams>(
+    PostForceSync.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId, instanceId } = request.params
+
+      const service = await Scheduler.getPluginService(pluginId, instanceId)
+      if (!service) {
+        response.status(404)
+        response.send(
+          `Plugin ${pluginId} with instance ${instanceId} not found`
+        )
+        return
+      }
+
+      // Don't await promise, this will end up in the console anyway
+      service.loaderScheduler?.immediate()
+
+      response.sendStatus(200)
+    }
+  )
 
   app.get<
     GetPluginInstanceSettings.RouteParams,

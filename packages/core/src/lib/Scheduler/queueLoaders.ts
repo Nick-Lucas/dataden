@@ -1,21 +1,20 @@
 import { MongoClient } from 'mongodb'
 
-import { SyncSuccessInfo } from '@dataden/sdk'
-
 import * as Db from 'src/db'
 import { DbPath } from 'src/db/plugins'
 import { runLoaders } from 'src/lib/Loaders'
 
-import { PluginService } from './types'
+import { PluginService, PluginLoaderScheduler } from './types'
 import { isSyncDue } from './isSyncDue'
 
+import { v4 } from 'uuid'
 import { getScoped } from 'src/logging'
 const log = getScoped('QueueLoaders')
 
 export function queueLoaders(
   client: MongoClient,
   pluginService: PluginService
-): NodeJS.Timeout {
+): PluginLoaderScheduler {
   const isRunning = false
 
   const { definition, instance } = pluginService
@@ -26,14 +25,17 @@ export function queueLoaders(
     instanceName: instance.name
   }
 
-  async function maybeLoadData() {
-    log.info(`${pluginId}->${instance.name}: Checking if sync is due`)
+  const queueUuid = v4().slice(0, 4)
+  async function maybeLoadData(force = false) {
+    log.info(
+      `${pluginId}->${instance.name} (Queue ${queueUuid}): Checking if sync is due`
+    )
 
     const settings = await Db.Plugins.Settings.get(client, dbPath)
     const lastSync = await Db.Plugins.Syncs.last(client, dbPath)
 
     const syncDue = isSyncDue(new Date(), lastSync.date, settings.schedule)
-    if (!syncDue) {
+    if (!syncDue && !force) {
       log.info(`${pluginId}->${instance.name}: Sync not due yet`)
       return
     }
@@ -56,5 +58,8 @@ export function queueLoaders(
 
   maybeLoadData()
 
-  return global.setInterval(maybeLoadData, 30000)
+  return {
+    interval: global.setInterval(maybeLoadData, 30000),
+    immediate: () => maybeLoadData(true)
+  }
 }

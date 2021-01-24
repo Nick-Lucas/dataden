@@ -135,3 +135,24 @@ export function usePluginInstanceSettingsUpdate() {
     }
   )
 }
+
+export function usePluginForceSync() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function (params: Api.Plugins.PostForceSync.RouteParams) {
+      return (
+        await axios.post(
+          getUri(Api.Plugins.PostForceSync.getPath(params)),
+          null,
+          { withCredentials: true }
+        )
+      ).data
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Data.GetStatus.path)
+      }
+    }
+  )
+}

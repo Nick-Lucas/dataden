@@ -13,9 +13,14 @@ export interface PluginServiceStatus {
   status: PluginServiceStatusType
 }
 
+export interface PluginLoaderScheduler {
+  interval?: NodeJS.Timeout
+  immediate: () => Promise<void>
+}
+
 export interface PluginService extends PluginServiceStatus {
   definition: PluginServiceDefinition
   instance: PluginInstance
 
-  interval?: NodeJS.Timeout
+  loaderScheduler?: PluginLoaderScheduler
 }

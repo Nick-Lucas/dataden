@@ -23,6 +23,18 @@ export namespace Reload {
   export const path = '/v1.0/plugins/reload'
 }
 
+export namespace PostForceSync {
+  export const path = '/v1.0/plugins/:pluginId/:instanceId/request-sync'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' +
+    encodeURIComponent(params.pluginId) +
+    '/' +
+    encodeURIComponent(params.instanceId) +
+    '/request-sync'
+
+  export type RouteParams = Common.PluginInstanceParams
+}
+
 // Management
 
 export namespace GetPlugin {
