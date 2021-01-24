@@ -1,19 +1,17 @@
 {
   "list": [
     {
-      "version": 1,
-      "id": "example/random-number",
+      "id": "dataden-plugin-rng",
       "name": "Random Number Generator",
       "description": "An example plugin, useful as a test plugin",
-      "source": "https://github.com/Nick-Lucas/dataden-plugin-rng/releases/download/v.0.1.0/dataden-plugin-rng.zip",
+      "source": "dataden-plugin-rng",
       "verified": true
     },
     {
-      "version": 1,
       "id": "example/non-installable",
       "name": "Fake Plugin which cannot be installed",
       "description": "An example plugin, useful as a test plugin",
-      "source": "",
+      "source": "@dataden/unknown-plugin",
       "verified": false
     }
   ]
