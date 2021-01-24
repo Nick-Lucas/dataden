@@ -8,6 +8,13 @@
       "verified": true
     },
     {
+      "id": "dataden-plugin-truelayer",
+      "name": "Truelayer",
+      "description": "A Truelayer Open Banking integration",
+      "source": "dataden-plugin-truelayer",
+      "verified": true
+    },
+    {
       "id": "example/non-installable",
       "name": "Fake Plugin which cannot be installed",
       "description": "An example plugin, useful as a test plugin",

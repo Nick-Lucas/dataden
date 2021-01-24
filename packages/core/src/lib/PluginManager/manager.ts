@@ -45,7 +45,7 @@ export async function installPlugin(
   )
   if (installedPlugin) {
     log.warn(
-      `Plugin was alrady installed \n${JSON.stringify(
+      `Plugin was already installed \n${JSON.stringify(
         installedPlugin,
         null,
         2
