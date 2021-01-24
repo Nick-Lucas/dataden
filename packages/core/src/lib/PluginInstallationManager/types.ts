@@ -3,8 +3,8 @@ export interface InstallOptions {
 }
 
 export interface IPluginInstallationManager {
-  isInstalled: (packageName: string) => boolean
-  getInstalledPath: (packageName: string) => string
-  getPackageJson: (packageName: string) => string
-  install: (packageName: string, opts: InstallOptions) => Promise<void>
+  isInstalled: (packageLocator: string) => boolean
+  getInstalledPath: (packageLocator: string) => string
+  getPackageJson: (packageLocator: string) => string
+  install: (packageLocator: string, opts: InstallOptions) => Promise<void>
 }

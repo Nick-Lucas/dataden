@@ -29,7 +29,7 @@ export class NpmInstallationManager implements IPluginInstallationManager {
     return fs.existsSync(this.getPackageJson(packageName))
   }
 
-  /** Returns the directory containing the package.json */
+  /** Returns the directory containing the package.json, this can be require'd to run the package */
   getInstalledPath = (packageName: string): string => {
     return path.join(getPluginDir(this.pluginsRoot, packageName))
   }
