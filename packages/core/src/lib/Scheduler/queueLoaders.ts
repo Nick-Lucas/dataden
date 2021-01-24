@@ -59,7 +59,7 @@ export function queueLoaders(
   maybeLoadData()
 
   return {
-    interval: global.setInterval(maybeLoadData, 30000),
+    interval: global.setInterval(() => maybeLoadData(false), 30000),
     immediate: () => maybeLoadData(true)
   }
 }
