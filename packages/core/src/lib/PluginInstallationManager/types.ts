@@ -2,6 +2,8 @@ export interface InstallOptions {
   forceUpdate: boolean
 }
 
+export class NotFoundError extends Error {}
+
 export interface IPluginInstallationManager {
   isInstalled: (packageLocator: string) => boolean
   getInstalledPath: (packageLocator: string) => string
