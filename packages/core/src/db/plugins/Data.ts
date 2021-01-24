@@ -4,7 +4,7 @@ import * as Sdk from '@dataden/sdk'
 
 import { PagingPosition, PagingResult } from '../common'
 import { DbPath } from './types'
-import { getPluginDb } from './helpers'
+import { getPluginDataDb } from './helpers'
 
 export type DataRow = Sdk.DataRow
 
@@ -15,7 +15,7 @@ export const Data = {
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, path, 'data_' + dataSetName).insertMany(rows, {
+    await getPluginDataDb(client, path, dataSetName).insertMany(rows, {
       ordered: true
     })
   },
@@ -26,7 +26,7 @@ export const Data = {
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDb(client, path, 'data_' + dataSetName).deleteMany({})
+    await getPluginDataDb(client, path, dataSetName).deleteMany({})
     await Data.append(client, path, dataSetName, rows)
   },
 
@@ -37,7 +37,7 @@ export const Data = {
     position: PagingPosition = { page: 0 },
     pageSize = 1000
   ): Promise<PagingResult<DataRow>> {
-    const cursor = await getPluginDb(client, path, 'data_' + dataSetName).find<
+    const cursor = await getPluginDataDb(client, path, dataSetName).find<
       DataRow
     >({})
 
