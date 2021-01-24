@@ -41,8 +41,7 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
                   marginBottom: 0
                 }}
               >
-                {plugin.id}{' '}
-                {(plugin.version ?? -1) >= 0 && `(version: ${plugin.version})`}
+                {plugin.id} ({plugin.version})
               </Typography.Title>
             </Space>
           </Typography.Title>

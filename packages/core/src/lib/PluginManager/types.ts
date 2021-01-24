@@ -10,7 +10,6 @@ export interface CorePlugin {
 }
 
 export interface RegistryPlugin extends CorePlugin {
-  version: number
   verified: boolean
   local: false
 }

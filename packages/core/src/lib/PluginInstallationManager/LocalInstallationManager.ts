@@ -1,70 +1,86 @@
-#!/usr/bin/env ts-node-script
-
 import path from 'path'
 import fs from 'fs'
-import child_process from 'child_process'
-import { IPluginInstallationManager, InstallOptions } from './types'
+import {
+  IPluginInstallationManager,
+  InstallOptions,
+  NotFoundError
+} from './types'
 import { SdkLogger } from '@dataden/sdk'
 
-// TODO: determine install directory, make it different in production to dev mode
-// const pluginsRoot = path.join(homedir(), '/.dataden-plugins')
-
 interface LocalInstallationManagerConstructor {
+  packageJsonPath: string
   logger?: SdkLogger
 }
 
-// TODO: support installing specific versions, listing available versions, etc
 export class LocalInstallationManager implements IPluginInstallationManager {
+  private packageJsonPath: string
   private log: SdkLogger
 
   constructor(props: LocalInstallationManagerConstructor) {
+    this.packageJsonPath = props.packageJsonPath
     this.log = props.logger ?? console
   }
 
   /** Is the plugin already installed? */
-  isInstalled = (packageJsonPath: string): boolean => {
-    return fs.existsSync(this.getPackageJson(packageJsonPath))
+  isInstalled = (): boolean => {
+    try {
+      return !!getPluginRoot(this.packageJsonPath)
+    } catch (e) {
+      return false
+    }
   }
 
   /** Returns the directory containing the package.json, this can be require'd to run the package */
-  getInstalledPath = (packageJsonPath: string): string => {
-    return path.join(getPluginDir(this.pluginsRoot, packageJsonPath))
+  getInstalledPath = (): string => {
+    if (!this.isInstalled()) {
+      return null
+    }
+
+    return getPluginRoot(this.packageJsonPath)
+  }
+
+  getInstalledVersion = (): string => {
+    if (!this.isInstalled()) {
+      return null
+    }
+
+    return require(this.getPackageJson()).version
   }
 
   /** Returns the calculated package.json path for a given plugin packageJsonPath */
-  getPackageJson = (packageJsonPath: string): string => {
-    return path.join(this.getInstalledPath(packageJsonPath), 'package.json')
+  getPackageJson = (): string => {
+    if (!this.isInstalled()) {
+      return null
+    }
+
+    return path.join(getPluginRoot(this.packageJsonPath), 'package.json')
   }
 
   // TODO: add isUpgradePossible method
 
   /** Install the plugin, or optionall update an existing installation */
-  install = async (
-    packageJsonPath: string,
-    opts: InstallOptions = { forceUpdate: false }
-  ) => {
-    this.log.info(`Attempting install of ${packageJsonPath}`)
+  install = async (opts: Omit<InstallOptions, 'forceUpdate'> = {}) => {
+    this.log.info(`Attempting install of ${this.packageJsonPath}`)
+
+    if (this.isInstalled()) {
+      return
+    }
+
+    // Nothing to do, we just use the calculated path relative to any provided path
+    return
   }
 }
 
-/** Get the very root of the plugin's installation, just contains: node_modules, package-lock.json */
-function getPluginRoot(pluginRoot: string, packageJsonPath: string) {
-  return path.join(pluginRoot, packageJsonPath)
-}
-
-/** Get the arg to pass to npm, which directs installation to the plugin root */
-const getPrefixArg = (pluginRoot: string, packageJsonPath: string) =>
-  `--prefix=${getPluginRoot(pluginRoot, packageJsonPath)}`
-
-/** Get the actual directory which the plugin can be found at.
- *
- * Thanks to NPM weirdness and wanting to isolate dependencies from each other, the plugin will be somewhere like:
- * $pluginsRoot/$packageJsonPath/node_modules/$packageJsonPath/package.json
- */
-function getPluginDir(pluginRoot: string, packageJsonPath: string) {
-  return path.join(
-    getPluginRoot(pluginRoot, packageJsonPath),
-    'node_modules',
-    packageJsonPath
-  )
+/** Get the very root of the plugin's installation, throw if package.json can't be found */
+function getPluginRoot(packageJsonPath: string) {
+  if (packageJsonPath.endsWith('package.json')) {
+    if (fs.existsSync(packageJsonPath)) {
+      return path.dirname(packageJsonPath)
+    } else {
+      throw new NotFoundError(packageJsonPath)
+    }
+  } else {
+    const guessedPath = path.join(packageJsonPath, 'package.json')
+    return getPluginRoot(guessedPath)
+  }
 }
