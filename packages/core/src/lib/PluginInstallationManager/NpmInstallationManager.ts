@@ -3,26 +3,25 @@
 import path from 'path'
 import fs from 'fs'
 import child_process from 'child_process'
-
-const thisRoot = __dirname // TODO: find the package root for this project
+import { IPluginInstallationManager, InstallOptions } from './types'
+import { SdkLogger } from '@dataden/sdk'
 
 // TODO: determine install directory, make it different in production to dev mode
 // const pluginsRoot = path.join(homedir(), '/.dataden-plugins')
 
 interface NpmInstallationManagerConstructor {
   pluginsRoot: string
-}
-
-interface InstallOptions {
-  forceUpdate: boolean
+  logger?: SdkLogger
 }
 
 // TODO: support installing specific versions, listing available versions, etc
-export class NpmInstallationManager {
+export class NpmInstallationManager implements IPluginInstallationManager {
   private pluginsRoot: string
+  private log: SdkLogger
 
   constructor(props: NpmInstallationManagerConstructor) {
     this.pluginsRoot = props.pluginsRoot
+    this.log = props.logger ?? console
   }
 
   /** Is the plugin already installed? */
@@ -43,31 +42,28 @@ export class NpmInstallationManager {
   // TODO: add isUpgradePossible method
 
   /** Install the plugin, or optionall update an existing installation */
-  install = (
+  install = async (
     packageName: string,
     opts: InstallOptions = { forceUpdate: false }
   ) => {
+    this.log.info(`Attempting install of ${packageName}`)
     if (!fs.existsSync(this.pluginsRoot)) {
       fs.mkdirSync(this.pluginsRoot, { recursive: true })
     }
 
     if (!this.isInstalled(packageName) || opts.forceUpdate) {
+      this.log.info(`Will Install`)
+
       child_process.spawnSync('npm', [
         'install',
         getPrefixArg(this.pluginsRoot, packageName),
         packageName
       ])
+
+      this.log.info(`Installed Successfully`)
+    } else {
+      this.log.info(`Already Installed`)
     }
-
-    // We link the package itself through npm
-    child_process.spawnSync('npm', ['link'], {
-      cwd: getPluginRoot(this.pluginsRoot, packageName)
-    })
-
-    // We then symlink the linked package into the dataden project
-    child_process.spawnSync('npm', ['link', packageName], {
-      cwd: thisRoot
-    })
   }
 }
 
