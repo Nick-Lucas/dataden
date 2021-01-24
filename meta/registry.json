@@ -11,7 +11,7 @@
       "id": "example/non-installable",
       "name": "Fake Plugin which cannot be installed",
       "description": "An example plugin, useful as a test plugin",
-      "source": "",
+      "source": "@dataden/unknown-plugin",
       "verified": false
     }
   ]

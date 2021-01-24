@@ -31,15 +31,11 @@ export class NpmInstallationManager implements IPluginInstallationManager {
 
   /** Is the plugin already installed? */
   isInstalled = (): boolean => {
-    return fs.existsSync(this.getPackageJson())
+    return fs.existsSync(path.join(this.getInstalledPath(), 'package.json'))
   }
 
   /** Returns the directory containing the package.json, this can be require'd to run the package */
   getInstalledPath = (): string => {
-    if (!this.isInstalled()) {
-      return null
-    }
-
     return path.join(getPluginDir(this.pluginsRoot, this.packageName))
   }
 

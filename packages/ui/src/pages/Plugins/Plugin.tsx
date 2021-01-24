@@ -58,7 +58,13 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
         </Row>
 
         <Row>
-          <Typography.Text type="secondary">{plugin.location}</Typography.Text>
+          <Typography.Text
+            type="secondary"
+            ellipsis
+            style={{ direction: 'rtl' }}
+          >
+            {plugin.location}
+          </Typography.Text>
         </Row>
 
         <List

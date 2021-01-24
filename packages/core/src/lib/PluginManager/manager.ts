@@ -1,11 +1,6 @@
 import fs from 'fs'
-import path from 'path'
 import axios, { AxiosResponse } from 'axios'
-import { Stream } from 'stream'
-import extractZip from 'extract-zip'
-import _ from 'lodash'
 
-import { getConfig } from 'src/config'
 import {
   LocalPlugin,
   PluginServiceDefinition,
@@ -64,7 +59,7 @@ export async function installPlugin(
     registryPlugin.source
   )
 
-  installationManager.install({ forceUpdate: true })
+  await installationManager.install({ forceUpdate: true })
 
   const plugin: Db.Plugins.Plugin = {
     id: registryPlugin.id,
@@ -83,7 +78,7 @@ export async function installPlugin(
   return plugin
 }
 
-export function uninstallPlugin(pluginId: string) {
+export function uninstallPlugin() {
   throw '[uninstallPlugin] Not Implemented'
 }
 
