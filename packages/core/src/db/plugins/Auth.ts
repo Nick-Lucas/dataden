@@ -34,5 +34,9 @@ export const Auth = {
       { $set: authState },
       { upsert: true }
     )
+  },
+
+  reset: async (client: MongoClient, path: DbPath): Promise<void> => {
+    await getPluginDb(client, path, 'auth').deleteOne({})
   }
 }

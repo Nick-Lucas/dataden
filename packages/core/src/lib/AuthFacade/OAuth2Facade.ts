@@ -16,6 +16,15 @@ export const createOAuth2Facade = (
   const log = getScoped('PluginOAuth2Facade->' + plugin.definition.plugin.id)
 
   return {
+    onReset: async () => {
+      log.info('Resetting Auth State')
+
+      Auth.reset(client, {
+        pluginId: plugin.definition.plugin.id,
+        instanceName: plugin.instance.name
+      })
+    },
+
     onUserInteractionPossible: async ({ redirectUri }) => {
       log.info('Fetching User Interaction URI')
 

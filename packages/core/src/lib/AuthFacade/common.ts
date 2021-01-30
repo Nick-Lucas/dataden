@@ -29,6 +29,8 @@ export interface AuthFacade {
   ) => Promise<AuthResult<PluginAuth.AuthState>>
 
   onCredentialsRequired?: () => Promise<AuthResult<PluginAuth.AuthState>>
+
+  onReset: () => Promise<void>
 }
 
 export async function getSettings(
