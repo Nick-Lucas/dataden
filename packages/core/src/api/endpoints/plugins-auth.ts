@@ -85,7 +85,7 @@ export function listen(app: Express, log: Logger) {
     }
 
     try {
-      const service = await Scheduler.getPluginService(pluginId, instanceId)
+      let service = await Scheduler.getPluginService(pluginId, instanceId)
       if (!service) {
         response.sendStatus(404)
         return
@@ -110,6 +110,12 @@ export function listen(app: Express, log: Logger) {
       }
 
       await Scheduler.restart()
+
+      service = await Scheduler.getPluginService(pluginId, instanceId)
+
+      // Start sync immediately, as ecosystems like open banking have some access limited to the first few minutes
+      // Don't await promise, this will end up in the console anyway
+      service.loaderScheduler?.immediate()
 
       response.sendStatus(200)
     } catch (error) {
