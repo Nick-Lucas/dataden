@@ -29,7 +29,9 @@ describe('NpmInstallationManager', () => {
     })
 
   afterEach(() => {
-    console.log('LOGGER CALLS', JSON.stringify(loggerFn.mock.calls, null, 2))
+    // Note: uncomment this line for more info on failures
+    // console.log('LOGGER CALLS', JSON.stringify(loggerFn.mock.calls, null, 2))
+
     loggerFn.mockReset()
   })
 
