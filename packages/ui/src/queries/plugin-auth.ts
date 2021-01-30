@@ -27,6 +27,21 @@ export function usePluginAuthInteraction(
   )
 }
 
+export function usePluginAuthState(
+  params: Api.PluginAuth.GetPluginAuth.RouteParams
+) {
+  return useQuery(Api.PluginAuth.GetPluginAuth.getPath(params), async () => {
+    const result = await axios.get<Api.PluginAuth.GetPluginAuth.Response>(
+      getUri(Api.PluginAuth.GetPluginAuth.getPath(params)),
+      {
+        withCredentials: true
+      }
+    )
+
+    return result.data
+  })
+}
+
 export function usePluginAuthReset() {
   const client = useQueryClient()
 

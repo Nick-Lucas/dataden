@@ -9,7 +9,8 @@ import { MaybeError, authenticatedEndpoint } from './common'
 import {
   PostPluginAuthInteraction,
   PostPluginAuth,
-  DeletePluginAuth
+  DeletePluginAuth,
+  GetPluginAuth
 } from './plugins-auth.types'
 
 export function listen(app: Express, log: Logger) {
@@ -123,6 +124,40 @@ export function listen(app: Express, log: Logger) {
       response.send(String(error))
     }
   })
+
+  app.get<GetPluginAuth.RouteParams, GetPluginAuth.Response>(
+    GetPluginAuth.path,
+    async (request, response) => {
+      const { pluginId, instanceId } = request.params
+
+      if (!pluginId || !instanceId) {
+        response.sendStatus(400)
+        return
+      }
+
+      try {
+        const client = await Db.getClient()
+
+        const service = await Scheduler.getPluginService(pluginId, instanceId)
+        if (!service) {
+          response.sendStatus(404)
+          return
+        }
+
+        const authFacade = AuthFacade.createAuthFacade(client, service)
+        if (!authFacade) {
+          response.status(200)
+          response.send({ resettable: false })
+          return
+        }
+
+        return response.send({ resettable: true })
+      } catch (error) {
+        response.status(500)
+        response.send(String(error) as any)
+      }
+    }
+  )
 
   app.delete<DeletePluginAuth.RouteParams>(
     DeletePluginAuth.path,

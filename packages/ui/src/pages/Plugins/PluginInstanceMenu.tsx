@@ -1,7 +1,11 @@
 import { Row, Space, Button, Popover, Popconfirm } from 'antd'
 import * as icons from '@ant-design/icons'
 
-import { usePluginForceSync, usePluginAuthReset } from 'src/queries'
+import {
+  usePluginForceSync,
+  usePluginAuthReset,
+  usePluginAuthState
+} from 'src/queries'
 import * as Api from '@dataden/core/dist/api-types.esm'
 
 interface PluginInstanceProps {
@@ -14,7 +18,14 @@ export const PluginInstanceMenu = ({
   instance
 }: PluginInstanceProps) => {
   const forceSync = usePluginForceSync()
+  const authState = usePluginAuthState({
+    pluginId: plugin.id,
+    instanceId: instance.name
+  })
   const authReset = usePluginAuthReset()
+
+  const cannotReset =
+    authState.isLoading || authReset.isLoading || !authState.data?.resettable
 
   return (
     <Popover
@@ -50,11 +61,12 @@ export const PluginInstanceMenu = ({
               }
               okText="Reset"
               okType="danger"
+              disabled={cannotReset}
             >
               <Button
                 style={{ flex: '1 1 auto', alignItems: 'flex-start' }}
                 danger
-                disabled={authReset.isLoading}
+                disabled={cannotReset}
               >
                 <Space>
                   <icons.LogoutOutlined />
