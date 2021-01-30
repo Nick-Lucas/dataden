@@ -56,9 +56,8 @@ export class LocalInstallationManager implements IPluginInstallationManager {
     return path.join(getPluginRoot(this.packageJsonPath), 'package.json')
   }
 
-  // TODO: add isUpgradePossible method
+  isUpgradePossible = () => Promise.resolve(false)
 
-  /** Install the plugin, or optionall update an existing installation */
   install = async (opts: Omit<InstallOptions, 'forceUpdate'> = {}) => {
     this.log.info(`Attempting install of ${this.packageJsonPath}`)
 
@@ -66,8 +65,7 @@ export class LocalInstallationManager implements IPluginInstallationManager {
       return
     }
 
-    // Nothing to do, we just use the calculated path relative to any provided path
-    return
+    throw `Local plugin at ${this.packageJsonPath} could not be found. Are you sure it exists?`
   }
 }
 

@@ -1,6 +1,10 @@
 import path from 'path'
 import fs from 'fs'
 import child_process from 'child_process'
+
+import axios from 'axios'
+import semver from 'semver'
+
 import {
   IPluginInstallationManager,
   InstallOptions,
@@ -54,6 +58,36 @@ export class NpmInstallationManager implements IPluginInstallationManager {
     }
 
     return path.join(this.getInstalledPath(), 'package.json')
+  }
+
+  isUpgradePossible = async () => {
+    if (!this.isInstalled()) {
+      return true
+    }
+
+    const API_PATH =
+      'https://api.npms.io/v2/package/' + encodeURIComponent(this.packageName)
+
+    let result: {
+      collection: { metadata: { name: string; version: string } }
+    } = null
+    try {
+      result = (
+        await axios.get(API_PATH, {
+          validateStatus: (status) => status === 200
+        })
+      ).data
+
+      const installedVersion = require(this.getPackageJson()).version
+
+      return semver.gt(installedVersion, result.collection.metadata.version)
+    } catch (err) {
+      this.log.warn(
+        `Could not load package "${this.packageName}" from npm registry`
+      )
+
+      return false
+    }
   }
 
   /** Install the plugin, or optionall update an existing installation */
