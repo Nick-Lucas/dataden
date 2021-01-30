@@ -6,6 +6,8 @@ import { PagingPosition, PagingResult } from '../common'
 import { DbPath } from './types'
 import { getPluginDataDb } from './helpers'
 
+import { getScoped } from 'src/logging'
+
 export type DataRow = Sdk.DataRow
 
 export const Data = {
@@ -15,9 +17,33 @@ export const Data = {
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDataDb(client, path, dataSetName).insertMany(rows, {
-      ordered: true
-    })
+    if (!rows || rows.length === 0) {
+      return
+    }
+
+    const log = getScoped(
+      `DB ${path.pluginId}->${path.instanceName}->${dataSetName}`
+    )
+
+    log.info(`Upserting ${rows.length} rows`)
+
+    const result = await getPluginDataDb(client, path, dataSetName).bulkWrite(
+      rows.map((row) => {
+        return {
+          updateOne: {
+            filter: { uniqueId: row.uniqueId },
+            update: { $set: row },
+            upsert: true
+          }
+        }
+      })
+    )
+
+    log.info(
+      `Inserted ${result.insertedCount} and Updated ${result.modifiedCount}. Total upserted: ${result.upsertedCount}`
+    )
+
+    return
   },
 
   replace: async function (
