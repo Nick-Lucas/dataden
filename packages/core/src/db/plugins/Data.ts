@@ -39,9 +39,7 @@ export const Data = {
       })
     )
 
-    log.info(
-      `Inserted ${result.insertedCount} and Updated ${result.modifiedCount}. Total upserted: ${result.upsertedCount}`
-    )
+    log.info(`Total upserted: ${result.upsertedCount}`)
 
     return
   },
