@@ -54,6 +54,11 @@ export class NpmInstallationManager implements IPluginInstallationManager {
       return null
     }
 
+    const packageJsonPath = this.getPackageJson()
+
+    // Clear the cache so any recent installs/updates don't get passed over
+    delete require.cache[packageJsonPath]
+
     return require(this.getPackageJson()).version
   }
 
@@ -103,12 +108,6 @@ export class NpmInstallationManager implements IPluginInstallationManager {
         nextVersion: null
       }
     }
-
-    return {
-      updatable: false,
-      currentVersion: this.getInstalledVersion(),
-      nextVersion: this.getInstalledVersion()
-    }
   }
 
   /** Install the plugin, or optionally update an existing installation */
@@ -135,7 +134,7 @@ export class NpmInstallationManager implements IPluginInstallationManager {
           'install',
           '--no-save',
           getPrefixArg(this.pluginsRoot, this.packageName),
-          this.packageName
+          this.packageName + '@latest'
         ])
 
         function rejectAndKill(reason) {
