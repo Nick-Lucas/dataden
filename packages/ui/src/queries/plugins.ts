@@ -30,6 +30,21 @@ export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
   })
 }
 
+export function useInstalledPluginUpgrade(
+  params: Api.Plugins.GetPluginUpdate.RouteParams
+) {
+  return useQuery(Api.Plugins.GetPluginUpdate.getPath(params), async () => {
+    return (
+      await axios.get<Api.Plugins.GetPluginUpdate.Response>(
+        getUri(Api.Plugins.GetPluginUpdate.getPath(params)),
+        {
+          withCredentials: true
+        }
+      )
+    ).data
+  })
+}
+
 export function useInstalledPluginUpdate() {
   const client = useQueryClient()
 

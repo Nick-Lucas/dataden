@@ -12,6 +12,16 @@ export namespace GetPlugins {
   export type Response = Db.Plugins.Plugin[]
 }
 
+export namespace GetPluginUpdate {
+  export const path = '/v1.0/plugins/:pluginId/update'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' + encodeURIComponent(params.pluginId) + '/update'
+
+  export type RouteParams = Common.PluginParams
+
+  export type Response = { updatable: boolean }
+}
+
 export namespace PostInstallPlugin {
   export const path = '/v1.0/plugins/install'
 

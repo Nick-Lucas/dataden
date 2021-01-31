@@ -70,7 +70,8 @@ export async function installPlugin(
         name: 'default'
       }
     ],
-    local: registryPlugin.local ?? false
+    local: registryPlugin.local ?? false,
+    source: registryPlugin.source
   }
 
   await Db.Plugins.Installed.upsert(client, plugin)

@@ -28,6 +28,11 @@ export class NpmInstallationManager implements IPluginInstallationManager {
   private log: SdkLogger
 
   constructor(props: NpmInstallationManagerConstructor) {
+    if (!props.pluginsRoot)
+      throw 'NpmInstallationManager: pluginsRoot not provided'
+    if (!props.packageName)
+      throw 'NpmInstallationManager: packageName not provided'
+
     this.pluginsRoot = props.pluginsRoot
     this.packageName = props.packageName
     this.log = props.logger ?? console
@@ -67,10 +72,15 @@ export class NpmInstallationManager implements IPluginInstallationManager {
 
     try {
       const result: NpmInfo = await _getNpmInfo(this.packageName)
+      const latestVersion = result.collected.metadata.version
 
       const installedVersion = require(this.getPackageJson()).version
 
-      return semver.gt(installedVersion, result.collected.metadata.version)
+      this.log.info(
+        `Checking for updates to "${this.packageName}". Current: ${installedVersion}, NPM Latest: ${latestVersion}`
+      )
+
+      return semver.gt(latestVersion, installedVersion)
     } catch (err) {
       this.log.warn(
         `Could not load package "${this.packageName}" from npm registry`
@@ -80,7 +90,7 @@ export class NpmInstallationManager implements IPluginInstallationManager {
     }
   }
 
-  /** Install the plugin, or optionall update an existing installation */
+  /** Install the plugin, or optionally update an existing installation */
   install = async (opts: InstallOptions = { forceUpdate: false }) => {
     this.log.info(`Attempting install of ${this.packageName}`)
 

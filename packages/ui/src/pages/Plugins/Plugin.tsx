@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
 import { Typography, List, Button, Row, Space, Modal } from 'antd'
+import * as icons from '@ant-design/icons'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'
@@ -8,6 +9,7 @@ import { PluginInstanceCreate } from './PluginInstanceCreate'
 
 import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
+import { useInstalledPluginUpgrade } from 'src/queries'
 
 interface PluginProps {
   plugin: Api.Plugins.Plugin
@@ -16,6 +18,10 @@ interface PluginProps {
 
 export const Plugin: FC<PluginProps> = ({ plugin }) => {
   const [addingInstance, setAddingInstance] = useState(false)
+
+  const pluginUpgrade = useInstalledPluginUpgrade({
+    pluginId: plugin.id
+  })
 
   return (
     <ContentCard
@@ -47,11 +53,15 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
           </Typography.Title>
 
           <Space>
-            <Button type="primary" onClick={() => setAddingInstance(true)}>
-              Add Instance
+            <Button
+              type="primary"
+              disabled={!pluginUpgrade.data?.updatable}
+              icon={<icons.ArrowUpOutlined />}
+            >
+              Update
             </Button>
 
-            <Button danger disabled>
+            <Button danger disabled icon={<icons.DeleteOutlined />}>
               Uninstall
             </Button>
           </Space>
@@ -68,7 +78,19 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
         </Row>
 
         <List
-          header={<Typography.Text strong>Instances:</Typography.Text>}
+          header={
+            <Row align="middle" justify="space-between">
+              <Typography.Text strong>Instances:</Typography.Text>
+
+              <Button
+                type="link"
+                onClick={() => setAddingInstance(true)}
+                icon={<icons.PlusOutlined />}
+              >
+                Add
+              </Button>
+            </Row>
+          }
           bordered
           size="small"
         >

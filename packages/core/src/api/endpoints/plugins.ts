@@ -8,6 +8,7 @@ import {
   InstallPluginError,
   PluginConflictError
 } from 'src/lib/PluginManager'
+import { getInstallationManager } from 'src/lib/PluginManager/getInstallationManager'
 import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
@@ -20,7 +21,8 @@ import {
   PutPluginInstanceSettings,
   GetPluginInstanceSettings,
   PostInstallPlugin,
-  PostForceSync
+  PostForceSync,
+  GetPluginUpdate
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -81,6 +83,39 @@ export function listen(app: Express, log: Logger) {
       try {
         const plugin = await Db.Plugins.Installed.get(client, pluginId)
         await response.send(plugin)
+      } catch (e) {
+        response.status(500)
+        await response.send(String(e))
+      }
+    }
+  )
+
+  app.get<
+    GetPluginUpdate.RouteParams,
+    MaybeError<GetPluginUpdate.Response>,
+    any,
+    any
+  >(
+    GetPluginUpdate.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId } = request.params
+
+      const plugin = await Scheduler.getPluginService(pluginId)
+      if (!plugin) {
+        response.sendStatus(404)
+        return
+      }
+
+      try {
+        const updatable = await getInstallationManager(
+          plugin.definition.plugin.local,
+          plugin.definition.plugin.source
+        ).isUpgradePossible()
+
+        await response.send({
+          updatable
+        })
       } catch (e) {
         response.status(500)
         await response.send(String(e))
