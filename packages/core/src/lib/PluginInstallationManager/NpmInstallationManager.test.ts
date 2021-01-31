@@ -1,4 +1,4 @@
-import { NpmInstallationManager } from './NpmInstallationManager'
+import { NpmInstallationManager, _getNpmInfo } from './NpmInstallationManager'
 import { tmpdir } from 'os'
 import fs from 'fs'
 import path from 'path'
@@ -151,6 +151,15 @@ describe('NpmInstallationManager', () => {
       )
 
       expect(subject.isInstalled()).toBe(false)
+    })
+  })
+
+  describe('check npm package', () => {
+    it('should get npm package info with name and version', async () => {
+      const info = await _getNpmInfo('dataden-plugin-rng')
+
+      expect(info.collected.metadata.name).toBe('dataden-plugin-rng')
+      expect(info.collected.metadata.version).toBeTruthy()
     })
   })
 })

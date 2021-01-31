@@ -65,22 +65,12 @@ export class NpmInstallationManager implements IPluginInstallationManager {
       return true
     }
 
-    const API_PATH =
-      'https://api.npms.io/v2/package/' + encodeURIComponent(this.packageName)
-
-    let result: {
-      collection: { metadata: { name: string; version: string } }
-    } = null
     try {
-      result = (
-        await axios.get(API_PATH, {
-          validateStatus: (status) => status === 200
-        })
-      ).data
+      const result: NpmInfo = await _getNpmInfo(this.packageName)
 
       const installedVersion = require(this.getPackageJson()).version
 
-      return semver.gt(installedVersion, result.collection.metadata.version)
+      return semver.gt(installedVersion, result.collected.metadata.version)
     } catch (err) {
       this.log.warn(
         `Could not load package "${this.packageName}" from npm registry`
@@ -179,4 +169,18 @@ function getPluginDir(pluginsRoot: string, packageName: string) {
     'node_modules',
     packageName
   )
+}
+
+interface NpmInfo {
+  collected: { metadata: { name: string; version: string } }
+}
+export async function _getNpmInfo(packageName: string): Promise<NpmInfo> {
+  const API_PATH =
+    'https://api.npms.io/v2/package/' + encodeURIComponent(packageName)
+
+  return (
+    await axios.get(API_PATH, {
+      validateStatus: (status) => status === 200
+    })
+  ).data
 }
