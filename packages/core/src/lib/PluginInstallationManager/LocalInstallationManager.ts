@@ -3,7 +3,8 @@ import fs from 'fs'
 import {
   IPluginInstallationManager,
   InstallOptions,
-  NotFoundError
+  NotFoundError,
+  UpgradeInfo
 } from './types'
 import { SdkLogger } from '@dataden/sdk'
 
@@ -56,7 +57,13 @@ export class LocalInstallationManager implements IPluginInstallationManager {
     return path.join(getPluginRoot(this.packageJsonPath), 'package.json')
   }
 
-  isUpgradePossible = () => Promise.resolve(false)
+  getUpgradeInfo = async (): Promise<UpgradeInfo> => {
+    return {
+      updatable: false,
+      currentVersion: this.getInstalledVersion(),
+      nextVersion: this.getInstalledVersion()
+    }
+  }
 
   install = async (opts: Omit<InstallOptions, 'forceUpdate'> = {}) => {
     this.log.info(`Attempting install of ${this.packageJsonPath}`)

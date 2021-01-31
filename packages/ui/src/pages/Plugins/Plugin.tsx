@@ -1,5 +1,14 @@
 import { FC, useState } from 'react'
-import { Typography, List, Button, Row, Space, Modal } from 'antd'
+import {
+  Typography,
+  List,
+  Button,
+  Row,
+  Space,
+  Modal,
+  Popconfirm,
+  notification
+} from 'antd'
 import * as icons from '@ant-design/icons'
 import { css } from 'styled-components/macro'
 
@@ -9,7 +18,10 @@ import { PluginInstanceCreate } from './PluginInstanceCreate'
 
 import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
-import { useInstalledPluginUpgrade } from 'src/queries'
+import {
+  useInstalledPluginUpgradeInfo,
+  useInstalledPluginUpgrader
+} from 'src/queries'
 
 interface PluginProps {
   plugin: Api.Plugins.Plugin
@@ -19,9 +31,10 @@ interface PluginProps {
 export const Plugin: FC<PluginProps> = ({ plugin }) => {
   const [addingInstance, setAddingInstance] = useState(false)
 
-  const pluginUpgrade = useInstalledPluginUpgrade({
+  const pluginUpgrade = useInstalledPluginUpgradeInfo({
     pluginId: plugin.id
   })
+  const pluginUpgrader = useInstalledPluginUpgrader()
 
   return (
     <ContentCard
@@ -53,13 +66,40 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
           </Typography.Title>
 
           <Space>
-            <Button
-              type="primary"
+            <Popconfirm
+              okText="Upgrade"
+              title={
+                'Are you sure you want to upgrade from v' +
+                (pluginUpgrade.data?.currentVersion ?? 'Unknown') +
+                ' to v' +
+                (pluginUpgrade.data?.nextVersion ?? 'Unknown') +
+                '?'
+              }
               disabled={!pluginUpgrade.data?.updatable}
-              icon={<icons.ArrowUpOutlined />}
+              onConfirm={async () => {
+                const result = await pluginUpgrader.mutateAsync({
+                  params: { pluginId: plugin.id }
+                })
+                if (result === 'started') {
+                  notification.info({
+                    message: 'Started Upgrading ' + plugin.id
+                  })
+                } else {
+                  notification.warning({
+                    message:
+                      'Could not start upgrade 😕, maybe check your logs?'
+                  })
+                }
+              }}
             >
-              Update
-            </Button>
+              <Button
+                type="primary"
+                disabled={!pluginUpgrade.data?.updatable}
+                icon={<icons.ArrowUpOutlined />}
+              >
+                Update
+              </Button>
+            </Popconfirm>
 
             <Button danger disabled icon={<icons.DeleteOutlined />}>
               Uninstall

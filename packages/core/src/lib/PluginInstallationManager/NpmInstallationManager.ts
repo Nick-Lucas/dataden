@@ -8,7 +8,8 @@ import semver from 'semver'
 import {
   IPluginInstallationManager,
   InstallOptions,
-  NotFoundError
+  NotFoundError,
+  UpgradeInfo
 } from './types'
 import { SdkLogger } from '@dataden/sdk'
 
@@ -65,28 +66,48 @@ export class NpmInstallationManager implements IPluginInstallationManager {
     return path.join(this.getInstalledPath(), 'package.json')
   }
 
-  isUpgradePossible = async () => {
+  getUpgradeInfo = async (): Promise<UpgradeInfo> => {
     if (!this.isInstalled()) {
-      return true
+      return {
+        updatable: false,
+        currentVersion: null,
+        nextVersion: null
+      }
     }
 
     try {
       const result: NpmInfo = await _getNpmInfo(this.packageName)
       const latestVersion = result.collected.metadata.version
 
-      const installedVersion = require(this.getPackageJson()).version
+      const installedVersion = this.getInstalledVersion()
 
       this.log.info(
         `Checking for updates to "${this.packageName}". Current: ${installedVersion}, NPM Latest: ${latestVersion}`
       )
 
-      return semver.gt(latestVersion, installedVersion)
+      const updatable = semver.gt(latestVersion, installedVersion)
+      return {
+        updatable,
+        currentVersion: installedVersion,
+        nextVersion: latestVersion
+      }
     } catch (err) {
       this.log.warn(
         `Could not load package "${this.packageName}" from npm registry`
       )
 
-      return false
+      // TODO: is this realistic/could be handled better?
+      return {
+        updatable: false,
+        currentVersion: null,
+        nextVersion: null
+      }
+    }
+
+    return {
+      updatable: false,
+      currentVersion: this.getInstalledVersion(),
+      nextVersion: this.getInstalledVersion()
     }
   }
 

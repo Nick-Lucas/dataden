@@ -3,11 +3,7 @@ import StatusCodes from 'http-status-codes'
 import _ from 'lodash'
 
 import * as Db from 'src/db'
-import {
-  installPlugin,
-  InstallPluginError,
-  PluginConflictError
-} from 'src/lib/PluginManager'
+import * as PluginManager from 'src/lib/PluginManager'
 import { getInstallationManager } from 'src/lib/PluginManager/getInstallationManager'
 import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
@@ -22,7 +18,8 @@ import {
   GetPluginInstanceSettings,
   PostInstallPlugin,
   PostForceSync,
-  GetPluginUpdate
+  GetPluginUpdate,
+  PostPluginUpdate
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -38,14 +35,14 @@ export function listen(app: Express, log: Logger) {
       const plugin = request.body
 
       try {
-        const installedPlugin = await installPlugin(plugin)
+        const installedPlugin = await PluginManager.installPlugin(plugin)
 
         await response.send(installedPlugin)
       } catch (e) {
-        if (e instanceof PluginConflictError) {
+        if (e instanceof PluginManager.PluginConflictError) {
           response.status(StatusCodes.CONFLICT)
           await response.send(String(e))
-        } else if (e instanceof InstallPluginError) {
+        } else if (e instanceof PluginManager.InstallPluginError) {
           response.status(StatusCodes.INTERNAL_SERVER_ERROR)
           await response.send(String(e))
         } else {
@@ -101,21 +98,36 @@ export function listen(app: Express, log: Logger) {
     async (request, response) => {
       const { pluginId } = request.params
 
-      const plugin = await Scheduler.getPluginService(pluginId)
-      if (!plugin) {
-        response.sendStatus(404)
-        return
+      try {
+        const upgradeInfo = await PluginManager.getUpgradeInfo(pluginId)
+
+        await response.send(upgradeInfo)
+      } catch (e) {
+        response.status(500)
+        await response.send(String(e))
       }
+    }
+  )
+
+  app.post<PostPluginUpdate.RouteParams>(
+    PostPluginUpdate.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId } = request.params
 
       try {
-        const updatable = await getInstallationManager(
-          plugin.definition.plugin.local,
-          plugin.definition.plugin.source
-        ).isUpgradePossible()
-
-        await response.send({
-          updatable
+        const success = await PluginManager.upgradePlugin(pluginId, {
+          inline: false,
+          onSuccess: async () => {
+            Scheduler.restart()
+          }
         })
+
+        if (success) {
+          response.sendStatus(200)
+        } else {
+          response.sendStatus(StatusCodes.NOT_MODIFIED)
+        }
       } catch (e) {
         response.status(500)
         await response.send(String(e))

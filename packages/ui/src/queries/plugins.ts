@@ -30,7 +30,7 @@ export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
   })
 }
 
-export function useInstalledPluginUpgrade(
+export function useInstalledPluginUpgradeInfo(
   params: Api.Plugins.GetPluginUpdate.RouteParams
 ) {
   return useQuery(Api.Plugins.GetPluginUpdate.getPath(params), async () => {
@@ -43,6 +43,30 @@ export function useInstalledPluginUpgrade(
       )
     ).data
   })
+}
+
+export function useInstalledPluginUpgrader() {
+  return useMutation(
+    async (opts: {
+      params: Api.Plugins.GetPluginUpdate.RouteParams
+    }): Promise<'started' | 'cannot update'> => {
+      const result = await axios.post(
+        getUri(Api.Plugins.PostPluginUpdate.getPath(opts.params)),
+        null,
+        {
+          withCredentials: true,
+          validateStatus: (status) => [200, 304].includes(status)
+        }
+      )
+
+      return result.status === 200 ? 'started' : 'cannot update'
+    },
+    {
+      onSuccess: () => {
+        //
+      }
+    }
+  )
 }
 
 export function useInstalledPluginUpdate() {

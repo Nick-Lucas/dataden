@@ -1,8 +1,9 @@
 import * as Db from 'src/db'
 import { Settings } from '@dataden/sdk'
-import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
 
 import { Common } from './common'
+import { LocalPlugin, RegistryPlugin } from 'src/lib/PluginManager'
+import { UpgradeInfo } from 'src/lib/PluginInstallationManager'
 
 // Other
 
@@ -19,7 +20,15 @@ export namespace GetPluginUpdate {
 
   export type RouteParams = Common.PluginParams
 
-  export type Response = { updatable: boolean }
+  export type Response = UpgradeInfo
+}
+
+export namespace PostPluginUpdate {
+  export const path = '/v1.0/plugins/:pluginId/update'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' + encodeURIComponent(params.pluginId) + '/update'
+
+  export type RouteParams = Common.PluginParams
 }
 
 export namespace PostInstallPlugin {
