@@ -1,7 +1,6 @@
-import { FilterQuery, MongoClient } from 'mongodb'
+import { MongoClient } from 'mongodb'
 
-import { DATABASES, COLLECTIONS, PagingPosition, PagingResult } from './common'
-import * as Sdk from '@dataden/sdk'
+import { DATABASES, COLLECTIONS } from './common'
 import { stripMongoId } from './stripMongoId'
 import { createHash } from 'crypto'
 
@@ -19,17 +18,20 @@ export function hashPassword(plainText) {
   return createHash('sha256').update(plainText).digest('hex').toString()
 }
 
-const DEFAULT_USERNAME = 'admin'
-const DEFAULT_PASSWORD_HASH = hashPassword('admin')
+export const DEFAULT_USERNAME = 'admin'
+export const DEFAULT_PASSWORD = 'admin'
+export const DEFAULT_PASSWORD_HASH = hashPassword(DEFAULT_PASSWORD)
 
 // Access
 
 export const Users = {
   get: async (client: MongoClient, username) => {
-    return await client
+    const user = await client
       .db(DATABASES.CORE)
       .collection(COLLECTIONS[DATABASES.CORE].USERS)
       .findOne<User>({ username: username })
+
+    return stripMongoId(user)
   },
 
   upsert: async (client: MongoClient, update: User) => {
@@ -44,7 +46,7 @@ export const Users = {
       nextUser.resetRequired = false
     }
 
-    return await client
+    await client
       .db(DATABASES.CORE)
       .collection(COLLECTIONS[DATABASES.CORE].USERS)
       .updateOne(
