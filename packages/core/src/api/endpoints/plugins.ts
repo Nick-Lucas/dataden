@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import * as Db from 'src/db'
 import * as PluginManager from 'src/lib/PluginManager'
-import { getInstallationManager } from 'src/lib/PluginManager/getInstallationManager'
+import { getInstallationManager } from 'src/lib/PluginManager'
 import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
