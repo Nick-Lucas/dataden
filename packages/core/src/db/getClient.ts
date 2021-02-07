@@ -11,3 +11,5 @@ export async function getClient() {
 
   return _client
 }
+
+export const getClientMocked = false
