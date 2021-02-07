@@ -59,6 +59,9 @@ describe('PluginManager', () => {
           source: pluginId
         })
       ).rejects.toThrowError(new PluginConflictError())
+
+      const installedPlugins = await Plugins.Installed.list(client)
+      expect(installedPlugins.length).toEqual(1)
     })
 
     it('reject when no source provided', async () => {
@@ -74,6 +77,9 @@ describe('PluginManager', () => {
       ).rejects.toThrowError(
         new InstallPluginError('Plugin source not provided')
       )
+
+      const installedPlugins = await Plugins.Installed.list(client)
+      expect(installedPlugins).toEqual([])
     })
 
     it('should reject unavailable plugin', async () => {
@@ -87,6 +93,9 @@ describe('PluginManager', () => {
           source: pluginId
         })
       ).rejects.toThrowError(new NotFoundError('NOT FOUND: ' + pluginId))
+
+      const installedPlugins = await Plugins.Installed.list(client)
+      expect(installedPlugins).toEqual([])
     })
   })
 })
