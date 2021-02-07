@@ -3,7 +3,10 @@ interface MaybeMongoEntity {
 }
 
 export function stripMongoId<T>(entity: T) {
-  const mongoEntity = entity as MaybeMongoEntity
-  delete mongoEntity._id
+  if (entity != null) {
+    const mongoEntity = entity as MaybeMongoEntity
+    delete mongoEntity._id
+  }
+
   return entity
 }
