@@ -7,6 +7,13 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpw
     ports: 
       - "27017:27017"
+  mongo_test: 
+    image: mongo:4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: testpw
+    ports: 
+      - "27018:27017"
 
   metabase:
     image: metabase/metabase
