@@ -25,7 +25,7 @@ interface UpgradeOptions {
   inline: boolean
 
   /** Called on a successful installation */
-  onSuccess: () => Promise<void>
+  onSuccess?: () => Promise<void>
 }
 export async function upgradePlugin(
   pluginId: string,
