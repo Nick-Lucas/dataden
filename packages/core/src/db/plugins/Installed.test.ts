@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb'
+import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from 'src/db/getClient'
 import { Installed, Plugin } from './Installed'
 
@@ -8,6 +9,7 @@ describe('DB: Installed', () => {
 
   beforeEach(async () => {
     client = await getClient()
+    await wipeDb()
 
     expect(getClientMocked).toBe(true)
   })

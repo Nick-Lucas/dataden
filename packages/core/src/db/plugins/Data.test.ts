@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb'
+import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from 'src/db/getClient'
 import { PagingResult } from '../common'
 import { Data, DataRow } from './Data'
@@ -11,6 +12,7 @@ describe('DB: Data', () => {
 
   beforeEach(async () => {
     client = await getClient()
+    await wipeDb()
 
     expect(getClientMocked).toBe(true)
   })
