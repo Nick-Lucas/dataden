@@ -3,6 +3,7 @@ import { MongoClient } from 'mongodb'
 import * as Sdk from '@dataden/sdk'
 
 import { PagingPosition, PagingResult } from '../common'
+import { stripMongoId } from '../stripMongoId'
 import { DbPath } from './types'
 import { getPluginDataDb } from './helpers'
 
@@ -66,7 +67,7 @@ export const Data = {
     >({})
 
     const totalRows = await cursor.count(false)
-    const pages = Math.ceil(totalRows / pageSize)
+    const pages = totalRows === 0 ? 1 : Math.ceil(totalRows / pageSize)
     const rows = await cursor
       .skip(pageSize * position.page)
       .limit(pageSize)
@@ -75,7 +76,7 @@ export const Data = {
     return {
       page: position.page,
       pages: pages,
-      data: rows
+      data: rows.map(stripMongoId)
     }
   }
 }
