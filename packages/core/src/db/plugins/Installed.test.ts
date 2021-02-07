@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb'
 import { getClient, getClientMocked } from 'src/db/getClient'
 import { Installed, Plugin } from './Installed'
-import { DbPath } from './types'
 
 describe('DB: Installed', () => {
   let client: MongoClient
