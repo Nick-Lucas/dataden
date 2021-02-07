@@ -1,4 +1,4 @@
-import { NpmInstallationManager } from './NpmInstallationManager'
+import { NpmInstallationManager, _getNpmInfo } from './NpmInstallationManager'
 import { tmpdir } from 'os'
 import fs from 'fs'
 import path from 'path'
@@ -21,27 +21,32 @@ const logger = {
 } as SdkLogger
 
 describe('NpmInstallationManager', () => {
-  const subject = new NpmInstallationManager({
-    pluginsRoot: pluginsRoot,
-    logger
-  })
+  const getSubject = (packageName) =>
+    new NpmInstallationManager({
+      pluginsRoot: pluginsRoot,
+      logger,
+      packageName
+    })
 
   afterEach(() => {
-    console.log('LOGGER CALLS', JSON.stringify(loggerFn.mock.calls, null, 2))
+    // Note: uncomment this line for more info on failures
+    // console.log('LOGGER CALLS', JSON.stringify(loggerFn.mock.calls, null, 2))
+
     loggerFn.mockReset()
   })
 
   describe('install dataden-plugin-rng', () => {
     const packageName = 'dataden-plugin-rng'
+    const subject = getSubject(packageName)
 
     beforeAll(async () => {
       console.log('INSTALLING INTO', pluginsRoot)
 
       wipeDir()
 
-      expect(subject.isInstalled(packageName)).toBe(false)
-      await subject.install(packageName)
-      expect(subject.isInstalled(packageName)).toBe(true)
+      expect(subject.isInstalled()).toBe(false)
+      await subject.install()
+      expect(subject.isInstalled()).toBe(true)
     })
 
     afterEach(() => {
@@ -51,15 +56,18 @@ describe('NpmInstallationManager', () => {
     })
 
     afterAll(() => {
-      // wipeDir()
+      wipeDir()
     })
 
     it('should install a plugin and be able to verify it', async () => {
-      expect(subject.isInstalled(packageName)).toBe(true)
+      const subject = getSubject(packageName)
+      expect(subject.isInstalled()).toBe(true)
     })
 
     it('should install a plugin and be able to load it', async () => {
-      const packageJsonPath = subject.getPackageJson(packageName)
+      const subject = getSubject(packageName)
+
+      const packageJsonPath = subject.getPackageJson()
       expect(packageJsonPath.endsWith('package.json')).toBe(true)
 
       const packageJson = require(packageJsonPath)
@@ -67,15 +75,17 @@ describe('NpmInstallationManager', () => {
     })
 
     it('should install a plugin and be able to run it', async () => {
-      const pluginService = require(subject.getInstalledPath(
-        packageName
-      )) as PluginService
+      const subject = getSubject(packageName)
+
+      const pluginService = require(subject.getInstalledPath()) as PluginService
 
       expect(pluginService?.loaders?.length ?? -1).toBeGreaterThan(0)
     })
 
     it('should install a plugin, and that plugin should import dependencies via its own node_modules directory', () => {
       // Patch the installed plugin to require a dependency and verify the directory tree it's within
+
+      const subject = getSubject(packageName)
 
       const errorThrow =
         'throw `UUID path was not within the correct tree, found: ${uuidPath} but expected: ' +
@@ -94,10 +104,7 @@ describe('NpmInstallationManager', () => {
       `
 
       // Load & patch
-      const filePath = path.join(
-        subject.getInstalledPath(packageName),
-        'dist/index.js'
-      )
+      const filePath = path.join(subject.getInstalledPath(), 'dist/index.js')
       const patchedFileContents = fs.readFileSync(filePath).toString() + patch
 
       // Write Patch
@@ -116,7 +123,7 @@ describe('NpmInstallationManager', () => {
       // We throw a success error to ensure that no caching has prevented the patch from loading
       // Any other errors are failure.
       try {
-        require(subject.getInstalledPath(packageName)) as PluginService
+        require(subject.getInstalledPath()) as PluginService
       } catch (e) {
         expect(e).toBe('PATCH_PASSED')
       }
@@ -135,13 +142,24 @@ describe('NpmInstallationManager', () => {
     })
 
     it('should fail to install the unknown plugin with a sensible error', async () => {
-      expect(subject.isInstalled(packageName)).toBe(false)
+      const subject = getSubject(packageName)
 
-      await expect(subject.install(packageName)).rejects.toThrowError(
+      expect(subject.isInstalled()).toBe(false)
+
+      await expect(subject.install()).rejects.toThrowError(
         new NotFoundError(packageName)
       )
 
-      expect(subject.isInstalled(packageName)).toBe(false)
+      expect(subject.isInstalled()).toBe(false)
+    })
+  })
+
+  describe('check npm package', () => {
+    it('should get npm package info with name and version', async () => {
+      const info = await _getNpmInfo('dataden-plugin-rng')
+
+      expect(info.collected.metadata.name).toBe('dataden-plugin-rng')
+      expect(info.collected.metadata.version).toBeTruthy()
     })
   })
 })

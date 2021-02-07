@@ -1,5 +1,15 @@
 import { FC, useState } from 'react'
-import { Typography, List, Button, Row, Space, Modal } from 'antd'
+import {
+  Typography,
+  List,
+  Button,
+  Row,
+  Space,
+  Modal,
+  Popconfirm,
+  notification
+} from 'antd'
+import * as icons from '@ant-design/icons'
 import { css } from 'styled-components/macro'
 
 import { ContentCard } from 'src/Layout'
@@ -8,6 +18,10 @@ import { PluginInstanceCreate } from './PluginInstanceCreate'
 
 import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
+import {
+  useInstalledPluginUpgradeInfo,
+  useInstalledPluginUpgrader
+} from 'src/queries'
 
 interface PluginProps {
   plugin: Api.Plugins.Plugin
@@ -16,6 +30,11 @@ interface PluginProps {
 
 export const Plugin: FC<PluginProps> = ({ plugin }) => {
   const [addingInstance, setAddingInstance] = useState(false)
+
+  const pluginUpgrade = useInstalledPluginUpgradeInfo({
+    pluginId: plugin.id
+  })
+  const pluginUpgrader = useInstalledPluginUpgrader()
 
   return (
     <ContentCard
@@ -47,11 +66,42 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
           </Typography.Title>
 
           <Space>
-            <Button type="primary" onClick={() => setAddingInstance(true)}>
-              Add Instance
-            </Button>
+            <Popconfirm
+              okText="Upgrade"
+              title={
+                'Are you sure you want to upgrade from v' +
+                (pluginUpgrade.data?.currentVersion ?? 'Unknown') +
+                ' to v' +
+                (pluginUpgrade.data?.nextVersion ?? 'Unknown') +
+                '?'
+              }
+              disabled={!pluginUpgrade.data?.updatable}
+              onConfirm={async () => {
+                const result = await pluginUpgrader.mutateAsync({
+                  params: { pluginId: plugin.id }
+                })
+                if (result === 'started') {
+                  notification.info({
+                    message: 'Started Upgrading ' + plugin.id
+                  })
+                } else {
+                  notification.warning({
+                    message:
+                      'Could not start upgrade 😕, maybe check your logs?'
+                  })
+                }
+              }}
+            >
+              <Button
+                type="primary"
+                disabled={!pluginUpgrade.data?.updatable}
+                icon={<icons.ArrowUpOutlined />}
+              >
+                Update
+              </Button>
+            </Popconfirm>
 
-            <Button danger disabled>
+            <Button danger disabled icon={<icons.DeleteOutlined />}>
               Uninstall
             </Button>
           </Space>
@@ -68,7 +118,19 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
         </Row>
 
         <List
-          header={<Typography.Text strong>Instances:</Typography.Text>}
+          header={
+            <Row align="middle" justify="space-between">
+              <Typography.Text strong>Instances:</Typography.Text>
+
+              <Button
+                type="link"
+                onClick={() => setAddingInstance(true)}
+                icon={<icons.PlusOutlined />}
+              >
+                Add
+              </Button>
+            </Row>
+          }
           bordered
           size="small"
         >

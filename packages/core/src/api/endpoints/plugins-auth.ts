@@ -8,7 +8,9 @@ import { Logger } from 'src/logging'
 import { MaybeError, authenticatedEndpoint } from './common'
 import {
   PostPluginAuthInteraction,
-  PostPluginAuthInteractionResult
+  PostPluginAuth,
+  DeletePluginAuth,
+  GetPluginAuth
 } from './plugins-auth.types'
 
 export function listen(app: Express, log: Logger) {
@@ -71,47 +73,118 @@ export function listen(app: Express, log: Logger) {
   )
 
   app.post<
-    PostPluginAuthInteractionResult.RouteParams,
+    PostPluginAuth.RouteParams,
     MaybeError<void>,
-    PostPluginAuthInteractionResult.Body,
+    PostPluginAuth.Body,
     void
-  >(
-    PostPluginAuthInteractionResult.path,
-    authenticatedEndpoint(),
+  >(PostPluginAuth.path, authenticatedEndpoint(), async (request, response) => {
+    const { pluginId, instanceId } = request.params
+    const authResultData = request.body
+    if (!pluginId || !instanceId || !authResultData) {
+      response.sendStatus(400)
+      return
+    }
+
+    try {
+      let service = await Scheduler.getPluginService(pluginId, instanceId)
+      if (!service) {
+        response.sendStatus(404)
+        return
+      }
+
+      if (service.status !== 'Authentication Required') {
+        response.sendStatus(200)
+        return
+      }
+
+      const client = await Db.getClient()
+      const authFacade = AuthFacade.createAuthFacade(client, service)
+      if (!authFacade) {
+        response.sendStatus(404)
+        return
+      }
+
+      const result = await authFacade.onUserInteractionComplete(authResultData)
+
+      if (result.status !== 'OK') {
+        throw result.error ?? 'Plugin Auth Failed'
+      }
+
+      await Scheduler.restart()
+
+      service = await Scheduler.getPluginService(pluginId, instanceId)
+
+      // Start sync immediately, as ecosystems like open banking have some access limited to the first few minutes
+      // Don't await promise, this will end up in the console anyway
+      service.loaderScheduler?.immediate()
+
+      response.sendStatus(200)
+    } catch (error) {
+      response.status(500)
+      response.send(String(error))
+    }
+  })
+
+  app.get<GetPluginAuth.RouteParams, GetPluginAuth.Response>(
+    GetPluginAuth.path,
     async (request, response) => {
       const { pluginId, instanceId } = request.params
-      const authResultData = request.body
-      if (!pluginId || !authResultData) {
+
+      if (!pluginId || !instanceId) {
         response.sendStatus(400)
         return
       }
 
       try {
+        const client = await Db.getClient()
+
         const service = await Scheduler.getPluginService(pluginId, instanceId)
         if (!service) {
           response.sendStatus(404)
           return
         }
 
-        if (service.status !== 'Authentication Required') {
-          response.sendStatus(200)
+        const authFacade = AuthFacade.createAuthFacade(client, service)
+        if (!authFacade) {
+          response.status(200)
+          response.send({ resettable: false })
           return
         }
 
+        return response.send({ resettable: true })
+      } catch (error) {
+        response.status(500)
+        response.send(String(error) as any)
+      }
+    }
+  )
+
+  app.delete<DeletePluginAuth.RouteParams>(
+    DeletePluginAuth.path,
+    async (request, response) => {
+      const { pluginId, instanceId } = request.params
+
+      if (!pluginId || !instanceId) {
+        response.sendStatus(400)
+        return
+      }
+
+      try {
         const client = await Db.getClient()
+
+        const service = await Scheduler.getPluginService(pluginId, instanceId)
+        if (!service) {
+          response.sendStatus(404)
+          return
+        }
+
         const authFacade = AuthFacade.createAuthFacade(client, service)
         if (!authFacade) {
           response.sendStatus(404)
           return
         }
 
-        const result = await authFacade.onUserInteractionComplete(
-          authResultData
-        )
-
-        if (result.status !== 'OK') {
-          throw result.error ?? 'Plugin Auth Failed'
-        }
+        await authFacade.onReset()
 
         await Scheduler.restart()
 

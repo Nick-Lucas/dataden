@@ -93,8 +93,8 @@ export async function runLoaders(
         getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
       )
 
+      // TODO: move this inside transaction
       await updateSyncOnDb(result.syncInfo)
-
       await updateDataOnDb(client, loader, dbPath, result)
 
       log.info(

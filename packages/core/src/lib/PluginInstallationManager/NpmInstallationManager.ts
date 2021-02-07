@@ -1,10 +1,15 @@
 import path from 'path'
 import fs from 'fs'
 import child_process from 'child_process'
+
+import axios from 'axios'
+import semver from 'semver'
+
 import {
   IPluginInstallationManager,
   InstallOptions,
-  NotFoundError
+  NotFoundError,
+  UpgradeInfo
 } from './types'
 import { SdkLogger } from '@dataden/sdk'
 
@@ -24,6 +29,11 @@ export class NpmInstallationManager implements IPluginInstallationManager {
   private log: SdkLogger
 
   constructor(props: NpmInstallationManagerConstructor) {
+    if (!props.pluginsRoot)
+      throw 'NpmInstallationManager: pluginsRoot not provided'
+    if (!props.packageName)
+      throw 'NpmInstallationManager: packageName not provided'
+
     this.pluginsRoot = props.pluginsRoot
     this.packageName = props.packageName
     this.log = props.logger ?? console
@@ -44,6 +54,11 @@ export class NpmInstallationManager implements IPluginInstallationManager {
       return null
     }
 
+    const packageJsonPath = this.getPackageJson()
+
+    // Clear the cache so any recent installs/updates don't get passed over
+    delete require.cache[packageJsonPath]
+
     return require(this.getPackageJson()).version
   }
 
@@ -56,7 +71,46 @@ export class NpmInstallationManager implements IPluginInstallationManager {
     return path.join(this.getInstalledPath(), 'package.json')
   }
 
-  /** Install the plugin, or optionall update an existing installation */
+  getUpgradeInfo = async (): Promise<UpgradeInfo> => {
+    if (!this.isInstalled()) {
+      return {
+        updatable: false,
+        currentVersion: null,
+        nextVersion: null
+      }
+    }
+
+    try {
+      const result: NpmInfo = await _getNpmInfo(this.packageName)
+      const latestVersion = result.collected.metadata.version
+
+      const installedVersion = this.getInstalledVersion()
+
+      this.log.info(
+        `Checking for updates to "${this.packageName}". Current: ${installedVersion}, NPM Latest: ${latestVersion}`
+      )
+
+      const updatable = semver.gt(latestVersion, installedVersion)
+      return {
+        updatable,
+        currentVersion: installedVersion,
+        nextVersion: latestVersion
+      }
+    } catch (err) {
+      this.log.warn(
+        `Could not load package "${this.packageName}" from npm registry`
+      )
+
+      // TODO: is this realistic/could be handled better?
+      return {
+        updatable: false,
+        currentVersion: null,
+        nextVersion: null
+      }
+    }
+  }
+
+  /** Install the plugin, or optionally update an existing installation */
   install = async (opts: InstallOptions = { forceUpdate: false }) => {
     this.log.info(`Attempting install of ${this.packageName}`)
 
@@ -80,7 +134,7 @@ export class NpmInstallationManager implements IPluginInstallationManager {
           'install',
           '--no-save',
           getPrefixArg(this.pluginsRoot, this.packageName),
-          this.packageName
+          this.packageName + '@latest'
         ])
 
         function rejectAndKill(reason) {
@@ -145,4 +199,18 @@ function getPluginDir(pluginsRoot: string, packageName: string) {
     'node_modules',
     packageName
   )
+}
+
+interface NpmInfo {
+  collected: { metadata: { name: string; version: string } }
+}
+export async function _getNpmInfo(packageName: string): Promise<NpmInfo> {
+  const API_PATH =
+    'https://api.npms.io/v2/package/' + encodeURIComponent(packageName)
+
+  return (
+    await axios.get(API_PATH, {
+      validateStatus: (status) => status === 200
+    })
+  ).data
 }

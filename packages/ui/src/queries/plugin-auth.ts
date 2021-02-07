@@ -27,6 +27,51 @@ export function usePluginAuthInteraction(
   )
 }
 
+export function usePluginAuthState(
+  params: Api.PluginAuth.GetPluginAuth.RouteParams
+) {
+  return useQuery(Api.PluginAuth.GetPluginAuth.getPath(params), async () => {
+    const result = await axios.get<Api.PluginAuth.GetPluginAuth.Response>(
+      getUri(Api.PluginAuth.GetPluginAuth.getPath(params)),
+      {
+        withCredentials: true
+      }
+    )
+
+    return result.data
+  })
+}
+
+export function usePluginAuthReset() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function (params: Api.PluginAuth.DeletePluginAuth.RouteParams) {
+      try {
+        return await axios.delete(
+          Api.PluginAuth.DeletePluginAuth.getPath(params),
+          {
+            withCredentials: true
+          }
+        )
+      } catch (e) {
+        if (e.response) {
+          // eslint-disable-next-line no-throw-literal
+          throw `The service returned an error: "${e.response.data}"`
+        } else {
+          throw e
+        }
+      }
+    },
+    {
+      onSuccess: () => {
+        // Wide reaching, so just reset everything
+        client.invalidateQueries()
+      }
+    }
+  )
+}
+
 export function usePluginAuthInteractionResult() {
   const client = useQueryClient()
 
@@ -35,15 +80,12 @@ export function usePluginAuthInteractionResult() {
       params,
       result
     }: {
-      params: Api.PluginAuth.PostPluginAuthInteractionResult.RouteParams
-      result: Omit<
-        Api.PluginAuth.PostPluginAuthInteractionResult.Body,
-        'redirectUri'
-      >
+      params: Api.PluginAuth.PostPluginAuth.RouteParams
+      result: Omit<Api.PluginAuth.PostPluginAuth.Body, 'redirectUri'>
     }) {
       try {
         return await axios.post(
-          Api.PluginAuth.PostPluginAuthInteractionResult.getPath(params),
+          Api.PluginAuth.PostPluginAuth.getPath(params),
           {
             ...result,
             redirectUri
@@ -62,10 +104,9 @@ export function usePluginAuthInteractionResult() {
       }
     },
     {
-      onSuccess: (data, { params }) => {
-        client.invalidateQueries(
-          Api.PluginAuth.PostPluginAuthInteraction.getPath(params)
-        )
+      onSuccess: () => {
+        // Wide reaching, so just reset everything
+        client.invalidateQueries()
       }
     }
   )

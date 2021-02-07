@@ -16,6 +16,7 @@ import { css } from 'styled-components/macro'
 import { PluginInstanceEdit } from './PluginInstanceEdit'
 import { useInstalledPluginUpdate, usePluginAuthInteraction } from 'src/queries'
 import * as Api from '@dataden/core/dist/api-types.esm'
+import { PluginInstanceMenu } from './PluginInstanceMenu'
 
 interface PluginInstanceProps {
   plugin: Api.Plugins.Plugin
@@ -88,6 +89,8 @@ export const PluginInstance: FC<PluginInstanceProps> = ({
               Remove
             </Button>
           </Popconfirm>
+
+          <PluginInstanceMenu plugin={plugin} instance={instance} />
         </Space>
       </Row>
 

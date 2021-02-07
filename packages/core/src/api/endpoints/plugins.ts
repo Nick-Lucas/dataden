@@ -3,11 +3,8 @@ import StatusCodes from 'http-status-codes'
 import _ from 'lodash'
 
 import * as Db from 'src/db'
-import {
-  installPlugin,
-  InstallPluginError,
-  PluginConflictError
-} from 'src/lib/PluginManager'
+import * as PluginManager from 'src/lib/PluginManager'
+import { getInstallationManager } from 'src/lib/PluginManager/getInstallationManager'
 import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
@@ -19,7 +16,10 @@ import {
   Reload,
   PutPluginInstanceSettings,
   GetPluginInstanceSettings,
-  PostInstallPlugin
+  PostInstallPlugin,
+  PostForceSync,
+  GetPluginUpdate,
+  PostPluginUpdate
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -35,14 +35,14 @@ export function listen(app: Express, log: Logger) {
       const plugin = request.body
 
       try {
-        const installedPlugin = await installPlugin(plugin)
+        const installedPlugin = await PluginManager.installPlugin(plugin)
 
         await response.send(installedPlugin)
       } catch (e) {
-        if (e instanceof PluginConflictError) {
+        if (e instanceof PluginManager.PluginConflictError) {
           response.status(StatusCodes.CONFLICT)
           await response.send(String(e))
-        } else if (e instanceof InstallPluginError) {
+        } else if (e instanceof PluginManager.InstallPluginError) {
           response.status(StatusCodes.INTERNAL_SERVER_ERROR)
           await response.send(String(e))
         } else {
@@ -87,6 +87,54 @@ export function listen(app: Express, log: Logger) {
     }
   )
 
+  app.get<
+    GetPluginUpdate.RouteParams,
+    MaybeError<GetPluginUpdate.Response>,
+    any,
+    any
+  >(
+    GetPluginUpdate.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId } = request.params
+
+      try {
+        const upgradeInfo = await PluginManager.getUpgradeInfo(pluginId)
+
+        await response.send(upgradeInfo)
+      } catch (e) {
+        response.status(500)
+        await response.send(String(e))
+      }
+    }
+  )
+
+  app.post<PostPluginUpdate.RouteParams>(
+    PostPluginUpdate.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId } = request.params
+
+      try {
+        const success = await PluginManager.upgradePlugin(pluginId, {
+          inline: false,
+          onSuccess: async () => {
+            Scheduler.restart()
+          }
+        })
+
+        if (success) {
+          response.sendStatus(200)
+        } else {
+          response.sendStatus(StatusCodes.NOT_MODIFIED)
+        }
+      } catch (e) {
+        response.status(500)
+        await response.send(String(e))
+      }
+    }
+  )
+
   app.put<
     PutPlugin.RouteParams,
     MaybeError<PutPlugin.Response>,
@@ -119,6 +167,28 @@ export function listen(app: Express, log: Logger) {
 
     response.sendStatus(200)
   })
+
+  app.post<PostForceSync.RouteParams>(
+    PostForceSync.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      const { pluginId, instanceId } = request.params
+
+      const service = await Scheduler.getPluginService(pluginId, instanceId)
+      if (!service) {
+        response.status(404)
+        response.send(
+          `Plugin ${pluginId} with instance ${instanceId} not found`
+        )
+        return
+      }
+
+      // Don't await promise, this will end up in the console anyway
+      service.loaderScheduler?.immediate()
+
+      response.sendStatus(200)
+    }
+  )
 
   app.get<
     GetPluginInstanceSettings.RouteParams,

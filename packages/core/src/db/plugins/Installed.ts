@@ -3,10 +3,20 @@ import { DATABASES, COLLECTIONS } from '../common'
 import { stripMongoId } from '../stripMongoId'
 
 interface PluginBase {
+  /** Unique ID for plugin */
   id: string
+
+  /** Location of the installed plugin, where to load it from */
   location: string
+
+  /** Version number from the plugin's package.json */
   version: string
+
+  /** Whether the plugin is installed from a local or remote location */
   local: boolean
+
+  /** The original source of the plugin, might be a registry name, or a filesystem path */
+  source: string
 }
 
 export type PluginInstallRequest = PluginBase

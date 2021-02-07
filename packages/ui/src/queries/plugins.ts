@@ -30,6 +30,45 @@ export function useInstalledPlugin(params: Api.Plugins.GetPlugin.RouteParams) {
   })
 }
 
+export function useInstalledPluginUpgradeInfo(
+  params: Api.Plugins.GetPluginUpdate.RouteParams
+) {
+  return useQuery(Api.Plugins.GetPluginUpdate.getPath(params), async () => {
+    return (
+      await axios.get<Api.Plugins.GetPluginUpdate.Response>(
+        getUri(Api.Plugins.GetPluginUpdate.getPath(params)),
+        {
+          withCredentials: true
+        }
+      )
+    ).data
+  })
+}
+
+export function useInstalledPluginUpgrader() {
+  return useMutation(
+    async (opts: {
+      params: Api.Plugins.GetPluginUpdate.RouteParams
+    }): Promise<'started' | 'cannot update'> => {
+      const result = await axios.post(
+        getUri(Api.Plugins.PostPluginUpdate.getPath(opts.params)),
+        null,
+        {
+          withCredentials: true,
+          validateStatus: (status) => [200, 304].includes(status)
+        }
+      )
+
+      return result.status === 200 ? 'started' : 'cannot update'
+    },
+    {
+      onSuccess: () => {
+        //
+      }
+    }
+  )
+}
+
 export function useInstalledPluginUpdate() {
   const client = useQueryClient()
 
@@ -131,6 +170,27 @@ export function usePluginInstanceSettingsUpdate() {
         client.invalidateQueries(
           Api.Plugins.GetPluginInstanceSettings.getPath(params)
         )
+      }
+    }
+  )
+}
+
+export function usePluginForceSync() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function (params: Api.Plugins.PostForceSync.RouteParams) {
+      return (
+        await axios.post(
+          getUri(Api.Plugins.PostForceSync.getPath(params)),
+          null,
+          { withCredentials: true }
+        )
+      ).data
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Data.GetStatus.path)
       }
     }
   )
