@@ -6,8 +6,8 @@ DataDen has as few external dependencies as possible, but some initial setup is 
 
 * Install [Node.JS v10+ or higher](https://nodejs.org/en/download/)
 * [Install MongoDB](https://docs.mongodb.com/manual/installation/#mongodb-community-edition-installation-tutorials) 
-  * Get your connection string for later `mongodb://username:password@localhost:port?retryWrites=true&w=majority`
-* `npm install -g dataden-core` or `yarn global add dataden-core`
+  * Get your connection string for later, ie. `mongodb://username:password@localhost:port?retryWrites=true&w=majority`
+* `npm install -g @dataden/core` or `yarn global add @dataden/core`
 
 
 ## Configuration
@@ -24,7 +24,7 @@ DataDen has as few external dependencies as possible, but some initial setup is 
 * Run `dataden-daemon start`
   * `dataden-daemon logs` to check for any errors
   * `dataden-daemon --help` for other commands
-* DataDen will now be running on port `8800` (or the next available port, check the logs to find out)
+* DataDen will now be running on port `8800` (or the next available port if not available, check the logs to find out)
 
 ## Using DataDen
 
