@@ -19,7 +19,8 @@ import {
   PostInstallPlugin,
   PostForceSync,
   GetPluginUpdate,
-  PostPluginUpdate
+  PostPluginUpdate,
+  DeletePlugin
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -51,6 +52,21 @@ export function listen(app: Express, log: Logger) {
           response.status(StatusCodes.INTERNAL_SERVER_ERROR)
           await response.send(String(e))
         }
+      }
+    }
+  )
+
+  app.delete<DeletePlugin.RouteParams>(
+    DeletePlugin.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      try {
+        await PluginManager.uninstallPlugin(request.params.pluginId)
+      } catch (e) {
+        log.error(`Error uninstalling plugin: ${String(e)}`)
+
+        response.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        await response.send(String(e))
       }
     }
   )

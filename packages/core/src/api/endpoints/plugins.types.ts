@@ -38,6 +38,14 @@ export namespace PostInstallPlugin {
   export type Response = Db.Plugins.Plugin | string
 }
 
+export namespace DeletePlugin {
+  export const path = '/v1.0/plugins/:pluginId'
+  export const getPath = (params: RouteParams) =>
+    '/v1.0/plugins/' + encodeURIComponent(params.pluginId)
+
+  export type RouteParams = Common.PluginParams
+}
+
 export namespace Reload {
   export const path = '/v1.0/plugins/reload'
 }
