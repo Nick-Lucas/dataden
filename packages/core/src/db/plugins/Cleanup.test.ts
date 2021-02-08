@@ -82,7 +82,6 @@ describe('DB: Cleanup', () => {
   })
 
   afterEach(async () => {
-    await client.close(true)
     client = null
   })
 

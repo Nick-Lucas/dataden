@@ -16,7 +16,6 @@ describe('DB: Auth', () => {
   })
 
   afterEach(async () => {
-    await client.close(true)
     client = null
   })
 

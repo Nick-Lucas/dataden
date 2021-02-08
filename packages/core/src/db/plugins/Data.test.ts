@@ -18,7 +18,6 @@ describe('DB: Data', () => {
   })
 
   afterEach(async () => {
-    await client.close(true)
     client = null
   })
 

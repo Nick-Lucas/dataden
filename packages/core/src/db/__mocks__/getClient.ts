@@ -1,12 +1,18 @@
 import { MongoClient } from 'mongodb'
 import { getConfig } from 'src/config'
 
+let _client: MongoClient
 export async function getClient() {
-  const client: MongoClient = await MongoClient.connect(getConfig().MONGO_URI, {
-    useUnifiedTopology: true
-  })
+  if (_client && !_client.isConnected()) {
+    _client = null
+  }
+  if (!_client) {
+    _client = await MongoClient.connect(getConfig().MONGO_URI, {
+      useUnifiedTopology: true
+    })
+  }
 
-  return client
+  return _client
 }
 
 export async function wipeDb() {

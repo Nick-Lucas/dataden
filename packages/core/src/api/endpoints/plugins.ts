@@ -152,7 +152,7 @@ export function listen(app: Express, log: Logger) {
 
     const client = await Db.getClient()
     try {
-      await Db.Plugins.Installed.upsert(client, pluginDto)
+      await PluginManager.updatePlugin(client, pluginDto)
       await Scheduler.restart()
 
       await response.send(pluginDto)

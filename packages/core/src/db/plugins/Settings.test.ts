@@ -17,7 +17,6 @@ describe('DB: Syncs', () => {
   })
 
   afterEach(async () => {
-    await client.close(true)
     client = null
   })
 
