@@ -4,14 +4,14 @@ import * as Sdk from '@dataden/sdk'
 
 import { stripMongoId } from '../stripMongoId'
 import { DbPath } from './types'
-import { getPluginDb } from './helpers'
+import { getPluginDbCollection } from './helpers'
 
 export type AuthState = Sdk.PluginAuth.AuthState
 
 // TODO: encrypt this data in the database
 export const Auth = {
   get: async (client: MongoClient, path: DbPath): Promise<AuthState | null> => {
-    const authState = await getPluginDb(
+    const authState = await getPluginDbCollection(
       client,
       path,
       'auth'
@@ -29,7 +29,7 @@ export const Auth = {
     path: DbPath,
     authState: AuthState
   ): Promise<void> => {
-    await getPluginDb(client, path, 'auth').updateOne(
+    await getPluginDbCollection(client, path, 'auth').updateOne(
       {},
       { $set: authState },
       { upsert: true }
@@ -37,6 +37,6 @@ export const Auth = {
   },
 
   reset: async (client: MongoClient, path: DbPath): Promise<void> => {
-    await getPluginDb(client, path, 'auth').deleteOne({})
+    await getPluginDbCollection(client, path, 'auth').deleteOne({})
   }
 }

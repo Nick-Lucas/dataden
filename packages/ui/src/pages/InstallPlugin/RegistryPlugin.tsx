@@ -29,7 +29,7 @@ export const RegistryPlugin: FC<{
               {/* TODO: support custon icon display from plugin registry */}
               <PluginLocalityIcon local={plugin.local} />
 
-              {plugin.name}
+              {plugin.id}
             </Space>
           </Typography.Title>
 

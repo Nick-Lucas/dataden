@@ -82,4 +82,31 @@ describe('DB: Installed', () => {
     plugin = await Installed.get(client, pluginId)
     expect(plugin).toEqual(updatedPlugin)
   })
+
+  it('removes an installed plugin', async () => {
+    const newPlugin: Plugin = {
+      id: pluginId,
+      local: true,
+      instances: [
+        {
+          name: 'instance-one'
+        }
+      ],
+      location: 'location',
+      source: 'source',
+      version: '1.0'
+    }
+
+    // Insert and check plugin
+    await Installed.upsert(client, newPlugin)
+    let plugin = await Installed.get(client, pluginId)
+    expect(plugin).toEqual(newPlugin)
+
+    // Remove
+    await Installed.remove(client, pluginId)
+
+    // Check removed
+    plugin = await Installed.get(client, pluginId)
+    expect(plugin).toBe(null)
+  })
 })

@@ -7,17 +7,19 @@ import { getClient, Plugins } from 'src/db'
 import { upgradePlugin, getUpgradeInfo } from './upgradePlugin'
 import { MongoClient } from 'mongodb'
 
-const mock = jest.requireMock('./getInstallationManager.ts')
+const getInstallationManagerMock = jest.requireMock(
+  './getInstallationManager.ts'
+)
 
 describe('PluginManager', () => {
   describe('upgradePlugin & getUpgradeInfo', () => {
     let client: MongoClient
-    const pluginId = mock.PLUGIN_IDS.upgradeable
+    const pluginId = getInstallationManagerMock.PLUGIN_IDS.upgradeable
 
     beforeEach(async () => {
       client = await getClient()
       await wipeDb()
-      mock.resetInstallationStates()
+      getInstallationManagerMock.resetInstallationStates()
 
       await Plugins.Installed.upsert(client, {
         id: pluginId,

@@ -1,5 +1,7 @@
 jest.mock('./getInstallationManager')
-const mock = jest.requireMock('./getInstallationManager.ts')
+const getInstallationManagerMock = jest.requireMock(
+  './getInstallationManager.ts'
+)
 
 import { NotFoundError } from 'src/lib/PluginInstallationManager'
 import { wipeDb } from 'src/db/__mocks__/getClient'
@@ -19,11 +21,11 @@ describe('PluginManager', () => {
     beforeEach(async () => {
       client = await getClient()
       await wipeDb()
-      mock.resetInstallationStates()
+      getInstallationManagerMock.resetInstallationStates()
     })
 
     it('should install plugin', async () => {
-      const pluginId = mock.PLUGIN_IDS.installable
+      const pluginId = getInstallationManagerMock.PLUGIN_IDS.installable
 
       await installPlugin({
         id: pluginId,
@@ -37,7 +39,7 @@ describe('PluginManager', () => {
     })
 
     it('should reject already installed plugin', async () => {
-      const pluginId = mock.PLUGIN_IDS.installable
+      const pluginId = getInstallationManagerMock.PLUGIN_IDS.installable
 
       await Plugins.Installed.upsert(client, {
         id: pluginId,
@@ -62,7 +64,7 @@ describe('PluginManager', () => {
     })
 
     it('reject when no source provided', async () => {
-      const pluginId = mock.PLUGIN_IDS.unavailable
+      const pluginId = getInstallationManagerMock.PLUGIN_IDS.unavailable
 
       await expect(
         installPlugin({
@@ -80,7 +82,7 @@ describe('PluginManager', () => {
     })
 
     it('should reject unavailable plugin', async () => {
-      const pluginId = mock.PLUGIN_IDS.unavailable
+      const pluginId = getInstallationManagerMock.PLUGIN_IDS.unavailable
 
       await expect(
         installPlugin({

@@ -29,7 +29,6 @@ export const InstallLocal: FC = () => {
               plugin: {
                 local: true,
                 id: values.id,
-                name: values.name,
                 description: values.description ?? '',
                 source: values.location
               }
@@ -53,15 +52,6 @@ export const InstallLocal: FC = () => {
             }
           ]}
           description="Unique ID for this plugin, for instance `example/my-plugin`"
-        >
-          <Input />
-        </DescribedFormItem>
-
-        <DescribedFormItem
-          name="name"
-          label="Plugin Name"
-          rules={[{ required: true }]}
-          description="Human friendly name for this plugin"
         >
           <Input />
         </DescribedFormItem>

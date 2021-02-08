@@ -72,5 +72,12 @@ export const Installed = {
       )
 
     return stripMongoId(pluginDto)
+  },
+
+  remove: async function (client: MongoClient, pluginId) {
+    await client
+      .db(DATABASES.CORE)
+      .collection(COLLECTIONS[DATABASES.CORE].PLUGINS)
+      .deleteOne({ id: pluginId })
   }
 }

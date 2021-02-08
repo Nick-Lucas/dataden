@@ -29,7 +29,7 @@ export const InstallPlugin: FC = () => {
     }
 
     return registry.data.list.filter((plugin) =>
-      (plugin.name?.toLowerCase() ?? '').includes(search.toLowerCase())
+      (plugin.id?.toLowerCase() ?? '').includes(search.toLowerCase())
     )
   }, [registry.data, search])
 
