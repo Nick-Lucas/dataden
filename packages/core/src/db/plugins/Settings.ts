@@ -4,13 +4,13 @@ import * as Sdk from '@dataden/sdk'
 
 import { stripMongoId } from '../stripMongoId'
 import { DbPath } from './types'
-import { getPluginDb } from './helpers'
+import { getPluginDbCollection } from './helpers'
 
 export type Settings = Sdk.Settings
 
 export const Settings = {
   get: async (client: MongoClient, path: DbPath): Promise<Settings | null> => {
-    const settings = await getPluginDb(
+    const settings = await getPluginDbCollection(
       client,
       path,
       'settings'
@@ -28,7 +28,7 @@ export const Settings = {
     path: DbPath,
     settings: Settings
   ): Promise<void> => {
-    await getPluginDb(client, path, 'settings').updateOne(
+    await getPluginDbCollection(client, path, 'settings').updateOne(
       {},
       { $set: stripMongoId(settings) },
       { upsert: true }

@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import * as Db from 'src/db'
 import * as PluginManager from 'src/lib/PluginManager'
-import { getInstallationManager } from 'src/lib/PluginManager/getInstallationManager'
+import { getInstallationManager } from 'src/lib/PluginManager'
 import * as Scheduler from 'src/lib/Scheduler'
 import { Logger } from 'src/logging'
 
@@ -19,7 +19,8 @@ import {
   PostInstallPlugin,
   PostForceSync,
   GetPluginUpdate,
-  PostPluginUpdate
+  PostPluginUpdate,
+  DeletePlugin
 } from './plugins.types'
 
 export function listen(app: Express, log: Logger) {
@@ -51,6 +52,21 @@ export function listen(app: Express, log: Logger) {
           response.status(StatusCodes.INTERNAL_SERVER_ERROR)
           await response.send(String(e))
         }
+      }
+    }
+  )
+
+  app.delete<DeletePlugin.RouteParams>(
+    DeletePlugin.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      try {
+        await PluginManager.uninstallPlugin(request.params.pluginId)
+      } catch (e) {
+        log.error(`Error uninstalling plugin: ${String(e)}`)
+
+        response.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        await response.send(String(e))
       }
     }
   )
@@ -152,7 +168,7 @@ export function listen(app: Express, log: Logger) {
 
     const client = await Db.getClient()
     try {
-      await Db.Plugins.Installed.upsert(client, pluginDto)
+      await PluginManager.updatePlugin(client, pluginDto)
       await Scheduler.restart()
 
       await response.send(pluginDto)

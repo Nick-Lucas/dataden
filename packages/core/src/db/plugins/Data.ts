@@ -3,8 +3,9 @@ import { MongoClient } from 'mongodb'
 import * as Sdk from '@dataden/sdk'
 
 import { PagingPosition, PagingResult } from '../common'
+import { stripMongoId } from '../stripMongoId'
 import { DbPath } from './types'
-import { getPluginDataDb } from './helpers'
+import { getDataDbCollection } from './helpers'
 
 import { getScoped } from 'src/logging'
 
@@ -27,7 +28,11 @@ export const Data = {
 
     log.info(`Upserting ${rows.length} rows`)
 
-    const result = await getPluginDataDb(client, path, dataSetName).bulkWrite(
+    const result = await getDataDbCollection(
+      client,
+      path,
+      dataSetName
+    ).bulkWrite(
       rows.map((row) => {
         return {
           updateOne: {
@@ -50,7 +55,7 @@ export const Data = {
     dataSetName: string,
     rows: DataRow[]
   ): Promise<void> {
-    await getPluginDataDb(client, path, dataSetName).deleteMany({})
+    await getDataDbCollection(client, path, dataSetName).deleteMany({})
     await Data.append(client, path, dataSetName, rows)
   },
 
@@ -61,12 +66,12 @@ export const Data = {
     position: PagingPosition = { page: 0 },
     pageSize = 1000
   ): Promise<PagingResult<DataRow>> {
-    const cursor = await getPluginDataDb(client, path, dataSetName).find<
+    const cursor = await getDataDbCollection(client, path, dataSetName).find<
       DataRow
     >({})
 
     const totalRows = await cursor.count(false)
-    const pages = Math.ceil(totalRows / pageSize)
+    const pages = totalRows === 0 ? 1 : Math.ceil(totalRows / pageSize)
     const rows = await cursor
       .skip(pageSize * position.page)
       .limit(pageSize)
@@ -75,7 +80,7 @@ export const Data = {
     return {
       page: position.page,
       pages: pages,
-      data: rows
+      data: rows.map(stripMongoId)
     }
   }
 }

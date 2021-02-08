@@ -20,7 +20,8 @@ import * as Api from '@dataden/core/dist/api-types.esm'
 import { PluginLocalityIcon } from 'src/components/PluginLocalityIcon'
 import {
   useInstalledPluginUpgradeInfo,
-  useInstalledPluginUpgrader
+  useInstalledPluginUpgrader,
+  usePluginUninstaller
 } from 'src/queries'
 
 interface PluginProps {
@@ -35,6 +36,7 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
     pluginId: plugin.id
   })
   const pluginUpgrader = useInstalledPluginUpgrader()
+  const pluginUninstaller = usePluginUninstaller()
 
   return (
     <ContentCard
@@ -101,9 +103,39 @@ export const Plugin: FC<PluginProps> = ({ plugin }) => {
               </Button>
             </Popconfirm>
 
-            <Button danger disabled icon={<icons.DeleteOutlined />}>
-              Uninstall
-            </Button>
+            <Popconfirm
+              okText="Uninstall"
+              title={
+                'Are you sure you want to uninstall this plugin? All associated data will be deleted.'
+              }
+              disabled={pluginUninstaller.isLoading}
+              okType="danger"
+              onConfirm={async () => {
+                try {
+                  await pluginUninstaller.mutateAsync({
+                    params: { pluginId: plugin.id }
+                  })
+
+                  notification.info({
+                    message: 'Started Uninstall of ' + plugin.id
+                  })
+                } catch (e) {
+                  notification.warning({
+                    message:
+                      'Could not uninstall 😕, maybe check your logs? Error: ' +
+                      String(e)
+                  })
+                }
+              }}
+            >
+              <Button
+                type="text"
+                icon={<icons.DeleteOutlined />}
+                disabled={pluginUninstaller.isLoading}
+              >
+                Uninstall
+              </Button>
+            </Popconfirm>
           </Space>
         </Row>
 

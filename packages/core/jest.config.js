@@ -1,5 +1,6 @@
 const base = require('../../jest.config.base')
 
+/** @type {import("@jest/types/build/Config").ProjectConfig} */
 module.exports = {
   ...base,
   rootDir: __dirname,

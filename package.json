@@ -12,7 +12,7 @@
     "dev:start": "ROLLUP_RUN=true yarn run dev",
     "lint": "yarn eslint '*/**/*.{js,ts,jsx,tsx}'",
     "lint:fix": "yarn run lint --fix",
-    "test": "yarn jest --watch",
+    "test": "yarn jest --watch --runInBand",
     "publish:daemon": "yarn run build && wsrun -p @dataden/core -c publish",
     "publish:sdk": "yarn run build && wsrun -p @dataden/sdk -c publish"
   },

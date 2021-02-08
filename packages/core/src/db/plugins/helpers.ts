@@ -2,28 +2,38 @@ import { MongoClient } from 'mongodb'
 import { DATABASES } from '../common'
 import { DbPath, Collection } from './types'
 
-function getPluginId(info: DbPath) {
-  return (info.pluginId + '__' + info.instanceName)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/, '_')
+const sanitise = (str: string) => str.toLowerCase().replace(/[^a-z0-9]+/g, '_')
+
+export function _getPluginId(info: DbPath) {
+  return sanitise(info.pluginId) + '__' + sanitise(info.instanceName)
 }
 
-export function getPluginDb<T>(
+export function getPluginDb(client: MongoClient, path: DbPath) {
+  return client.db(DATABASES.PLUGIN_PREFIX + _getPluginId(path))
+}
+
+export function getPluginDbCollection<T>(
   client: MongoClient,
   path: DbPath,
   collection: Collection
 ) {
-  return client
-    .db(DATABASES.PLUGIN_PREFIX + getPluginId(path))
-    .collection<T>(collection)
+  return getPluginDb(client, path).collection<T>(collection)
 }
 
-export function getPluginDataDb<T>(
+export function getDataDb(client: MongoClient) {
+  return client.db(DATABASES.DATA)
+}
+
+export function getDataDbCollectionName(path: DbPath, dataSetName = '') {
+  return _getPluginId(path) + '__' + dataSetName
+}
+
+export function getDataDbCollection<T>(
   client: MongoClient,
   path: DbPath,
   dataSetName: string
 ) {
-  return client
-    .db(DATABASES.DATA)
-    .collection<T>(getPluginId(path) + '__' + dataSetName)
+  return getDataDb(client).collection<T>(
+    getDataDbCollectionName(path, dataSetName)
+  )
 }

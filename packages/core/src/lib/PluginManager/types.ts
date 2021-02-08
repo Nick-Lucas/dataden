@@ -3,7 +3,6 @@ import { PluginService } from '@dataden/sdk'
 
 export interface CorePlugin {
   id: string
-  name: string
   description: string
   source: string
   local: boolean

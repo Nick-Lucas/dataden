@@ -31,18 +31,22 @@ export interface Plugin extends PluginBase {
 
 export const Installed = {
   list: async function (client: MongoClient): Promise<Plugin[]> {
-    return await client
+    const list = await client
       .db(DATABASES.CORE)
       .collection(COLLECTIONS[DATABASES.CORE].PLUGINS)
       .find<Plugin>()
       .toArray()
+
+    return list.map(stripMongoId)
   },
 
   get: async function (client: MongoClient, pluginId: string): Promise<Plugin> {
-    return await client
+    const plugin = await client
       .db(DATABASES.CORE)
       .collection(COLLECTIONS[DATABASES.CORE].PLUGINS)
       .findOne<Plugin>({ id: pluginId })
+
+    return stripMongoId(plugin)
   },
 
   upsert: async function (
@@ -60,13 +64,20 @@ export const Installed = {
       .db(DATABASES.CORE)
       .collection(COLLECTIONS[DATABASES.CORE].PLUGINS)
       .updateOne(
-        { name: plugin.id },
+        { id: plugin.id },
         { $set: pluginDto },
         {
           upsert: true
         }
       )
 
-    return pluginDto
+    return stripMongoId(pluginDto)
+  },
+
+  remove: async function (client: MongoClient, pluginId) {
+    await client
+      .db(DATABASES.CORE)
+      .collection(COLLECTIONS[DATABASES.CORE].PLUGINS)
+      .deleteOne({ id: pluginId })
   }
 }

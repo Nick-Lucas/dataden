@@ -5,5 +5,7 @@
     "**/bower_components": true,
     "**/*.code-search": true,
     "**/dist/**": true
-  }
+  },
+  "jest.runAllTestsFirst": false,
+  "jest.pathToJest": "yarn run test --"
 }

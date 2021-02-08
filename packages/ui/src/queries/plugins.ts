@@ -144,6 +144,30 @@ export function usePluginInstaller() {
   )
 }
 
+export function usePluginUninstaller() {
+  const client = useQueryClient()
+
+  return useMutation(
+    async function ({
+      params
+    }: {
+      params: Api.Plugins.DeletePlugin.RouteParams
+    }) {
+      return await axios.delete(
+        getUri(Api.Plugins.DeletePlugin.getPath(params)),
+        {
+          withCredentials: true
+        }
+      )
+    },
+    {
+      onSuccess: () => {
+        client.invalidateQueries(Api.Plugins.GetPlugins.path)
+      }
+    }
+  )
+}
+
 export function usePluginInstanceSettingsUpdate() {
   const client = useQueryClient()
 
