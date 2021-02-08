@@ -16,6 +16,6 @@ services:
       - "27018:27017"
 
   metabase:
-    image: metabase/metabase
+    image: metabase/metabase:v0.38.0-rc4 # Adds Date ISO string support
     ports:
       - "3001:3000"

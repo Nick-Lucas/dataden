@@ -21,7 +21,7 @@ export async function uninstallInstance(
   pluginId: string,
   instanceName: string
 ) {
-  log.info(`Attempting to uninstall plugin ${pluginId}`)
+  log.info(`Attempting to remove instance ${pluginId}/${instanceName}`)
   const client = await Db.getClient()
 
   const plugin = await Db.Plugins.Installed.get(client, pluginId)
