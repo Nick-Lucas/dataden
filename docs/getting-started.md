@@ -4,10 +4,21 @@
 
 DataDen has as few external dependencies as possible, but some initial setup is required.
 
+### Hardware & OS
+
+DataDen is design to be installed on small but somewhat powerful devices. The spec is up to you but bear some things in mind:
+
+* MongoDB only support 64bit architecture, so  make sure you use hardware and  an operating system which provides this
+* Raspberry Pi OS (at time of writing) is 32bit only, so you will need to select a different flavour of Linux as [described here](https://developer.mongodb.com/how-to/mongodb-on-raspberry-pi/)
+
+### Software Dependencies
+
 * Install [Node.JS v10+ or higher](https://nodejs.org/en/download/)
-* [Install MongoDB](https://docs.mongodb.com/manual/installation/#mongodb-community-edition-installation-tutorials) 
-  * Get your connection string for later, ie. `mongodb://username:password@localhost:port?retryWrites=true&w=majority`
+* [Install and configure MongoDB](https://docs.mongodb.com/manual/installation/#mongodb-community-edition-installation-tutorials) 
+  * for Raspberry Pi you [will want these instructions](https://developer.mongodb.com/how-to/mongodb-on-raspberry-pi/)
+  * Get your connection string for later, ie. `mongodb://username:password@127.0.0.1:27017?retryWrites=true&w=majority`
 * `npm install -g @dataden/core` or `yarn global add @dataden/core`
+  * If your get an npm access permission error on linux, [check this guide](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally)
 
 
 ## Configuration
@@ -17,7 +28,7 @@ DataDen has as few external dependencies as possible, but some initial setup is 
   // ~/.dataden.json
 
   {
-    "MONGO_URI": "add your mongodb connection string here",
+    "MONGO_URI": "mongodb://username:password@127.0.0.1:27017?retryWrites=true&w=majority",
     "LOG_LEVEL": "info"
   }
   ```
