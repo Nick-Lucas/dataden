@@ -29,15 +29,43 @@ export async function runLoaders(
     log.info(`${pluginId}->${instance.name}: attempting to refresh auth tokens`)
   }
 
+  const sync: Db.Plugins.Sync = {
+    date: new Date().toISOString(),
+    items: definition.service.loaders.map((loader) => {
+      const item = lastSync.items.find((item) => item.name == loader.name)
+
+      // We default the sync to a series of failures, in case of a catastrophic failure, but will ideally capture any failures later
+      return {
+        ...(item ?? {}),
+        name: loader.name,
+        type: 'loader',
+        syncInfo: {
+          rehydrationData: {},
+          ...(item?.syncInfo ?? {}),
+          success: false,
+          error: 'Unknown Error'
+        }
+      }
+    })
+  }
+  await Db.Plugins.Syncs.upsert(client, dbPath, sync)
+
   const authState = await authFacade?.onCredentialsRequired()
   if (authState && authState.status === 'Authentication Required') {
     // TODO: how to handle unhappy cases including reauthentication?
     pluginService.status = 'Authentication Required'
 
-    // TODO: track error in sync
+    for (const item of sync.items) {
+      item.syncInfo = {
+        ...item.syncInfo,
+        success: false,
+        error: authState.status
+      }
+    }
+    await Db.Plugins.Syncs.upsert(client, dbPath, sync)
 
     log.error(
-      `${pluginId}->${instance.name}: auth failed with "${authState.status}". Bailing. \n` +
+      `${pluginId}->${instance.name}: auth failed as credentials have expired. Bailing. \n` +
         authState.error
     )
 
@@ -45,30 +73,25 @@ export async function runLoaders(
   } else if (authState && authState.status !== 'OK') {
     pluginService.status = 'Error'
 
-    // TODO: log error
-    // TODO: track error in sync
+    for (const item of sync.items) {
+      item.syncInfo = {
+        ...item.syncInfo,
+        success: false,
+        error: String(authState.error)
+      }
+    }
+    await Db.Plugins.Syncs.upsert(client, dbPath, sync)
+
+    log.error(
+      `${pluginId}->${instance.name}: auth failed with "${authState.status}". Bailing. \n` +
+        authState.error
+    )
 
     return
   } else if (authState) {
     pluginService.status = 'OK'
     log.info(`${pluginId}->${instance.name}: auth refreshed`)
   }
-
-  const sync: Db.Plugins.Sync = {
-    date: new Date().toISOString(),
-    items: lastSync.items.map((item) => {
-      // We default the sync to a series of failures, in case of a catastrophic failure, but will ideally capture any failures later
-      return {
-        ...item,
-        syncInfo: {
-          ...item.syncInfo,
-          success: false,
-          error: 'Unknown: Copied from previous Sync'
-        }
-      }
-    })
-  }
-  Db.Plugins.Syncs.upsert(client, dbPath, sync)
 
   for (const loader of definition.service.loaders) {
     const [lastLoaderSync, lastLoaderSyncIndex] = getLastSyncForLoader(
@@ -82,12 +105,8 @@ export async function runLoaders(
         syncInfo: syncInfo
       }
 
-      if (lastLoaderSyncIndex >= 0) {
-        sync.items[lastLoaderSyncIndex] = syncItem
-      } else {
-        sync.items.push(syncItem)
-      }
-
+      const index = sync.items.findIndex((item) => item.name === loader.name)
+      sync.items[index] = syncItem
       await Db.Plugins.Syncs.upsert(client, dbPath, sync)
     }
 
@@ -103,7 +122,6 @@ export async function runLoaders(
         getPluginLogger(`${pluginId}->${instance.name}->${loader.name}`)
       )
 
-      // TODO: move this inside transaction
       await updateSyncOnDb(result.syncInfo)
       await updateDataOnDb(client, loader, dbPath, result)
 
