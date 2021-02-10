@@ -34,6 +34,14 @@ export const Syncs = {
     }
   },
 
+  list: async (client: MongoClient, path: DbPath): Promise<Sync[]> => {
+    const syncs = await getPluginDbCollection(client, path, 'syncs')
+      .find<Sync>({}, { sort: { date: -1 } })
+      .toArray()
+
+    return syncs.map(stripMongoId)
+  },
+
   upsert: async (
     client: MongoClient,
     path: DbPath,

@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from 'src/db/getClient'
 
 import { DbPath } from './types'
@@ -34,7 +33,6 @@ describe('DB: Cleanup', () => {
 
   beforeEach(async () => {
     client = await getClient()
-    await wipeDb()
     expect(getClientMocked).toBe(true)
 
     //

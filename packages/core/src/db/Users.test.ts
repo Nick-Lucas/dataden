@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from './getClient'
 import {
   Users,
@@ -16,7 +15,6 @@ describe('DB: Syncs', () => {
 
   beforeEach(async () => {
     client = await getClient()
-    await wipeDb()
 
     expect(getClientMocked).toBe(true)
   })

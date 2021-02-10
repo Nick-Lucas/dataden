@@ -4,7 +4,6 @@ const getInstallationManagerMock = jest.requireMock(
 )
 
 import { NotFoundError } from 'src/lib/PluginInstallationManager'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, Plugins } from 'src/db'
 
 import {
@@ -20,7 +19,6 @@ describe('PluginManager', () => {
 
     beforeEach(async () => {
       client = await getClient()
-      await wipeDb()
       getInstallationManagerMock.resetInstallationStates()
     })
 

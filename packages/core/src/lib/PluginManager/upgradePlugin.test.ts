@@ -1,7 +1,6 @@
 jest.mock('./getInstallationManager')
 
 import { UpgradeInfo } from 'src/lib/PluginInstallationManager'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, Plugins } from 'src/db'
 
 import { upgradePlugin, getUpgradeInfo } from './upgradePlugin'
@@ -18,7 +17,6 @@ describe('PluginManager', () => {
 
     beforeEach(async () => {
       client = await getClient()
-      await wipeDb()
       getInstallationManagerMock.resetInstallationStates()
 
       await Plugins.Installed.upsert(client, {

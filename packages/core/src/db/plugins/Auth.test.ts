@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from 'src/db/getClient'
 import { Auth, AuthState } from './Auth'
 import { DbPath } from './types'
@@ -10,7 +9,6 @@ describe('DB: Auth', () => {
 
   beforeEach(async () => {
     client = await getClient()
-    await wipeDb()
 
     expect(getClientMocked).toBe(true)
   })

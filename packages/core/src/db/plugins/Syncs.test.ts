@@ -1,5 +1,4 @@
 import { MongoClient } from 'mongodb'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, getClientMocked } from 'src/db/getClient'
 import { Sync, Syncs, _getDefaultSync } from './Syncs'
 import { DbPath } from './types'
@@ -10,8 +9,6 @@ describe('DB: Syncs', () => {
 
   beforeEach(async () => {
     client = await getClient()
-    await wipeDb()
-
     expect(getClientMocked).toBe(true)
   })
 
@@ -25,32 +22,75 @@ describe('DB: Syncs', () => {
   })
 
   it('sets a sync and returns', async () => {
-    const newSync: Sync = {
-      date: new Date().toISOString(),
-      items: [
-        {
-          type: 'loader',
-          name: 'loader_1',
-          syncInfo: {
-            success: true,
-            rehydrationData: { something: 1 }
-          }
-        },
-        {
-          type: 'loader',
-          name: 'loader_2',
-          syncInfo: {
-            success: false,
-            error: 'loader failed',
-            rehydrationData: { something: 2 }
-          }
-        }
-      ]
-    }
+    const newSync: Sync = makeSync(new Date())
 
     await Syncs.upsert(client, dbPath, newSync)
 
     const upsertedSync = await Syncs.last(client, dbPath)
     expect(upsertedSync).toEqual(newSync)
   })
+
+  it('returns an empty list of all syncs', async () => {
+    const syncs = await Syncs.list(client, dbPath)
+    expect(syncs).toEqual([])
+  })
+
+  it('returns a sorted list of recent syncs', async () => {
+    const now: number = Date.now()
+
+    await Syncs.upsert(client, dbPath, makeSync(new Date(now + 3)))
+    await Syncs.upsert(client, dbPath, makeSync(new Date(now + 1)))
+    await Syncs.upsert(client, dbPath, makeSync(new Date(now + 2)))
+
+    const syncs = await Syncs.list(client, dbPath)
+    expect(syncs).toEqual([
+      makeSync(new Date(now + 3)),
+      makeSync(new Date(now + 2)),
+      makeSync(new Date(now + 1))
+    ])
+  })
+
+  it('upserts syncs using sync date as a key', async () => {
+    const now: number = Date.now()
+
+    const subjectSync = makeSync(new Date(now + 3))
+    await Syncs.upsert(client, dbPath, subjectSync)
+    await Syncs.upsert(client, dbPath, makeSync(new Date(now + 1)))
+    await Syncs.upsert(client, dbPath, makeSync(new Date(now + 2)))
+
+    subjectSync.items[0].syncInfo.rehydrationData.value = 'changed_value'
+    await Syncs.upsert(client, dbPath, subjectSync)
+
+    const syncs = await Syncs.list(client, dbPath)
+    expect(syncs).toEqual([
+      subjectSync,
+      makeSync(new Date(now + 2)),
+      makeSync(new Date(now + 1))
+    ])
+  })
 })
+
+function makeSync(date: Date): Sync {
+  return {
+    date: date.toISOString(),
+    items: [
+      {
+        type: 'loader',
+        name: 'loader_1',
+        syncInfo: {
+          success: true,
+          rehydrationData: { value: date.toISOString() }
+        }
+      },
+      {
+        type: 'loader',
+        name: 'loader_2',
+        syncInfo: {
+          success: false,
+          error: 'loader failed',
+          rehydrationData: { value: date.toISOString() }
+        }
+      }
+    ]
+  }
+}
