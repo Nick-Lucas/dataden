@@ -1,8 +1,6 @@
 jest.mock('./getInstallationManager')
 jest.mock('./uninstallPlugin.ts')
 
-import { UpgradeInfo } from 'src/lib/PluginInstallationManager'
-import { wipeDb } from 'src/db/__mocks__/getClient'
 import { getClient, Plugins } from 'src/db'
 
 import { updatePlugin } from './updatePlugin'
@@ -18,7 +16,6 @@ describe('PluginManager', () => {
 
     beforeEach(async () => {
       client = await getClient()
-      await wipeDb()
       jest.resetAllMocks()
 
       plugin = {
