@@ -30,9 +30,11 @@ export async function runLoaders(
   }
 
   const authState = await authFacade?.onCredentialsRequired()
-  if (authState && authState.status !== 'OK') {
+  if (authState && authState.status === 'Authentication Required') {
     // TODO: how to handle unhappy cases including reauthentication?
     pluginService.status = 'Authentication Required'
+
+    // TODO: track error in sync
 
     log.error(
       `${pluginId}->${instance.name}: auth failed with "${authState.status}". Bailing. \n` +
@@ -40,7 +42,15 @@ export async function runLoaders(
     )
 
     return
+  } else if (authState && authState.status !== 'OK') {
+    pluginService.status = 'Error'
+
+    // TODO: log error
+    // TODO: track error in sync
+
+    return
   } else if (authState) {
+    pluginService.status = 'OK'
     log.info(`${pluginId}->${instance.name}: auth refreshed`)
   }
 
