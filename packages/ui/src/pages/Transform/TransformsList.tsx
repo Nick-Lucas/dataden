@@ -13,32 +13,30 @@ export function TransformsList() {
   const transforms = [{ id: '1' }]
 
   return (
-    <>
-      <Layout title="Transforms" limitWidth>
-        <Row align="stretch">
-          <div
-            css={css`
-              flex: 1 1 auto;
-            `}
-          >
-            <Input
-              autoFocus
-              size="large"
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search"
-              suffix={'...'}
-            />
-          </div>
-        </Row>
+    <Layout title="Transforms" limitWidth>
+      <Row align="stretch">
+        <div
+          css={css`
+            flex: 1 1 auto;
+          `}
+        >
+          <Input
+            autoFocus
+            size="large"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search"
+            suffix={'...'}
+          />
+        </div>
+      </Row>
 
-        {transforms
-          ?.filter((plugin) =>
-            search && search.length > 0 ? plugin.id.indexOf(search) >= 0 : true
-          )
-          .map((plugin) => (
-            <TransformCard key={plugin.id} />
-          ))}
-      </Layout>
-    </>
+      {transforms
+        ?.filter((plugin) =>
+          search && search.length > 0 ? plugin.id.indexOf(search) >= 0 : true
+        )
+        .map((plugin) => (
+          <TransformCard key={plugin.id} />
+        ))}
+    </Layout>
   )
 }

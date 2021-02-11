@@ -1,4 +1,5 @@
 import { css } from 'styled-components/macro'
+import { Link } from 'react-router-dom'
 
 import { ContentCard } from 'src/Layout'
 import { Button } from 'antd'
@@ -11,7 +12,9 @@ export function TransformCard() {
       `}
     >
       Transform{'  '}
-      <Button type="primary">Edit</Button>
+      <Link to="/transforms/mytransformid">
+        <Button type="primary">Edit</Button>
+      </Link>
     </ContentCard>
   )
 }
