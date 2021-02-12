@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { ContentCard } from 'src/Layout'
 import { Button } from 'antd'
 
-export function TransformCard() {
+export function AggregationCard() {
   return (
     <ContentCard
       css={css`
@@ -12,7 +12,7 @@ export function TransformCard() {
       `}
     >
       Transform{'  '}
-      <Link to="/transforms/mytransformid">
+      <Link to="/aggregations/myaggregationid">
         <Button type="primary">Edit</Button>
       </Link>
     </ContentCard>

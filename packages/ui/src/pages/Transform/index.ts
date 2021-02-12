@@ -1,2 +1,2 @@
-export * from './TransformsList'
-export * from './TransformEdit'
+export * from './AggregationsList'
+export * from './AggregationEdit'

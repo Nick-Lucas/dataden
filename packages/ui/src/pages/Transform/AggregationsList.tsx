@@ -5,15 +5,15 @@ import * as icons from '@ant-design/icons'
 import { css } from 'styled-components/macro'
 
 import { Layout } from 'src/Layout'
-import { TransformCard } from './TransformCard'
+import { AggregationCard } from './AggregationCard'
 
-export function TransformsList() {
+export function AggregationsList() {
   const [search, setSearch] = useState('')
 
   const transforms = [{ id: '1' }]
 
   return (
-    <Layout title="Transforms" limitWidth>
+    <Layout title="Aggregations" limitWidth>
       <Row align="stretch">
         <div
           css={css`
@@ -35,7 +35,7 @@ export function TransformsList() {
           search && search.length > 0 ? plugin.id.indexOf(search) >= 0 : true
         )
         .map((plugin) => (
-          <TransformCard key={plugin.id} />
+          <AggregationCard key={plugin.id} />
         ))}
     </Layout>
   )

@@ -1,12 +1,12 @@
 import { css } from 'styled-components/macro'
 
-import { ContentCard, Layout } from 'src/Layout'
-import { Button, Form, Input, Select, Typography } from 'antd'
+import { Layout } from 'src/Layout'
+import { Button, Form, Input, Select, Typography, Divider } from 'antd'
 
-export function TransformEdit() {
+export function AggregationEdit() {
   return (
     <Layout
-      title="Edit Transform"
+      title="Edit Aggregation"
       limitWidth
       css={css`
         & .ant-form-item {
@@ -15,9 +15,15 @@ export function TransformEdit() {
       `}
     >
       <Form layout="vertical">
+        <Typography.Text type="secondary">
+          Create a calculated collection based on data collected by plugins
+        </Typography.Text>
+
+        <Divider />
+
         <Form.Item
           name="name"
-          label="Name"
+          label="Collection Name"
           rules={[{ required: true, pattern: /^[a-zA-Z0-9_]+$/ }]}
         >
           <Input />
@@ -25,7 +31,7 @@ export function TransformEdit() {
 
         <Form.Item
           name="sources"
-          label="Sources"
+          label="Source Collections"
           rules={[{ required: true, len: 1 }]}
         >
           <Select mode="multiple">

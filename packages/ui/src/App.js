@@ -8,7 +8,7 @@ import { Plugins } from './pages/Plugins'
 import { InstallPlugin, InstallLocal } from './pages/InstallPlugin'
 import { AuthWrapper } from './pages/Login'
 import { OAuth2 } from './pages/OAuth2'
-import { TransformsList, TransformEdit } from './pages/Transform'
+import { AggregationsList, AggregationEdit } from './pages/Transform'
 
 export function App() {
   return (
@@ -20,11 +20,11 @@ export function App() {
 
           <Route exact path="/plugins" component={Plugins} />
 
-          <Route exact path="/transforms" component={TransformsList} />
+          <Route exact path="/aggregations" component={AggregationsList} />
           <Route
             exact
-            path="/transforms/:transformId"
-            component={TransformEdit}
+            path="/aggregations/:aggregationId"
+            component={AggregationEdit}
           />
 
           <Route

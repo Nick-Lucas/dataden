@@ -53,9 +53,9 @@ export const Layout: FC<LayoutProps> = ({
               </Menu.Item>
               <Menu.Item
                 icon={<icons.CalculatorFilled />}
-                onClick={() => history.push('/transforms')}
+                onClick={() => history.push('/aggregations')}
               >
-                Transform
+                Aggregate
               </Menu.Item>
             </Menu>
 
