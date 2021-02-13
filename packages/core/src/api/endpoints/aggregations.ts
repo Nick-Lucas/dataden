@@ -9,7 +9,8 @@ import {
   DeleteAggregation,
   GetCollections,
   PutAggregation,
-  Collection
+  Collection,
+  GetAggregations
 } from './aggregations.types'
 
 export function listen(app: Express, log: Logger) {
@@ -39,6 +40,32 @@ export function listen(app: Express, log: Logger) {
     }
   )
 
+  app.get<void, GetAggregations.Response, void, void>(
+    GetAggregations.path,
+    authenticatedEndpoint(),
+    async (request, response) => {
+      try {
+        const client = await Db.getClient()
+
+        const allCollections = await client.db(Db.DATABASES.DATA).collections()
+        const collections = _(allCollections)
+          .map<Collection>((c) => {
+            return {
+              name: c.collectionName
+            }
+          })
+          .sortBy((c) => c.name)
+          .value()
+
+        // response.send(collections)
+      } catch (e) {
+        log.error(e)
+        response.status(500)
+        response.send(String(e) as any)
+      }
+    }
+  )
+
   app.put<void, PutAggregation.Response, PutAggregation.Body>(
     PutAggregation.path,
     authenticatedEndpoint(),
@@ -52,6 +79,16 @@ export function listen(app: Express, log: Logger) {
         // TODO: validate and clean  up all inputs
         // TODO: 400 if inputs not valid
         // TODO: sanitise and formalise aggregation name
+
+        try {
+          const existing = await client
+            .db(Db.DATABASES.DATA)
+            .collection(aggregation.name)
+
+          if (existing !== null) {
+            await existing.drop()
+          }
+        } catch (e) {}
 
         const collection = await client
           .db(Db.DATABASES.DATA)

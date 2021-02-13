@@ -17,6 +17,12 @@ export namespace GetCollections {
   export type Response = Collection[]
 }
 
+export namespace GetAggregations {
+  export const path = '/v1.0/aggregations'
+
+  export type Response = Aggregation[]
+}
+
 export namespace PutAggregation {
   export const path = '/v1.0/aggregations'
 
