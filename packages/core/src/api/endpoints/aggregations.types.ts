@@ -1,11 +1,10 @@
+import * as Db from 'src/db'
+
 export interface AggregationParams {
   name: string
 }
 
-export interface Aggregation {
-  name: string
-  sources: string[]
-}
+export type Aggregation = Db.Plugins.Aggregation
 
 export interface Collection {
   name: string

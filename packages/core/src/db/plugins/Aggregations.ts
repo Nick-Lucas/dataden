@@ -2,7 +2,6 @@ import { MongoClient, Collection, CollectionCreateOptions } from 'mongodb'
 
 import { COLLECTIONS, DATABASES } from '../common'
 import { stripMongoId } from '../stripMongoId'
-import { DbPath } from './types'
 import {
   getDataDb,
   getDataDbAggregationName,
@@ -33,7 +32,7 @@ export const Aggregations = {
     client: MongoClient,
     aggregationName: string,
     aggregation: Aggregation
-  ): Promise<Collection> {
+  ): Promise<Aggregation> {
     log.info(`Will create/update ${aggregationName}`)
 
     const aggregationCollectionName = getDataDbAggregationName(aggregationName)
@@ -56,6 +55,8 @@ export const Aggregations = {
         throw 'source_not_found'
       }
     }
+
+    // TODO: validate circular dependencies
 
     //
     // Do upsert
@@ -82,14 +83,14 @@ export const Aggregations = {
     } catch (e) {}
 
     log.info(`Creating aggregation pipeline`)
-    const collection = await getDataDb(client).createCollection(
+    await getDataDb(client).createCollection(
       getDataDbAggregationName(aggregation.name),
       transformAggregationToMongoPipeline(aggregation)
     )
 
     log.info(`OK`)
 
-    return stripMongoId(collection)
+    return aggregation
   },
 
   remove: async function (client: MongoClient, aggregationName: string) {

@@ -47,17 +47,9 @@ export function listen(app: Express, log: Logger) {
       try {
         const client = await Db.getClient()
 
-        const allCollections = await client.db(Db.DATABASES.DATA).collections()
-        const collections = _(allCollections)
-          .map<Collection>((c) => {
-            return {
-              name: c.collectionName
-            }
-          })
-          .sortBy((c) => c.name)
-          .value()
+        const aggregations = await Db.Plugins.Aggregations.list(client)
 
-        // response.send(collections)
+        response.send(aggregations)
       } catch (e) {
         log.error(e)
         response.status(500)
@@ -76,39 +68,30 @@ export function listen(app: Express, log: Logger) {
 
         const client = await Db.getClient()
 
-        // TODO: validate and clean  up all inputs
-        // TODO: 400 if inputs not valid
-        // TODO: sanitise and formalise aggregation name
-
-        try {
-          const existing = await client
-            .db(Db.DATABASES.DATA)
-            .collection(aggregation.name)
-
-          if (existing !== null) {
-            await existing.drop()
-          }
-        } catch (e) {}
-
-        const collection = await client
-          .db(Db.DATABASES.DATA)
-          .createCollection(aggregation.name, {
-            viewOn: aggregation.sources[0],
-            pipeline: [
-              ...aggregation.sources
-                .slice(1)
-                .map((source) => ({ $unionWith: source }))
-            ]
-          })
+        const aggegration = await Db.Plugins.Aggregations.upsert(
+          client,
+          aggregation.name,
+          aggregation
+        )
 
         response.status(201)
-        response.send({
-          name: collection.collectionName
-        })
+        response.send(aggegration)
       } catch (e) {
-        log.error(e)
-        response.status(500)
-        response.send(String(e) as any)
+        if (e === 'consumes_itself') {
+          response.status(400)
+          response.send(
+            'The aggregation cannot consume itself as a source' as any
+          )
+        } else if (e === 'source_not_found') {
+          response.status(400)
+          response.send(
+            'The aggregation consumes a source collection which does not exist' as any
+          )
+        } else {
+          log.error(e)
+          response.status(500)
+          response.send(String(e) as any)
+        }
       }
     }
   )
@@ -123,6 +106,10 @@ export function listen(app: Express, log: Logger) {
           response.sendStatus(400)
           return
         }
+
+        const client = await Db.getClient()
+
+        await Db.Plugins.Aggregations.remove(client, name)
 
         response.sendStatus(200)
       } catch (e) {

@@ -6,11 +6,12 @@ import { css } from 'styled-components/macro'
 
 import { Layout } from 'src/Layout'
 import { AggregationCard } from './AggregationCard'
+import { useAggregations } from 'src/queries'
+import { generatePath, Link } from 'react-router-dom'
 
 export function AggregationsList() {
   const [search, setSearch] = useState('')
-
-  const transforms = [{ id: '1' }]
+  const aggregations = useAggregations()
 
   return (
     <Layout title="Aggregations" limitWidth>
@@ -28,15 +29,29 @@ export function AggregationsList() {
             suffix={'...'}
           />
         </div>
+
+        <Space>
+          <div />
+          <Link
+            to={generatePath('/aggregations/:aggregationId', {
+              aggregationId: 'new'
+            })}
+          >
+            <Button type="primary" size="large">
+              Create New
+            </Button>
+          </Link>
+        </Space>
       </Row>
 
-      {transforms
-        ?.filter((plugin) =>
-          search && search.length > 0 ? plugin.id.indexOf(search) >= 0 : true
-        )
-        .map((plugin) => (
-          <AggregationCard key={plugin.id} />
-        ))}
+      {aggregations.isFetched &&
+        aggregations.data
+          ?.filter((aggr) =>
+            search && search.length > 0 ? aggr.name.indexOf(search) >= 0 : true
+          )
+          .map((aggr) => (
+            <AggregationCard key={aggr.name} aggregation={aggr} />
+          ))}
     </Layout>
   )
 }
