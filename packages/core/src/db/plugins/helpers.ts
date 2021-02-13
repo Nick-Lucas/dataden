@@ -25,7 +25,11 @@ export function getDataDb(client: MongoClient) {
 }
 
 export function getDataDbCollectionName(path: DbPath, dataSetName = '') {
-  return _getPluginId(path) + '__' + dataSetName
+  return _getPluginId(path) + '__' + sanitise(dataSetName)
+}
+
+export function getDataDbAggregationName(aggregationName = '') {
+  return 'aggregation__' + sanitise(aggregationName)
 }
 
 export function getDataDbCollection<T>(
@@ -35,5 +39,14 @@ export function getDataDbCollection<T>(
 ) {
   return getDataDb(client).collection<T>(
     getDataDbCollectionName(path, dataSetName)
+  )
+}
+
+export function getDataDbAggregation<T>(
+  client: MongoClient,
+  aggregationName: string
+) {
+  return getDataDb(client).collection<T>(
+    getDataDbAggregationName(aggregationName)
   )
 }

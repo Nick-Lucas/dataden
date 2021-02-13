@@ -8,6 +8,7 @@ import { Plugins } from './pages/Plugins'
 import { InstallPlugin, InstallLocal } from './pages/InstallPlugin'
 import { AuthWrapper } from './pages/Login'
 import { OAuth2 } from './pages/OAuth2'
+import { AggregationsList, AggregationEdit } from './pages/Transform'
 
 export function App() {
   return (
@@ -18,6 +19,13 @@ export function App() {
           <Redirect exact from="/" to="/dashboard" />
 
           <Route exact path="/plugins" component={Plugins} />
+
+          <Route exact path="/aggregations" component={AggregationsList} />
+          <Route
+            exact
+            path="/aggregations/:aggregationId"
+            component={AggregationEdit}
+          />
 
           <Route
             exact

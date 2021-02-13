@@ -38,6 +38,7 @@ export const Layout: FC<LayoutProps> = ({
         {isAuthenticated && (
           <>
             <Menu theme="dark" mode="horizontal">
+              {/* TODO: turn these into proper links */}
               <Menu.Item
                 icon={<icons.HomeFilled />}
                 onClick={() => history.push('/dashboard')}
@@ -48,7 +49,13 @@ export const Layout: FC<LayoutProps> = ({
                 icon={<icons.DatabaseFilled />}
                 onClick={() => history.push('/plugins')}
               >
-                Installed Plugins
+                Plugins
+              </Menu.Item>
+              <Menu.Item
+                icon={<icons.CalculatorFilled />}
+                onClick={() => history.push('/aggregations')}
+              >
+                Aggregate
               </Menu.Item>
             </Menu>
 

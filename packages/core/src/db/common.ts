@@ -7,7 +7,8 @@ export const DATABASES = {
 export const COLLECTIONS = {
   [DATABASES.CORE]: {
     PLUGINS: 'plugins',
-    USERS: 'users'
+    USERS: 'users',
+    AGGREGATIONS: 'aggregations'
   }
 }
 
