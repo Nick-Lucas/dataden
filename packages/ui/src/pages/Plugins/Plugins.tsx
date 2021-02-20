@@ -80,6 +80,8 @@ export const Plugins: FC = () => {
                 : true
             )
             .map((plugin) => <Plugin key={plugin.id} plugin={plugin} />)}
+
+        <div style={{ height: '1rem' }} />
       </Layout>
     </>
   )
