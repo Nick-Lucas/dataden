@@ -15,6 +15,13 @@
       "verified": true
     },
     {
+      "id": "dataden-plugin-ig",
+      "name": "IG Trading",
+      "description": "Fetches your ig.com portfolio history",
+      "source": "dataden-plugin-ig",
+      "verified": true
+    },
+    {
       "id": "example/non-installable",
       "name": "Fake Plugin which cannot be installed",
       "description": "An example plugin, useful as a test plugin",
